@@ -1,7 +1,7 @@
 <template>
   <h1>Overview Page</h1>
 
-  <MathInput></MathInput>
+  <MathInput type="logical"></MathInput>
 
   TODO: List of pages
   <h3>Cat pages</h3>

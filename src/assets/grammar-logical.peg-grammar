@@ -1,0 +1,29 @@
+start := logicalExpression
+
+logicalTrue := text='[Tt]([Rr][Uu][Ee])?|1|[Ww]([Aa][Hh][Rr])?'
+               .value = boolean { return true; }
+logicalFalse := 'False' | 'false' | 'F' | 'f' | '0'
+                .value = boolean { return false; }
+logicalData := value=logicalTrue | value=logicalFalse
+
+logicalNot := 'NOT' | 'Not' | 'not' | '!'
+              .value = String { return 'not'; }
+logicalUnaryOperator := logicalNot
+
+logicalImplies := 'IMPLIES' | 'Implies' | 'implies' | '=>'
+                  .value = String { return 'implies'; }
+logicalAnd := 'AND' | 'And' | 'and' | '&' | '&&'
+              .value = String { return 'and'; }
+logicalOr := 'OR' | 'Or' | 'or' | '|' | '||'
+             .value = String { return 'or'; }
+logicalXor := 'XOR' | 'Xor' | 'xor' | '^'
+              .value = String { return 'xor'; }
+logicalNand := 'NAND' | 'Nand' | 'nand' | '!&' | '!&&'
+               .value = String { return 'nand'; }
+logicalNor := 'NOR' | 'Nor' | 'nor' | '!|' | '!||'
+              .value = String { return 'nor'; }
+logicalEquals := 'EQUALS' | 'Equals' | 'equals' | '=' | '==' | '<==>' | '<=>'
+                 .value = String { return 'equals'; }
+logicalBinaryOperator := logicalImplies | logicalAnd | logicalOr | logicalXor | logicalNand | logicalNor | logicalEquals
+
+logicalExpression := left=logicalData operator=logicalBinaryOperator right=logicalData | operator=logicalUnaryOperator right=logicalData | logicalData

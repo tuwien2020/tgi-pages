@@ -17,29 +17,55 @@ import {
 } from "vue";
 import { MathJson } from "./../MathJson";
 import Katex from "katex";
-import { parse } from "./../assets/grammar";
+import { parse as parseAstLogical } from "./../assets/grammar-logical";
 
-function useMathParsing() {
-  function parseMath(value: string): MathJson {
-    console.log(parse(value));
+function useLogicalParsing() {
+  function parseLogical(value: string): MathJson {
+    console.log(parseAstLogical(value));
     //@ts-ignore
     return [value];
   }
 
+  return {
+    parseLogical,
+  };
+}
+
+function useMathParsing() {
+  function parseMath(value: string): MathJson {
+    console.log(parseAstLogical(value));
+    //@ts-ignore
+    return [value];
+  }
+
+  return {
+    parseMath,
+  };
+}
+
+function useMathPrinting() {
   function mathToLatex(value: MathJson) {
     //@ts-ignore
     return value[0];
   }
 
   return {
-    parseMath,
     mathToLatex,
   };
 }
 
 export default defineComponent({
-  setup() {
+  props: {
+    type: {
+      type: String, // "math" | "logical"
+      default: "math",
+    },
+  },
+
+  setup(props, context) {
+    const logicalParsing = useLogicalParsing();
     const mathParsing = useMathParsing();
+    const mathPrinting = useMathPrinting();
 
     const mathinput = ref("");
     const parsed = ref<any>();
@@ -48,10 +74,13 @@ export default defineComponent({
     onMounted(() => {
       watch(mathinput, (value) => {
         nextTick(() => {
-          parsed.value = mathParsing.parseMath(value);
+          if (props.type === "logical") {
+            parsed.value = logicalParsing.parseLogical(value);
+          } else {
+            parsed.value = mathParsing.parseMath(value);
+          }
 
-          //@ts-ignore
-          const latex = mathParsing.mathToLatex(parsed.value);
+          const latex = mathPrinting.mathToLatex(parsed.value);
 
           Katex.render(latex, mathoutput.value, {
             displayMode: true,

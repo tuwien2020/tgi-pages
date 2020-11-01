@@ -2,7 +2,7 @@
   "name": "tgi-pages",
   "version": "0.0.1",
   "scripts": {
-    "grammar": "tspeg src/assets/grammar.peg-grammar src/assets/grammar.ts",
+    "grammar": "tspeg src/assets/grammar-logical.peg-grammar src/assets/grammar-logical.ts",
     "dev": "vite",
     "build": "vite build",
     "deploy": "vite build --base=/tgi-pages/ && node utils/publish.js"
