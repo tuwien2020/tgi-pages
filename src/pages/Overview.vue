@@ -1,6 +1,8 @@
 <template>
   <h1>Overview Page</h1>
 
+  <MathInput></MathInput>
+
   TODO: List of pages
   <h3>Cat pages</h3>
   <ul>
@@ -25,7 +27,12 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
+import MathInput from "./../components/MathInput.vue";
+
 export default defineComponent({
+  components: {
+    MathInput,
+  },
   setup() {
     const count = ref(0);
 
