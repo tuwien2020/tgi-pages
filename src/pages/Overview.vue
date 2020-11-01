@@ -1,7 +1,7 @@
 <template>
   <h1>Overview Page</h1>
 
-  <MathInput></MathInput>
+  <MathInput type="logical"></MathInput>
 
   <input>
 

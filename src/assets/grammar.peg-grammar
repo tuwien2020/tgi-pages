@@ -1,5 +1,0 @@
-start := helloChoice
-booleanTrue := 'True' | 'true' | 'T' | 't' | '1' | 'W' | 'w'
-booleanFalse := 'False' | 'false' | 'F' | 'f' | '0'
-helloWorld := hello 'World'
-helloChoice := hello 'Mars' | helloWorld
