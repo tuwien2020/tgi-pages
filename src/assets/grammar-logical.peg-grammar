@@ -2,28 +2,33 @@ start := logicalExpression
 
 logicalTrue := text='[Tt]([Rr][Uu][Ee])?|1|[Ww]([Aa][Hh][Rr])?'
                .value = boolean { return true; }
-logicalFalse := 'False' | 'false' | 'F' | 'f' | '0'
+logicalFalse := text='[Ff]([Aa][Ll][Ss]([Ee]|[Cc][Hh]))?|0'
                 .value = boolean { return false; }
-logicalData := value=logicalTrue | value=logicalFalse
+logicalData := data={ logicalTrue | logicalFalse }
+               .value = boolean { return this.data.value; }
 
-logicalNot := 'NOT' | 'Not' | 'not' | '!'
+logicalNot := text={'NOT' | 'Not' | 'not' | '!'}
               .value = String { return 'not'; }
-logicalUnaryOperator := logicalNot
+logicalUnaryOperator := data={ logicalNot }
+                        .value = String { return this.data.value; }
 
-logicalImplies := 'IMPLIES' | 'Implies' | 'implies' | '=>'
+logicalImplies := text={ 'IMPLIES' | 'Implies' | 'implies' | '=>' }
                   .value = String { return 'implies'; }
-logicalAnd := 'AND' | 'And' | 'and' | '&' | '&&'
+logicalAnd := text={ 'AND' | 'And' | 'and' | '&' | '&&' }
               .value = String { return 'and'; }
-logicalOr := 'OR' | 'Or' | 'or' | '|' | '||'
+logicalOr := text={ 'OR' | 'Or' | 'or' | '|' | '||' }
              .value = String { return 'or'; }
-logicalXor := 'XOR' | 'Xor' | 'xor' | '^'
+logicalXor := text={ 'XOR' | 'Xor' | 'xor' | '^' }
               .value = String { return 'xor'; }
-logicalNand := 'NAND' | 'Nand' | 'nand' | '!&' | '!&&'
+logicalNand := text={ 'NAND' | 'Nand' | 'nand' | '!&' | '!&&' }
                .value = String { return 'nand'; }
-logicalNor := 'NOR' | 'Nor' | 'nor' | '!|' | '!||'
+logicalNor := text={ 'NOR' | 'Nor' | 'nor' | '!|' | '!||' }
               .value = String { return 'nor'; }
-logicalEquals := 'EQUALS' | 'Equals' | 'equals' | '=' | '==' | '<==>' | '<=>'
+logicalEquals := text={ 'EQUALS' | 'Equals' | 'equals' | '=' | '==' | '<==>' | '<=>' }
                  .value = String { return 'equals'; }
-logicalBinaryOperator := logicalImplies | logicalAnd | logicalOr | logicalXor | logicalNand | logicalNor | logicalEquals
+logicalBinaryOperator := data={ logicalImplies | logicalAnd | logicalOr | logicalXor | logicalNand | logicalNor | logicalEquals }
+                         .value = String { return this.data.value; }
 
-logicalExpression := left=logicalData operator=logicalBinaryOperator right=logicalData | operator=logicalUnaryOperator right=logicalData | logicalData
+logicalTerm := right=logicalData | operator=logicalUnaryOperator right=logicalExpression | '\(' right=logicalExpression '\)'
+
+logicalExpression := left=logicalTerm operator=logicalBinaryOperator right=logicalTerm | right=logicalTerm
