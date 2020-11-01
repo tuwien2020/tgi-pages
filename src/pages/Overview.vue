@@ -3,6 +3,8 @@
 
   <MathInput type="logical"></MathInput>
 
+  <input>
+
   TODO: List of pages
   <h3>Cat pages</h3>
   <ul>
@@ -16,6 +18,10 @@
   <h3>Neko pages</h3>
   <ul>
     <li><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Nyehehe</a></li>
+  </ul>
+
+  <ul>
+    <li><router-link to="/hamming">Hamming</router-link></li>
   </ul>
 
   <!-- Stuff and thingies -->
