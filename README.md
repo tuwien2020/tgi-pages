@@ -1,6 +1,10 @@
 # tgi-pages
 
+Krauti, Yousif, Moritz, Møxwell, eSportSuBZero
 
+
+
+## [View it online](https://tuwien2020.github.io/tgi-pages/#/)
 
 
 
