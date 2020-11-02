@@ -168,7 +168,9 @@ export default defineComponent({
     const route = useRoute();
     const logicalMath = useLogicalMath();
 
-    const logicalUserInput = ref("" + route.query["input"]);
+    const logicalUserInput = ref(
+      "" + (route.query["input"] ?? "a and (b xor 1)")
+    );
     const logicalMathJson = shallowRef<MathJson>();
 
     const tableHeaders = shallowRef<MathJson[]>([]);
