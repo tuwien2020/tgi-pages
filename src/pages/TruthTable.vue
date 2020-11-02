@@ -10,6 +10,7 @@
   <div>
     <label><input type="checkbox" v-model="flipBits" /> Flip the bits </label>
   </div>
+
   <table class="truth-table">
     <thead>
       <tr>
@@ -31,7 +32,52 @@
     </tbody>
   </table>
 
-  <!-- TODO: Documentation -->
+  <br />
+  <br />
+  <br />
+  <h4>Documentation</h4>
+  <table class="documentation-table">
+    <thead>
+      <tr>
+        <th>Operator</th>
+        <th>Type this text</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><math-output :value="['not', 'a']"></math-output></td>
+        <td>not</td>
+      </tr>
+      <tr>
+        <td><math-output :value="['and', 'a', 'b']"></math-output></td>
+        <td>and</td>
+      </tr>
+      <tr>
+        <td><math-output :value="['or', 'a', 'b']"></math-output></td>
+        <td>or</td>
+      </tr>
+      <tr>
+        <td><math-output :value="['xor', 'a', 'b']"></math-output></td>
+        <td>xor</td>
+      </tr>
+      <tr>
+        <td><math-output :value="['nand', 'a', 'b']"></math-output></td>
+        <td>nand</td>
+      </tr>
+      <tr>
+        <td><math-output :value="['nor', 'a', 'b']"></math-output></td>
+        <td>nor</td>
+      </tr>
+      <tr>
+        <td><math-output :value="['implies', 'a', 'b']"></math-output></td>
+        <td>implies</td>
+      </tr>
+      <tr>
+        <td><math-output :value="['equals', 'a', 'b']"></math-output></td>
+        <td>equals</td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script lang="ts">
@@ -277,5 +323,11 @@ export default defineComponent({
   height: 10000px;
   width: 100%;
   z-index: -1;
+}
+</style>
+
+<style>
+.documentation-table .katex-display {
+  margin: 0px;
 }
 </style>
