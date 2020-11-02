@@ -18,6 +18,7 @@
     <li><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Nyehehe</a></li>
   </ul>
 
+  <h3>Hamming-Code</h3>
   <ul>
     <li><router-link to="/hamming-code">Hamming-Codes</router-link></li>
   </ul>
@@ -25,6 +26,11 @@
   <h3>Boolesche Algebra</h3>
   <ul>
     <li><router-link to="/truth-table">Wahrheitstabelle</router-link></li>
+  </ul>
+
+  <h3>Hamming-Distanz</h3>
+  <ul>
+    <li><router-link to="/hamming-distance">Hamming-Distanz</router-link></li>
   </ul>
 
   <!-- Stuff and thingies -->
