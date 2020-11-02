@@ -182,6 +182,7 @@ export default defineComponent({
       let operations = logicalMath.extractOperations(value);
 
       const getters = Array.from(logicalMath.extractGetters(value));
+      getters.sort();
 
       tableHeaders.value = (getters as MathJson[]).concat(operations);
 
