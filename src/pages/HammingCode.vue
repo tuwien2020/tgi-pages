@@ -9,11 +9,22 @@
 
     <!-- parity bits !-->
     <pre>Hamming-Code: {{hammingCode.code}}</pre>
+    <pre>Datenbits: {{hammingCode.data}}</pre>
     <pre>Anzahl der Codebits: {{hammingCode.numCodeBits}}</pre>
     <pre>Anzahl der Paritybits: {{hammingCode.numParityBits}}</pre>
     <pre>Anzahl der Datenbits: {{hammingCode.numDataBits}}</pre>
     <pre>{{hammingCode.getFormattedHammingCodeParityFormulas()}}</pre>
-    <pre>Fehler an der Stelle: {{hammingCode.errorBit}}</pre>
+    <pre>Fehler an der Stelle: {{hammingCode.errorBit}} (bei 0 → kein erkennbarer Fehler)</pre>
+
+    <h2>Berechnungen</h2>
+    
+    <p>Wie viele Prüfbits werden für einen Hamming-Code mit d Datenbits benötigt?</p>
+    <input v-model="givenDataBits" pattern="[0-9]+">
+    <pre>mindestens {{minParityBits}} Prüfbits</pre>    
+
+    <p>Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn dieser p Prüfbits hat?</p>
+    <input v-model="givenParityBits" pattern="[0-9]+">
+    <pre>maximal {{maxCodebits}} Code- und {{maxDatabits}} Datenbits  </pre>
 
 </template>
 
@@ -30,27 +41,63 @@ export default defineComponent({
     let data = ref("");
 
     watch(data, (value) => {
-        if (data.value.match(/^[01]+$/)) {
-            hammingCode.value = new HammingCode(data.value, true);
-        } else {
-            hammingCode.value = new HammingCode("");
-        }
+        data.value = data.value.replace(/[^01]+$/, "");
+        hammingCode.value = new HammingCode(data.value, true);
         code.value = "";
     })
 
     watch (code, (value) => {
-        if (code.value.match(/^[01]+$/)) {
-            hammingCode.value = new HammingCode(code.value, false)
-        } else {
-            hammingCode.value = new HammingCode("");
-        }
+        code.value = code.value.replace(/[^01]+$/, "");
+        hammingCode.value = new HammingCode(code.value, false)
         data.value = "";
+    })
+
+    let givenParityBits = ref(""); 
+    let givenDataBits = ref("");
+    let maxCodebits = ref(0);
+    let maxDatabits = ref(0);
+    let minParityBits = ref(0);
+
+    watch(givenParityBits, (value) => {
+        givenParityBits.value = givenParityBits.value.replace(/[^0-9]+$/, "");
+        if (value == "") {
+            maxCodebits.value = 0;
+            maxDatabits.value = 0;
+            return;
+        }
+        maxCodebits.value = Math.pow(2, parseInt(value))-1;
+        maxDatabits.value = maxCodebits.value - parseInt(value);
+    })
+
+    watch(givenDataBits, (value) => {
+        givenDataBits.value = givenDataBits.value.replace(/[^0-9]+$/, "");
+         if (value == "") {
+            minParityBits.value = 0;
+            return;
+        }
+        let parityBits = 0;
+        let dataBitIndex = 0;
+        let codeBitIndex = 1;
+        while (dataBitIndex < parseInt(givenDataBits.value)) {
+            if (isPowerOfTwo(codeBitIndex)) {
+                parityBits++;
+            } else {
+                dataBitIndex++;
+            }
+            codeBitIndex++;
+        }
+        minParityBits.value = parityBits;
     })
 
     return {
       code,
       data,
       hammingCode, 
+      givenParityBits,
+      givenDataBits,
+      maxCodebits,
+      maxDatabits,
+      minParityBits,
     };
   },
 });
@@ -59,13 +106,14 @@ export default defineComponent({
 class HammingCode {
 
     readonly code: string;
+    readonly data: string;
     readonly numCodeBits: number;
     readonly numDataBits: number;
     readonly numParityBits: number;
     readonly parityBitFormulas: Array<String>;
     readonly parityBits: Array<number>;
+    
     readonly errorBit: number;
-
 
     constructor(data: string, onlyDatabits?: boolean) {
         if (data == "") {
@@ -80,7 +128,7 @@ class HammingCode {
         }
 
         if (!onlyDatabits) {
-            this.code = data; 
+            this.code = data;
         } else {
             let code = "";
             let dataBitIndex = 0;
@@ -102,18 +150,18 @@ class HammingCode {
         this.numDataBits = this.numCodeBits - this.numParityBits;
 
         this.parityBits = new Array();
-        this.parityBitFormulas = new Array();
+        this.parityBitFormulas = new Array(); 
 
         for ( let i = 0; i < this.numParityBits; i++) {
             let parityBitFormula = "[p" + (i+1) + "] = " ;
             let parity = 0;
 
             for ( let j = 1; j <= this.numCodeBits; j++) {
-                if ((j & (j - 1)) == 0) continue; // i is a power of two
+                if (isPowerOfTwo(j)) continue; // i is a power of two
                 if (((1 << i) & j) != 0) {
                     parity ^= this.code.codePointAt(j - 1) - '0'.codePointAt(0);
                     parityBitFormula += "c" + j + " ^ ";
-                }
+                }   
             }
             parityBitFormula = parityBitFormula.substring(0, parityBitFormula.length - 3);
             this.parityBitFormulas[i] = parityBitFormula;
@@ -145,6 +193,16 @@ class HammingCode {
             }
             this.code = correctedCode;
         }
+
+        if (onlyDatabits) {
+            this.data = data; 
+        } else {
+            this.data = "";
+            for (let i = 1; i <= this.numCodeBits; i++) {
+                if (isPowerOfTwo(i)) continue;
+                this.data += this.code.charAt(i-1);
+            }
+        }
     }
 
    getFormattedHammingCodeParityFormulas() : string {
@@ -163,6 +221,10 @@ class HammingCode {
 
 function toSizedBinaryString(number: number, length: number) : string{
     return number.toString(2).padStart(length, "0"); 
+}
+
+function isPowerOfTwo(n: number) : boolean {
+    return (n & (n - 1)) == 0;
 }
 
 </script>
