@@ -18,22 +18,25 @@
     <li><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Nyehehe</a></li>
   </ul>
 
-  <h3>Hamming-Code</h3>
+  <h3>Hamming Code</h3>
   <ul>
-    <li><router-link to="/hamming-code">Hamming-Codes</router-link></li>
+    <li><router-link to="/hamming-code">Hamming Code</router-link></li>
+    <li><router-link to="/hamming-distance">Hamming Distance</router-link></li>
   </ul>
 
   <h3>Boolesche Algebra</h3>
   <ul>
     <li><router-link to="/truth-table">Wahrheitstabelle</router-link></li>
   </ul>
-
-  <h3>Hamming-Distanz</h3>
-  <ul>
-    <li><router-link to="/hamming-distance">Hamming-Distanz</router-link></li>
-  </ul>
-
+  
   <!-- Stuff and thingies -->
+  <h3>GitHub</h3>
+  <ul>
+    <li>
+      <a href="https://github.com/tuwien2020/tgi-pages">TGI Pages</a>
+    </li>
+  </ul>
+  
   <button @click="count++">count is: {{ count }}</button>
   <p>
     Edit <code>components/Overview.vue</code> to test hot module replacement.

@@ -14,7 +14,7 @@ const routes = [
   { path: "/", component: Overview },
   { path: "/hamming-code", component: HammingCode },
   { path: "/truth-table", component: TruthTable },
-  { path: "/hamming-distance", component: HammingDistance},
+  { path: "/hamming-distance", component: HammingDistance },
 ];
 
 if (import.meta.env.PROD) {
