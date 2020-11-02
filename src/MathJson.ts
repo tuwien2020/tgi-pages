@@ -1,4 +1,4 @@
-export type MathJsonData = boolean;
+export type MathJsonData = boolean | "string";
 
 export type MathJsonLogicalOperator =
   | "not"
