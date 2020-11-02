@@ -2,7 +2,6 @@
   <div class="math-input">
     <input type="text" v-model="mathinput" size="100" />
     <div ref="mathoutput"></div>
-    <div class="error"></div>
   </div>
 </template>
 
@@ -16,37 +15,38 @@ import {
   onMounted,
   nextTick,
 } from "vue";
-import { MathJson } from "./../MathJson";
+import { MathJson, MathJsonLogicalOperator } from "./../MathJson";
 import Katex from "katex";
-import { parse as parseAstLogical } from "./../assets/grammar-logical";
+import { tryParse as tryParseAstLogical } from "./../assets/grammar-logical";
+import { useMathPrinting } from "./../math/math-printing";
 
 function useLogicalParsing() {
+  function toMathJsonRecursive(ast: any) {
+    if (ast.left) {
+      return [
+        ast.operator,
+        toMathJsonRecursive(ast.left),
+        toMathJsonRecursive(ast.right),
+      ];
+    } else if (ast.right && ast.operator) {
+      return [ast.operator, toMathJsonRecursive(ast.right)];
+    } else if (ast.right) {
+      return toMathJsonRecursive(ast.right);
+    } else {
+      return ast.value;
+    }
+  }
+
   function parseLogical(
     value: string
   ): { mathJson?: MathJson; error?: string } {
     // Doesn't have a AND before OR order of operations (yet)
-    const parsed = parseAstLogical(value.replace(/[ \n\t]*/g, ""));
-    if (parsed.err) {
-      return { error: "" + parsed.err };
+    try {
+      const parsed = tryParseAstLogical(value);
+      return { mathJson: toMathJsonRecursive(parsed) };
+    } catch (e) {
+      return { error: "" + e };
     }
-
-    function toMathJson(ast: any) {
-      if (ast.left) {
-        return [
-          ast.operator.value,
-          toMathJson(ast.left),
-          toMathJson(ast.right),
-        ];
-      } else if (ast.right && ast.operator) {
-        return [ast.operator.value, toMathJson(ast.right)];
-      } else if (ast.right) {
-        return toMathJson(ast.right);
-      } else {
-        return ast.value;
-      }
-    }
-
-    return { mathJson: toMathJson(parsed.ast) };
   }
 
   return {
@@ -56,7 +56,7 @@ function useLogicalParsing() {
 
 function useMathParsing() {
   function parseMath(value: string): { mathJson?: MathJson; error?: string } {
-    console.log(parseAstLogical(value));
+    console.log(tryParseAstLogical(value));
     //@ts-ignore
     return [value];
   }
@@ -66,62 +66,61 @@ function useMathParsing() {
   };
 }
 
-function useMathPrinting() {
-  function mathToLatex(value: { mathJson?: MathJson; error?: string }): string {
-    if (value.error) {
-      // https://tex.stackexchange.com/a/34586
-      let escaped = value.error
-        .replace(/\\/g, "\\textbackslash")
-        .replace(/[&%$#_{}]/g, "\\$&")
-        .replace(/\[/g, "{[}")
-        .replace(/\]/g, "{]}")
-        .replace(/~/g, "{\\textasciitilde}")
-        .replace(/\^/g, "{\\textasciicircum}");
-      return `\\textcolor{red}{\\texttt{${escaped}}}`;
-    }
-
-    return "";
-  }
-
-  return {
-    mathToLatex,
-  };
-}
-
 export default defineComponent({
   props: {
     type: {
       type: String, // "math" | "logical"
       default: "math",
     },
+    modelValue: {
+      type: String,
+      required: true,
+    },
   },
-
+  emits: {
+    "update:modelValue": (value: string) => true,
+    mathJson: (value: MathJson) => true,
+  },
   setup(props, context) {
     const logicalParsing = useLogicalParsing();
     const mathParsing = useMathParsing();
     const mathPrinting = useMathPrinting();
 
-    const mathinput = ref("");
+    const mathinput = ref("" + props.modelValue);
     const mathoutput = ref<HTMLElement>();
 
-    onMounted(() => {
-      watch(mathinput, (value) => {
-        nextTick(() => {
-          let parsedAst =
-            props.type === "logical"
-              ? logicalParsing.parseLogical(value)
-              : mathParsing.parseMath(value);
+    watch(
+      () => props.modelValue,
+      (value) => {
+        mathinput.value = value;
+        let parsedAst =
+          props.type === "logical"
+            ? logicalParsing.parseLogical(value)
+            : mathParsing.parseMath(value);
 
-          console.log(parsedAst);
+        if (parsedAst.mathJson && !parsedAst.error) {
+          context.emit("mathJson", parsedAst.mathJson);
+        }
+
+        nextTick(() => {
           const latex = mathPrinting.mathToLatex(parsedAst);
 
-          Katex.render(latex, mathoutput.value, {
-            displayMode: true,
-            throwOnError: false,
-            output: "html",
-          });
+          if (mathoutput.value) {
+            Katex.render(latex, mathoutput.value, {
+              displayMode: true,
+              throwOnError: false,
+              output: "html",
+            });
+          }
         });
-      });
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    watch(mathinput, (value) => {
+      context.emit("update:modelValue", value);
     });
 
     return {

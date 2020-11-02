@@ -1,6 +1,6 @@
-export type MathJsonData = boolean;
+export type MathJsonData = boolean | "string";
 
-export type MathJsonOperator =
+export type MathJsonLogicalOperator =
   | "not"
   | "implies"
   | "and"
@@ -11,5 +11,5 @@ export type MathJsonOperator =
   | "equals";
 
 export type MathJson =
-  | [operator: MathJsonOperator, ...args: MathJson[]]
+  | [operator: MathJsonLogicalOperator, ...args: MathJson[]]
   | MathJsonData;
