@@ -21,7 +21,7 @@
   </ul>
 
   <ul>
-    <li><router-link to="/hamming">Hamming</router-link></li>
+    <li><router-link to="/hammingcode">Hamming-Codes</router-link></li>
   </ul>
 
   <!-- Stuff and thingies -->
