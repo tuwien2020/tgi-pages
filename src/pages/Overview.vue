@@ -1,8 +1,6 @@
 <template>
   <h1>Overview Page</h1>
 
-  <MathInput type="logical"></MathInput>
-
   <input />
 
   TODO: List of pages
@@ -24,6 +22,11 @@
     <li><router-link to="/hamming-code">Hamming-Codes</router-link></li>
   </ul>
 
+  <h3>Boolesche Algebra</h3>
+  <ul>
+    <li><router-link to="/truth-table">Wahrheitstabelle</router-link></li>
+  </ul>
+
   <!-- Stuff and thingies -->
   <button @click="count++">count is: {{ count }}</button>
   <p>
@@ -33,12 +36,9 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
-import MathInput from "./../components/MathInput.vue";
 
 export default defineComponent({
-  components: {
-    MathInput,
-  },
+  components: {},
   setup() {
     const count = ref(0);
 

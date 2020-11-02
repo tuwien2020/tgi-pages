@@ -2,7 +2,6 @@
   <div class="math-input">
     <input type="text" v-model="mathinput" size="100" />
     <div ref="mathoutput"></div>
-    <div class="error"></div>
   </div>
 </template>
 
@@ -43,7 +42,6 @@ function useLogicalParsing() {
     // Doesn't have a AND before OR order of operations (yet)
     try {
       const parsed = tryParseAstLogical(value);
-      console.log(parsed);
       return { mathJson: toMathJsonRecursive(parsed) };
     } catch (e) {
       return { error: "" + e };
@@ -68,7 +66,6 @@ function useMathParsing() {
 }
 
 function useMathPrinting() {
-  // TODO: handle (0∨ not 1 ∨ not 0)
   const mathJsonOperatorMap = new Map<MathJsonLogicalOperator, string>([
     ["not", "\\neg"],
     ["implies", "\\implies"],
@@ -80,54 +77,54 @@ function useMathPrinting() {
     ["equals", "\\Leftrightarrow"],
   ]);
 
+  function needsBrackets(ast: MathJson) {
+    // For a correct implementation, you'd need to implement operator precedence...
+    if (Array.isArray(ast) && ast.length == 3) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function toLatexRecursive(ast: MathJson) {
+    if (Array.isArray(ast)) {
+      const op = mathJsonOperatorMap.get(ast[0]);
+      if (!op) {
+        throw new Error("Unknown operator " + ast);
+      }
+
+      if (ast.length == 0) {
+        throw new Error("Not well formed AST tree " + ast);
+      } else if (ast.length == 2) {
+        let right = toLatexRecursive(ast[1]);
+        if (needsBrackets(ast[1])) {
+          right = `(${right})`;
+        }
+        return `${op} ${right}`;
+      } else if (ast.length == 3) {
+        let left = toLatexRecursive(ast[1]);
+        if (needsBrackets(ast[1])) {
+          left = `(${left})`;
+        }
+        let right = toLatexRecursive(ast[2]);
+        if (needsBrackets(ast[2])) {
+          right = `(${right})`;
+        }
+        return `${left} ${op} ${right}`; // TODO:
+      } else {
+        throw new Error("Not well formed AST tree " + ast);
+      }
+    } else if (ast === true) {
+      return "\\mathtt{1}";
+    } else if (ast === false) {
+      return "\\mathtt{0}";
+    } else if (typeof ast === "string") {
+      return ast;
+    }
+  }
+
   function mathToLatex(value: { mathJson?: MathJson; error?: string }): string {
     if (value.mathJson) {
-      function needsBrackets(ast: MathJson) {
-        // For a correct implementation, you'd need to implement operator precedence...
-        if (Array.isArray(ast) && ast.length == 3) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      function toLatexRecursive(ast: MathJson) {
-        if (Array.isArray(ast)) {
-          const op = mathJsonOperatorMap.get(ast[0]);
-          if (!op) {
-            throw new Error("Unknown operator " + ast);
-          }
-
-          if (ast.length == 0) {
-            throw new Error("Not well formed AST tree " + ast);
-          } else if (ast.length == 2) {
-            let right = toLatexRecursive(ast[1]);
-            if (needsBrackets(ast[1])) {
-              right = `(${right})`;
-            }
-            return `${op} ${right}`;
-          } else if (ast.length == 3) {
-            let left = toLatexRecursive(ast[1]);
-            if (needsBrackets(ast[1])) {
-              left = `(${left})`;
-            }
-            let right = toLatexRecursive(ast[2]);
-            if (needsBrackets(ast[2])) {
-              right = `(${right})`;
-            }
-            return `${left} ${op} ${right}`; // TODO:
-          } else {
-            throw new Error("Not well formed AST tree " + ast);
-          }
-        } else if (ast === true) {
-          return "\\mathtt{1}";
-        } else if (ast === false) {
-          return "\\mathtt{0}";
-        } else if (typeof ast === "string") {
-          return ast;
-        }
-      }
-
       try {
         const output = toLatexRecursive(value.mathJson);
         return output;
@@ -144,7 +141,10 @@ function useMathPrinting() {
         .replace(/\[/g, "{[}")
         .replace(/\]/g, "{]}")
         .replace(/~/g, "{\\textasciitilde}")
-        .replace(/\^/g, "{\\textasciicircum}");
+        .replace(/\^/g, "{\\textasciicircum}")
+        .replace(/[^\x00-\x7F]/g, function (c) {
+          return `\\char"${c.codePointAt(0).toString(16)}`;
+        });
       // TODO: Prevent KaTeX warnings when encountering Unicode symbols
       return `\\textcolor{red}{\\texttt{${escaped}}}`;
     }
@@ -163,34 +163,52 @@ export default defineComponent({
       type: String, // "math" | "logical"
       default: "math",
     },
+    modelValue: {
+      type: String,
+      required: true,
+    },
   },
-
+  emits: {
+    "update:modelValue": (value: string) => true,
+    mathJson: (value: MathJson) => true,
+  },
   setup(props, context) {
     const logicalParsing = useLogicalParsing();
     const mathParsing = useMathParsing();
     const mathPrinting = useMathPrinting();
 
-    const mathinput = ref("");
+    const mathinput = ref("" + props.modelValue);
     const mathoutput = ref<HTMLElement>();
 
-    onMounted(() => {
-      watch(mathinput, (value) => {
-        nextTick(() => {
-          let parsedAst =
-            props.type === "logical"
-              ? logicalParsing.parseLogical(value)
-              : mathParsing.parseMath(value);
+    watch(
+      () => props.modelValue,
+      (value) => {
+        mathinput.value = value;
+        let parsedAst =
+          props.type === "logical"
+            ? logicalParsing.parseLogical(value)
+            : mathParsing.parseMath(value);
 
-          console.log(parsedAst);
+        if (parsedAst.mathJson && !parsedAst.error) {
+          context.emit("mathJson", parsedAst.mathJson);
+        }
+
+        nextTick(() => {
           const latex = mathPrinting.mathToLatex(parsedAst);
 
-          Katex.render(latex, mathoutput.value, {
-            displayMode: true,
-            throwOnError: false,
-            output: "html",
-          });
+          if (mathoutput.value) {
+            Katex.render(latex, mathoutput.value, {
+              displayMode: true,
+              throwOnError: false,
+              output: "html",
+            });
+          }
         });
-      });
+      }
+    );
+
+    watch(mathinput, (value) => {
+      context.emit("update:modelValue", value);
     });
 
     return {
