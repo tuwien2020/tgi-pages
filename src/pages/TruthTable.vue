@@ -7,6 +7,9 @@
     @mathJson="(value) => (logicalMathJson = value)"
   ></math-input>
 
+  <div>
+    <label><input type="checkbox" v-model="flipBits" /> Flip the bits </label>
+  </div>
   <table class="truth-table">
     <thead>
       <tr>
@@ -16,7 +19,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(row, index) in tableRows" :key="index">
+      <tr v-for="(row, index) in tableRows" :key="index" tabindex="0">
         <td
           v-for="(item, itemIndex) in row"
           :key="itemIndex"
@@ -27,6 +30,8 @@
       </tr>
     </tbody>
   </table>
+
+  <!-- TODO: Documentation -->
 </template>
 
 <script lang="ts">
@@ -175,9 +180,9 @@ export default defineComponent({
 
     const tableHeaders = shallowRef<MathJson[]>([]);
     const tableRows = ref<boolean[][]>([[]]);
+    const flipBits = ref<boolean>(false);
 
-    watch(logicalMathJson, (value) => {
-      console.log(value);
+    function createTable(value: MathJson) {
       const getterNames = logicalMath.extractGetters(value);
       let operations = logicalMath.extractOperations(value);
 
@@ -197,10 +202,14 @@ export default defineComponent({
         tableData[i] = new Array(tableWidth);
 
         for (let j = 0; j < getters.length; j++) {
-          tableData[i][j] = binaryNumber.value[j];
+          tableData[i][j] =
+            binaryNumber.value[flipBits.value ? getters.length - j - 1 : j];
         }
         const getterData = new Map<string, boolean>(
-          getters.map((v, j) => [v, binaryNumber.value[j]])
+          getters.map((v, j) => [
+            v,
+            binaryNumber.value[flipBits.value ? getters.length - j - 1 : j],
+          ])
         );
 
         for (let j = getters.length; j < tableWidth; j++) {
@@ -213,10 +222,18 @@ export default defineComponent({
       }
 
       tableRows.value = tableData;
+    }
+    watch(logicalMathJson, (value) => {
+      console.log(value);
+      createTable(value);
     });
 
     watch(logicalUserInput, (value) => {
       router.replace({ query: { input: value } });
+    });
+
+    watch(flipBits, (value) => {
+      createTable(logicalMathJson.value);
     });
 
     return {
@@ -224,6 +241,7 @@ export default defineComponent({
       logicalMathJson,
       tableHeaders,
       tableRows,
+      flipBits,
     };
   },
 });
@@ -244,11 +262,13 @@ export default defineComponent({
 .faded-text {
   color: #7c7c7c;
 }
-.truth-table tbody tr:hover {
+.truth-table tbody tr:hover,
+.truth-table tbody tr:focus {
   background-color: #f1f1f1;
 }
 
-.truth-table th:hover::after {
+.truth-table th:hover::after,
+.truth-table th:focus::after {
   background-color: #f1f1f1;
   content: "";
   position: absolute;
