@@ -41,40 +41,49 @@
       <tr>
         <th>Operator</th>
         <th>Type this text</th>
+        <th>Or this symbol</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td><math-output :value="['not', 'a']"></math-output></td>
         <td>not</td>
+        <td>!</td>
       </tr>
       <tr>
         <td><math-output :value="['and', 'a', 'b']"></math-output></td>
         <td>and</td>
+        <td>&&</td>
       </tr>
       <tr>
         <td><math-output :value="['or', 'a', 'b']"></math-output></td>
         <td>or</td>
+        <td>||</td>
       </tr>
       <tr>
         <td><math-output :value="['xor', 'a', 'b']"></math-output></td>
         <td>xor</td>
+        <td>^</td>
       </tr>
       <tr>
         <td><math-output :value="['nand', 'a', 'b']"></math-output></td>
         <td>nand</td>
+        <td>!&&</td>
       </tr>
       <tr>
         <td><math-output :value="['nor', 'a', 'b']"></math-output></td>
         <td>nor</td>
+        <td>!||</td>
       </tr>
       <tr>
         <td><math-output :value="['implies', 'a', 'b']"></math-output></td>
         <td>implies</td>
+        <td>=></td>
       </tr>
       <tr>
         <td><math-output :value="['equals', 'a', 'b']"></math-output></td>
         <td>equals</td>
+        <td>=</td>
       </tr>
     </tbody>
   </table>
