@@ -5,3 +5,17 @@
   color: #2c3e50;
   margin: 24px;
 }
+
+table {
+  border-collapse: collapse;
+  border-style: hidden;
+}
+
+table td,
+table th {
+  border: solid 1px #919191;
+  padding: 0px 6px;
+}
+table th {
+  border-bottom: solid 1px black;
+}
