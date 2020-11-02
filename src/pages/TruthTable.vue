@@ -15,9 +15,11 @@
         </th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="monospace">
       <tr v-for="(row, index) in tableRows" :key="index">
-        <td v-for="(item, itemIndex) in row" :key="itemIndex">{{ item }}</td>
+        <td v-for="(item, itemIndex) in row" :key="itemIndex">
+          {{ item === true ? 1 : item === false ? 0 : item }}
+        </td>
       </tr>
     </tbody>
   </table>
@@ -33,6 +35,7 @@ import {
   shallowRef,
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { BinaryNumber } from "../math/binary-number";
 import { MathJson } from "../MathJson";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
@@ -115,7 +118,7 @@ export default defineComponent({
     const logicalMathJson = shallowRef<MathJson>();
 
     const tableHeaders = shallowRef<MathJson[]>([]);
-    const tableRows = ref<string[][]>([[]]);
+    const tableRows = ref<boolean[][]>([[]]);
 
     watch(logicalMathJson, (value) => {
       console.log(value);
@@ -126,7 +129,28 @@ export default defineComponent({
         operations
       );
 
-      //tableRows.value =
+      let binaryNumber = BinaryNumber.fromSize(getters.size);
+      const oneInBinary = BinaryNumber.fromSize(getters.size).add(
+        new BinaryNumber([true])
+      );
+
+      const tableWidth = tableHeaders.value.length;
+      const tableData = new Array(2 ** getters.size);
+      for (let i = 0; i < tableData.length; i++) {
+        tableData[i] = new Array(tableWidth);
+
+        for (let j = 0; j < getters.size; j++) {
+          tableData[i][j] = binaryNumber.value[j];
+        }
+
+        for (let j = getters.size; j < tableWidth; j++) {
+          //tableData[i][j] =
+        }
+
+        binaryNumber = binaryNumber.add(oneInBinary);
+      }
+
+      tableRows.value = tableData;
     });
 
     watch(logicalUserInput, (value) => {
@@ -142,3 +166,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.monospace {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+}
+</style>
