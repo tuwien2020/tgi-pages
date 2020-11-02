@@ -27,6 +27,12 @@
     <li><router-link to="/truth-table">Wahrheitstabelle</router-link></li>
   </ul>
 
+  <h3>GitHub</h3>
+  <ul>
+    <li>
+      <a href="https://github.com/tuwien2020/tgi-pages">TGI Pages</a>
+    </li>
+  </ul>
   <!-- Stuff and thingies -->
   <button @click="count++">count is: {{ count }}</button>
   <p>
