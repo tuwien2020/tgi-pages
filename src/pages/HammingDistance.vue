@@ -1,0 +1,147 @@
+<template>
+    <h1>Hamming-Distanz</h1>
+
+    <textarea rows="4" cols="50" v-model="codewords" ></textarea>
+    <pre>Maximale Hamming-Distanz: {{maxHammingDistance}}</pre>
+    <pre>Minimale Hamming-Distanz: {{minHammingDistance}}</pre>
+    <pre>Ist ein Blockcode: {{isBlockCode}}</pre>
+    <pre>Ist ein linearer Code: {{isLinearCode}}</pre>
+    <pre>Ist ein zyklischer Code: {{isCyclicCode}}</pre>
+</template>
+
+<script lang="ts">
+import { defineComponent, computed, ref, watch, watchEffect } from "vue"; 
+
+export default defineComponent({
+  components: { 
+  },
+  setup() {
+    let codewords = ref(""); 
+    let isBlockCode = ref(false);
+    let isLinearCode = ref(false);
+    let isCyclicCode = ref(false);
+    let maxHammingDistance = ref("");
+    let minHammingDistance = ref("");
+
+    watch(codewords, (value) => { 
+      if(blockCode(value)) {
+        let hammingDistance = getHammingDistance(value);
+        minHammingDistance.value = hammingDistance.min + "";
+        maxHammingDistance.value = hammingDistance.max + "";
+
+          isLinearCode.value = linearCode(value);
+          isCyclicCode.value = cyclicCode(value);
+          isBlockCode.value = true
+        } else {
+          isLinearCode.value = false;
+          isCyclicCode.value = false;
+          isBlockCode.value = false;
+          minHammingDistance.value = 0 + "";
+          maxHammingDistance.value = 0 + "";
+        }
+
+        
+    });
+
+    return {
+      codewords,
+      isBlockCode,
+      isLinearCode,
+      isCyclicCode,
+      maxHammingDistance,
+      minHammingDistance,
+    };
+  },
+});
+
+function bitCount (n: number) : number {
+  n = n - ((n >> 1) & 0x55555555)
+  n = (n & 0x33333333) + ((n >> 2) & 0x33333333)
+  return ((n + (n >> 4) & 0xF0F0F0F) * 0x1010101) >> 24
+}
+
+function getHammingDistance(codewords: string) {
+    let codewordStrings = codewords.split("\n");
+    let distances = new Array<number>();
+    for (let i = 0; i < codewordStrings.length; i++) {
+      let codewordA = codewordStrings[i];
+      for (let j = 0; j < codewordStrings.length; j++) {
+        if (i == j) continue;
+        let codewordB = codewordStrings[j];
+        distances.push(bitCount(parseInt(codewordA, 2) ^ parseInt(codewordB ,2)));
+      }
+    }
+    let sortedDistances = distances.sort();
+
+    return {
+      min: sortedDistances[0],
+      max: sortedDistances[sortedDistances.length-1],
+      distances: distances
+    };
+}
+
+function blockCode(codewords: string) : boolean {
+  let codewordStrings = codewords.split("\n");
+  let codewordLength = codewordStrings[0].length;
+  for (let i = 1; i < codewordStrings.length; i++) {
+    if (codewordStrings[i].length != codewordLength) {
+      return false;
+    }
+  }
+  return true;
+} 
+
+function linearCode(codewords: string) : boolean {
+  let codewordStrings = codewords.split("\n");
+
+  for (let i = 0; i < codewordStrings.length; i++) {
+    let codewordA = codewordStrings[i];
+    for (let j = 0; j < codewordStrings.length; j++) {
+      if (i == j) continue;
+      let codewordB = codewordStrings[j];
+        if (codewordA.length != codewordB.length) {
+           return false;
+        }
+      let xorString = xorBinaryStrings(codewordA, codewordB);
+
+      if (!codewordStrings.includes(xorString)) {
+        return false;
+      };
+    }
+  }
+  return true;
+}
+
+function cyclicCode(codewords: string) : boolean {
+  let codewordStrings = codewords.split("\n");
+
+  for (let i = 0; i < codewordStrings.length; i++) {
+    let codeword = codewordStrings[i];
+    for (let j = 0; j < codewordStrings.length; j++) {  
+      let shiftedCode = cyclicShiftString(codeword, j);
+      if (!codewordStrings.includes(shiftedCode)) {
+        return false;
+      };
+    }
+  }
+  return true;
+}
+
+function cyclicShiftString(s: String, n: number) {
+  let rotatedString = "";
+  for (let i = 0; i < s.length; i++) {
+    rotatedString += s[(i+n)%s.length];
+  }
+  return rotatedString;
+}
+
+function xorBinaryStrings(a: string, b: string) {
+  let xorString = "";
+  for (let i = 0; i < a.length; i++) {
+    xorString += parseInt(a[i]) ^ parseInt(b[i]);
+  }
+  return xorString;
+}
+
+
+</script>

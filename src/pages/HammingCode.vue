@@ -18,11 +18,11 @@
 
     <h2>Berechnungen</h2>
     
-    <p>Wie viele Prüfbits werden für einen Hamming-Code mit d Datenbits benötigt?</p>
+    <p>Wie viele Paritybits werden für einen Hamming-Code mit d Datenbits benötigt?</p>
     <input v-model="givenDataBits" pattern="[0-9]+">
-    <pre>mindestens {{minParityBits}} Prüfbits</pre>    
+    <pre>mindestens {{minParityBits}} Paritybits</pre>    
 
-    <p>Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn dieser p Prüfbits hat?</p>
+    <p>Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn dieser p Paritybits hat?</p>
     <input v-model="givenParityBits" pattern="[0-9]+">
     <pre>maximal {{maxCodebits}} Code- und {{maxDatabits}} Datenbits  </pre>
 
@@ -184,7 +184,7 @@ class HammingCode {
             let correctedCode = "";
             let parityBitIndex = 0;
             for (let i = 1; i <= this.numCodeBits; i++) {
-                if ((i & (i - 1)) == 0) {
+                if (isPowerOfTwo(i)) {
                     correctedCode += this.parityBits[parityBitIndex];
                     parityBitIndex++;
                 } else {
