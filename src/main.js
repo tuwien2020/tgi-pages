@@ -10,7 +10,7 @@ import { name, version } from "./../package.json";
 /** @type {import("vue-router").RouteRecordRaw[]} */
 const routes = [
   { path: "/", component: Overview },
-  { path: "/hamming", component: HammingCode },
+  { path: "/hamming-code", component: HammingCode },
 ];
 
 if (import.meta.env.PROD) {

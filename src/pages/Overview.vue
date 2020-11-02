@@ -3,7 +3,7 @@
 
   <MathInput type="logical"></MathInput>
 
-  <input>
+  <input />
 
   TODO: List of pages
   <h3>Cat pages</h3>
@@ -21,7 +21,7 @@
   </ul>
 
   <ul>
-    <li><router-link to="/hammingcode">Hamming-Codes</router-link></li>
+    <li><router-link to="/hamming-code">Hamming-Codes</router-link></li>
   </ul>
 
   <!-- Stuff and thingies -->

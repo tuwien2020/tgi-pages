@@ -149,7 +149,7 @@ const logicalImpliesOp: bnb.Parser<LogicalExpression> = logicalOrOps.chain(
 
 const logicalEqualsOp: bnb.Parser<LogicalExpression> = logicalImpliesOp.chain(
   (expr) => {
-    return operator({ operator: "equals", match: /equal(s)?/i })
+    return operator({ operator: "equals", match: /equal(s)?|==?|<==?>|≡/i })
       .and(logicalImpliesOp)
       .many0()
       .map((pairs) => {
@@ -162,11 +162,6 @@ const logicalEqualsOp: bnb.Parser<LogicalExpression> = logicalImpliesOp.chain(
 
 // Lowest level
 const mathExpr = logicalEqualsOp;
-
-const text = "( 0 or 1 )and1 and   0or( 1 xor 1   ) ";
-
-const ast = mathExpr.tryParse(text);
-console.log(ast);
 
 export function tryParse(value: string) {
   return mathExpr.tryParse(value);
