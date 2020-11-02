@@ -74,9 +74,9 @@ function useMathPrinting() {
     ["implies", "\\implies"],
     ["and", "\\land"],
     ["or", "\\lor"],
-    ["xor", "\\mathtt{XOR}"],
-    ["nand", "\\mathtt{NAND}"],
-    ["nor", "\\mathtt{NOR}"],
+    ["xor", "\\mathbin{\\mathtt{xor}}"],
+    ["nand", "\\mathbin{\\mathtt{nand}}"],
+    ["nor", "\\mathbin{\\mathtt{nor}}"],
     ["equals", "\\Leftrightarrow"],
   ]);
 
@@ -123,6 +123,8 @@ function useMathPrinting() {
           return "\\mathtt{1}";
         } else if (ast === false) {
           return "\\mathtt{0}";
+        } else if (typeof ast === "string") {
+          return ast;
         }
       }
 
@@ -143,6 +145,7 @@ function useMathPrinting() {
         .replace(/\]/g, "{]}")
         .replace(/~/g, "{\\textasciitilde}")
         .replace(/\^/g, "{\\textasciicircum}");
+      // TODO: Prevent KaTeX warnings when encountering Unicode symbols
       return `\\textcolor{red}{\\texttt{${escaped}}}`;
     }
 

@@ -16,8 +16,6 @@
 
 import * as bnb from "bread-n-butter";
 
-import { MathJsonLogicalOperator } from "./../MathJson";
-
 export interface LogicalExpression {
   kind: "logical-expression";
 }
@@ -42,6 +40,12 @@ export class BooleanLiteral implements LogicalExpression {
   kind: "logical-expression" = "logical-expression";
 
   constructor(public value: boolean) {}
+}
+
+export class VariableLiteral implements LogicalExpression {
+  kind: "logical-expression" = "logical-expression";
+
+  constructor(public value: string) {}
 }
 
 // ---[ Parser ]---
@@ -71,6 +75,10 @@ const pUnaryOperators = [operator({ operator: "not", match: /not|!|¬/i })];
     .match(/[0-9]+([.][0-9]+)?/)
     .map((str) => new MathNumber(Number(str)));*/
 
+const pVar = bnb
+  .match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]+))?/)
+  .map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
+
 const pBooleanFalse = bnb
   .match(/[Ff]([Aa][Ll][Ss]([Ee]|[Cc][Hh]))?|0/)
   .map((x) => new BooleanLiteral(false));
@@ -87,6 +95,7 @@ const mathBasic: bnb.Parser<LogicalExpression> = bnb.lazy(() => {
     .thru(token)
     .wrap(bnb.text("("), bnb.text(")"))
     .or(pBoolean)
+    .or(pVar)
     .trim(mathWS);
 });
 
@@ -103,10 +112,10 @@ const logicalAndOps: bnb.Parser<LogicalExpression> = mathUnaryPrefix.chain(
   (expr) => {
     return bnb
       .choice(
-        operator({ operator: "and", match: /and/i }),
-        operator({ operator: "nand" as const, match: /nand/i })
+        operator({ operator: "and", match: /and|&&?|∧/i }),
+        operator({ operator: "nand" as const, match: /nand|!&&?|↑/i })
       )
-      .and(logicalAndOps) // TODO: Remove?
+      .and(mathUnaryPrefix)
       .many0()
       .map((pairs) => {
         return pairs.reduce((accum, [operator, expr]) => {
@@ -120,9 +129,9 @@ const logicalOrOps: bnb.Parser<LogicalExpression> = logicalAndOps.chain(
   (expr) => {
     return bnb
       .choice(
-        operator({ operator: "or", match: /or/i }),
-        operator({ operator: "nor" as const, match: /nor/i }),
-        operator({ operator: "xor" as const, match: /xor/i })
+        operator({ operator: "or", match: /or|\|\|?|∨/i }),
+        operator({ operator: "nor" as const, match: /nor|!\|\|?|↓/i }),
+        operator({ operator: "xor" as const, match: /xor|\^|⊕/i })
       )
       .and(logicalAndOps)
       .many0()
@@ -136,7 +145,7 @@ const logicalOrOps: bnb.Parser<LogicalExpression> = logicalAndOps.chain(
 
 const logicalImpliesOp: bnb.Parser<LogicalExpression> = logicalOrOps.chain(
   (expr) => {
-    return operator({ operator: "implies", match: /impl(y|ies)?/i })
+    return operator({ operator: "implies", match: /impl(y|ies)?|==?>|⇒/i })
       .and(logicalOrOps)
       .many0()
       .map((pairs) => {
