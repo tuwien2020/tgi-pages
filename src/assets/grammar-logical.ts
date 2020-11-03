@@ -76,7 +76,7 @@ const pUnaryOperators = [operator({ operator: "not", match: /not|!|¬/i })];
     .map((str) => new MathNumber(Number(str)));*/
 
 const pVar = bnb
-  .match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]+))?/)
+  .match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/)
   .map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
 
 const pBooleanFalse = bnb

@@ -14,7 +14,13 @@
   <table class="truth-table">
     <thead>
       <tr>
-        <th v-for="(item, index) in tableHeaders" :key="index">
+        <th
+          v-for="(item, index) in tableHeaders"
+          :key="index"
+          :class="{
+            'right-thick-border': index === tableThickBorderIndex,
+          }"
+        >
           <math-output :value="item"></math-output>
         </th>
       </tr>
@@ -24,7 +30,10 @@
         <td
           v-for="(item, itemIndex) in row"
           :key="itemIndex"
-          :class="{ 'faded-text': item === false }"
+          :class="{
+            'faded-text': item === false,
+            'right-thick-border': itemIndex === tableThickBorderIndex,
+          }"
         >
           {{ item === true ? 1 : item === false ? 0 : item }}
         </td>
@@ -236,6 +245,7 @@ export default defineComponent({
     const tableHeaders = shallowRef<MathJson[]>([]);
     const tableRows = ref<boolean[][]>([[]]);
     const flipBits = ref<boolean>(false);
+    const tableThickBorderIndex = ref(0);
 
     function createTable(value: MathJson) {
       const getterNames = logicalMath.extractGetters(value);
@@ -277,6 +287,7 @@ export default defineComponent({
       }
 
       tableRows.value = tableData;
+      tableThickBorderIndex.value = getters.length - 1;
     }
     watch(logicalMathJson, (value) => {
       console.log(value);
@@ -297,6 +308,7 @@ export default defineComponent({
       tableHeaders,
       tableRows,
       flipBits,
+      tableThickBorderIndex,
     };
   },
 });
@@ -332,6 +344,10 @@ export default defineComponent({
   height: 10000px;
   width: 100%;
   z-index: -1;
+}
+.right-thick-border {
+  border-right-width: 2px;
+  border-right-color: black;
 }
 </style>
 

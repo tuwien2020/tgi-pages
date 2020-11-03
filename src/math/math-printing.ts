@@ -54,7 +54,7 @@ export function useMathPrinting() {
     } else if (ast === false) {
       return "\\mathtt{0}";
     } else if (typeof ast === "string") {
-      return ast;
+      return ast.replace(/^([^_]+)_([^]+)$/, "$1_{$2}");
     }
   }
 
