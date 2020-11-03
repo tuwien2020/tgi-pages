@@ -1,12 +1,15 @@
 <template>
     <h1>Hamming-Distanz</h1>
 
+    <p>Gebe hier die Codewörter ein (getrennt durch einen Linienumbruch):</p>
     <textarea rows="4" cols="50" v-model="codewords" ></textarea>
     <pre>Maximale Hamming-Distanz: {{maxHammingDistance}}</pre>
     <pre>Minimale Hamming-Distanz: {{minHammingDistance}}</pre>
     <pre>Ist ein Blockcode: {{isBlockCode}}</pre>
     <pre>Ist ein linearer Code: {{isLinearCode}}</pre>
     <pre>Ist ein zyklischer Code: {{isCyclicCode}}</pre>
+
+    <div id="hammingMatrix"></div>
 </template>
 
 <script lang="ts">
@@ -39,9 +42,9 @@ export default defineComponent({
           minHammingDistance.value = 0 + "";
           maxHammingDistance.value = 0 + "";
         }
-
-        
     });
+
+    
 
     return {
       codewords,
@@ -53,6 +56,7 @@ export default defineComponent({
     };
   },
 });
+
 
 function bitCount (n: number) : number {
   n = n - ((n >> 1) & 0x55555555)
@@ -143,5 +147,22 @@ function xorBinaryStrings(a: string, b: string) {
   return xorString;
 }
 
+function createTable() {
+  let hammingMatrix = document.getElementById("hammingMatrix");
+  let table = document.createElement("table");
+
+  for (let row = 0; row < 4; row++) {
+    let tr = document.createElement("tr");
+
+    for (let col = 0; col < 4; col++) {
+      tr.appendChild( document.createElement("td") ); 
+      tr.cells[0].appendChild( document.createTextNode('Text1') ) 
+    }
+  
+    table.appendChild(tr);
+  }
+
+  hammingMatrix.appendChild(table);
+}
 
 </script>
