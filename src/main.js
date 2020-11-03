@@ -7,6 +7,7 @@ import Overview from "./pages/Overview.vue";
 import HammingCode from "./pages/HammingCode.vue";
 import TruthTable from "./pages/TruthTable.vue";
 import HammingDistance from "./pages/HammingDistance.vue";
+import PolynomCode from "./pages/PolynomCode.vue";
 import { name, version } from "./../package.json";
 
 /** @type {import("vue-router").RouteRecordRaw[]} */
@@ -15,6 +16,7 @@ const routes = [
   { path: "/hamming-code", component: HammingCode },
   { path: "/truth-table", component: TruthTable },
   { path: "/hamming-distance", component: HammingDistance},
+  { path: "/polynom-code", component: PolynomCode},
 ];
 
 if (import.meta.env.PROD) {

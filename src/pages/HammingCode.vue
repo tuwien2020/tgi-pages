@@ -14,7 +14,8 @@
     <pre>Anzahl der Paritybits: {{hammingCode.numParityBits}}</pre>
     <pre>Anzahl der Datenbits: {{hammingCode.numDataBits}}</pre>
     <pre>{{hammingCode.getFormattedHammingCodeParityFormulas()}}</pre>
-    <pre>Fehler an der Stelle: {{hammingCode.errorBit}} (bei 0 → kein erkennbarer Fehler)</pre>
+    <pre v-if="hammingCode.errorBit != 0">Fehler an der Stelle: {{hammingCode.errorBit}}</pre>
+    <pre v-if="hammingCode.errorBit == 0">Kein erkennbarer Fehler</pre>
 
     <h2>Berechnungen</h2>
     
@@ -169,17 +170,15 @@ class HammingCode {
         }
 
         if (!onlyDatabits) {
-            let error = "";
-            for (let j = 0; j < this.numParityBits; j++) {
-                let parity = 0;
-                for (let i = 1; i <= this.numCodeBits; i++) {
-                    if (((1 << j) & i) != 0) {
-                        parity ^= this.code.codePointAt(i - 1) - '0'.codePointAt(0);
-                    }
+            let error = 0;
+            for(let i = 0; i < this.numParityBits; i++) {
+                let codebitIndex = Math.floor(Math.pow(2, i)); 
+
+                if (parseInt(this.code[codebitIndex-1]) != this.parityBits[i]) {
+                    error += codebitIndex;
                 }
-                error = parity + error;
             }
-            this.errorBit = parseInt(error, 2);
+            this.errorBit = error;
         } else { 
             let correctedCode = "";
             let parityBitIndex = 0;
