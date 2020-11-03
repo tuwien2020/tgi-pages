@@ -3,8 +3,7 @@
 
     <p>Gebe hier die Codewörter ein (getrennt durch einen Linienumbruch):</p>
     <textarea rows="4" cols="50" v-model="codewords" ></textarea>
-    <pre>Maximale Hamming-Distanz: {{maxHammingDistance}}</pre>
-    <pre>Minimale Hamming-Distanz: {{minHammingDistance}}</pre>
+    <pre>Hamming-Distanz: {{hammingDistance}}</pre> 
     <pre>Ist ein Blockcode: {{isBlockCode}}</pre>
     <pre>Ist ein linearer Code: {{isLinearCode}}</pre>
     <pre>Ist ein zyklischer Code: {{isCyclicCode}}</pre>
@@ -23,14 +22,14 @@ export default defineComponent({
     let isBlockCode = ref(false);
     let isLinearCode = ref(false);
     let isCyclicCode = ref(false);
-    let maxHammingDistance = ref("");
+    let hammingDistance = ref("");
     let minHammingDistance = ref("");
 
     watch(codewords, (value) => { 
       if(blockCode(value)) {
-        let hammingDistance = getHammingDistance(value);
-        minHammingDistance.value = hammingDistance.min + "";
-        maxHammingDistance.value = hammingDistance.max + "";
+          let hammingDistanceData = getHammingDistance(value);
+
+          hammingDistance.value = hammingDistanceData.hammingDistance.toString();
 
           isLinearCode.value = linearCode(value);
           isCyclicCode.value = cyclicCode(value);
@@ -39,8 +38,7 @@ export default defineComponent({
           isLinearCode.value = false;
           isCyclicCode.value = false;
           isBlockCode.value = false;
-          minHammingDistance.value = 0 + "";
-          maxHammingDistance.value = 0 + "";
+          minHammingDistance.value = 0 + ""; 
         }
     });
 
@@ -51,8 +49,7 @@ export default defineComponent({
       isBlockCode,
       isLinearCode,
       isCyclicCode,
-      maxHammingDistance,
-      minHammingDistance,
+      hammingDistance,
     };
   },
 });
@@ -78,8 +75,7 @@ function getHammingDistance(codewords: string) {
     let sortedDistances = distances.sort();
 
     return {
-      min: sortedDistances[0],
-      max: sortedDistances[sortedDistances.length-1],
+      hammingDistance: sortedDistances[0], 
       distances: distances
     };
 }

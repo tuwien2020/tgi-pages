@@ -13,9 +13,12 @@
                                   x^1   
 
 </pre> -->
-    <p>Nachrichtenwort * x^(Grad des Generatorpolynoms)</p>
+    <p>Bitfolge zu Polynom</p>
+    <input v-model="code">
+    <pre>{{polynom}}</pre>
+    <p>Dividend</p>
     <input v-model="M">
-    <p>Generatorpolynom</p>
+    <p>Divisor</p>
     <input v-model="G">
     <br>
     <br>
@@ -31,8 +34,22 @@ export default defineComponent({
   setup() {
     let M = ref("x^5+x^4+x^0");
     let G = ref("x^2+x^0");
+    let code = ref("");
+    let polynom = ref("");
 
     let output = ref(getOutputString(M.value, G.value));
+
+    watch(code, (value) => {
+      let exponent = 0;
+      let polynomString = ""; 
+      for (let i = value.length-1; i >= 0; i--) {
+        if (value[exponent] == "1") {
+          polynomString += "x^" + i + "+";
+        }
+        exponent++;
+      }
+      polynom.value = polynomString.substring(0, polynomString.length-1);
+    })
 
     watch(M, (value)=> {
       output.value = getOutputString(value, G.value);
@@ -45,6 +62,8 @@ export default defineComponent({
     return {
         M,G,
         output,
+        code,
+        polynom,
     };
 },
 });
@@ -65,7 +84,6 @@ function getOutputString(m: string, g: string) : string {
   let currentMonoms = [...messageMonoms]; 
  
   while(currentDegree >= degreeOfGeneratorPolynom) { 
-    console.log(currentDegree);
     let currentResultDegree = currentDegree - degreeOfGeneratorPolynom;
     result += "x^" + currentResultDegree + "+";
 
