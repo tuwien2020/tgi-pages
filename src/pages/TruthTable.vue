@@ -4,6 +4,7 @@
   <math-input
     type="logical"
     v-model="logicalUserInput"
+    :mathParser="parseLogical"
     @mathJson="(value) => (logicalMathJson = value)"
   ></math-input>
 
@@ -96,6 +97,8 @@
       </tr>
     </tbody>
   </table>
+
+  <p>Protip: Wenn man eine Variable haben will die nichts macht, kann man <pre style="display: inline">or (variableName and 0)</pre> eingeben.</p>
 </template>
 
 <script lang="ts">
@@ -110,8 +113,43 @@ import {
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
 import { MathJson, MathJsonLogicalOperator } from "../MathJson";
+import { tryParse as tryParseAstLogical } from "./../assets/grammar-logical";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
+
+function useLogicalParsing() {
+  function toMathJsonRecursive(ast: any) {
+    if (ast.left) {
+      return [
+        ast.operator,
+        toMathJsonRecursive(ast.left),
+        toMathJsonRecursive(ast.right),
+      ];
+    } else if (ast.right && ast.operator) {
+      return [ast.operator, toMathJsonRecursive(ast.right)];
+    } else if (ast.right) {
+      return toMathJsonRecursive(ast.right);
+    } else {
+      return ast.value;
+    }
+  }
+
+  function parseLogical(
+    value: string
+  ): { mathJson?: MathJson; error?: string } {
+    // Doesn't have a AND before OR order of operations (yet)
+    try {
+      const parsed = tryParseAstLogical(value);
+      return { mathJson: toMathJsonRecursive(parsed) };
+    } catch (e) {
+      return { error: "" + e };
+    }
+  }
+
+  return {
+    parseLogical,
+  };
+}
 
 function useLogicalMath() {
   function extractGetters(ast: MathJson) {
@@ -235,6 +273,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
+    const { parseLogical } = useLogicalParsing();
     const logicalMath = useLogicalMath();
 
     const logicalUserInput = ref(
@@ -303,6 +342,7 @@ export default defineComponent({
     });
 
     return {
+      parseLogical,
       logicalUserInput,
       logicalMathJson,
       tableHeaders,

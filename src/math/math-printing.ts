@@ -55,7 +55,37 @@ export function useMathPrinting() {
       return "\\mathtt{0}";
     } else if (typeof ast === "string") {
       return ast.replace(/^([^_]+)_([^]+)$/, "$1_{$2}");
+    } else if (ast.kind == "number") {
+      if (ast.base === 2) {
+        const [beforeComma, afterComma] = ast.value.split(".");
+
+        return `\\mathtt{${splitIntoChunks(beforeComma ?? "", 4, true).join(
+          "\\,"
+        )}.${splitIntoChunks(afterComma ?? "", 4).join("\\,")}}`;
+      } else {
+        return ast.value;
+      }
     }
+  }
+
+  function splitIntoChunks(
+    value: string,
+    chunkSize: number,
+    backwards: boolean = false
+  ) {
+    const chunkCount = Math.ceil(value.length / chunkSize);
+    const chunks = new Array(chunkCount);
+
+    // If we have 100 and want the first block to be 4 bits long, we have to shift by -1
+    const nextLargestMultiple = chunkCount * chunkSize;
+    const startOffset = backwards ? value.length - nextLargestMultiple : 0;
+
+    for (let i = 0; i < chunks.length; i++) {
+      const position = i * chunkSize + startOffset;
+      chunks[i] = value.substring(position, position + chunkSize);
+    }
+
+    return chunks;
   }
 
   function mathToLatex(value: { mathJson?: MathJson; error?: string }): string {

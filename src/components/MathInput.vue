@@ -14,66 +14,22 @@ import {
   computed,
   onMounted,
   nextTick,
+  PropType,
 } from "vue";
 import { MathJson, MathJsonLogicalOperator } from "./../MathJson";
 import Katex from "katex";
-import { tryParse as tryParseAstLogical } from "./../assets/grammar-logical";
 import { useMathPrinting } from "./../math/math-printing";
-
-function useLogicalParsing() {
-  function toMathJsonRecursive(ast: any) {
-    if (ast.left) {
-      return [
-        ast.operator,
-        toMathJsonRecursive(ast.left),
-        toMathJsonRecursive(ast.right),
-      ];
-    } else if (ast.right && ast.operator) {
-      return [ast.operator, toMathJsonRecursive(ast.right)];
-    } else if (ast.right) {
-      return toMathJsonRecursive(ast.right);
-    } else {
-      return ast.value;
-    }
-  }
-
-  function parseLogical(
-    value: string
-  ): { mathJson?: MathJson; error?: string } {
-    // Doesn't have a AND before OR order of operations (yet)
-    try {
-      const parsed = tryParseAstLogical(value);
-      return { mathJson: toMathJsonRecursive(parsed) };
-    } catch (e) {
-      return { error: "" + e };
-    }
-  }
-
-  return {
-    parseLogical,
-  };
-}
-
-function useMathParsing() {
-  function parseMath(value: string): { mathJson?: MathJson; error?: string } {
-    console.log(tryParseAstLogical(value));
-    //@ts-ignore
-    return [value];
-  }
-
-  return {
-    parseMath,
-  };
-}
 
 export default defineComponent({
   props: {
-    type: {
-      type: String, // "math" | "logical"
-      default: "math",
-    },
     modelValue: {
       type: String,
+      required: true,
+    },
+    mathParser: {
+      type: Function as PropType<
+        (value: string) => { mathJson?: MathJson; error?: string }
+      >,
       required: true,
     },
   },
@@ -82,8 +38,6 @@ export default defineComponent({
     mathJson: (value: MathJson) => true,
   },
   setup(props, context) {
-    const logicalParsing = useLogicalParsing();
-    const mathParsing = useMathParsing();
     const mathPrinting = useMathPrinting();
 
     const mathinput = ref("" + props.modelValue);
@@ -93,10 +47,7 @@ export default defineComponent({
       () => props.modelValue,
       (value) => {
         mathinput.value = value;
-        let parsedAst =
-          props.type === "logical"
-            ? logicalParsing.parseLogical(value)
-            : mathParsing.parseMath(value);
+        let parsedAst = props.mathParser(value);
 
         if (parsedAst.mathJson && !parsedAst.error) {
           context.emit("mathJson", parsedAst.mathJson);

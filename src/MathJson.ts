@@ -1,4 +1,9 @@
-export type MathJsonData = boolean | "string";
+export type MathJsonNumber = {
+  kind: "number";
+  value: string;
+  base: number;
+};
+export type MathJsonData = boolean | "string" | MathJsonNumber;
 
 export type MathJsonLogicalOperator =
   | "not"
@@ -8,6 +13,16 @@ export type MathJsonLogicalOperator =
   | "xor"
   | "nand"
   | "nor"
+  | "equals";
+
+export type MathJsonMathOperator =
+  | "unaryMinus"
+  | "unaryPlus"
+  | "exponent"
+  | "multiply"
+  | "divide"
+  | "add"
+  | "subtract"
   | "equals";
 
 export type MathJson =
