@@ -26,13 +26,22 @@ export default defineComponent({
     let minHammingDistance = ref("");
 
     watch(codewords, (value) => { 
-      if(blockCode(value)) {
-          let hammingDistanceData = getHammingDistance(value);
+      let codewordStrings = value.split("\n");
+      
+      if (codewordStrings.length < 2) {
+        return 0;
+      }
 
+      if(blockCode(codewordStrings)) {
+          
+          let hammingDistanceData = getHammingDistance(codewordStrings);
+          
+          if (linearCode(codewordStrings)) {
+            isCyclicCode.value = cyclicCode(codewordStrings);
+          } else {
+            isLinearCode.value = false;
+          }
           hammingDistance.value = hammingDistanceData.hammingDistance.toString();
-
-          isLinearCode.value = linearCode(value);
-          isCyclicCode.value = cyclicCode(value);
           isBlockCode.value = true
         } else {
           isLinearCode.value = false;
@@ -41,8 +50,6 @@ export default defineComponent({
           minHammingDistance.value = 0 + ""; 
         }
     });
-
-    
 
     return {
       codewords,
@@ -61,14 +68,13 @@ function bitCount (n: number) : number {
   return ((n + (n >> 4) & 0xF0F0F0F) * 0x1010101) >> 24
 }
 
-function getHammingDistance(codewords: string) {
-    let codewordStrings = codewords.split("\n");
+function getHammingDistance(codewords: Array<string>) { 
     let distances = new Array<number>();
-    for (let i = 0; i < codewordStrings.length; i++) {
-      let codewordA = codewordStrings[i];
-      for (let j = 0; j < codewordStrings.length; j++) {
+    for (let i = 0; i < codewords.length; i++) {
+      let codewordA = codewords[i];
+      for (let j = 0; j < codewords.length; j++) {
         if (i == j) continue;
-        let codewordB = codewordStrings[j];
+        let codewordB = codewords[j];
         distances.push(bitCount(parseInt(codewordA, 2) ^ parseInt(codewordB ,2)));
       }
     }
@@ -80,31 +86,29 @@ function getHammingDistance(codewords: string) {
     };
 }
 
-function blockCode(codewords: string) : boolean {
-  let codewordStrings = codewords.split("\n");
-  let codewordLength = codewordStrings[0].length;
-  for (let i = 1; i < codewordStrings.length; i++) {
-    if (codewordStrings[i].length != codewordLength) {
+function blockCode(codewords: Array<string>) : boolean {
+  let codewordLength = codewords[0].length;
+  for (let i = 1; i < codewords.length; i++) {
+    if (codewords[i].trim().length == 0) continue;
+    if (codewords[i].length != codewordLength) {
       return false;
     }
   }
   return true;
 } 
 
-function linearCode(codewords: string) : boolean {
-  let codewordStrings = codewords.split("\n");
-
-  for (let i = 0; i < codewordStrings.length; i++) {
-    let codewordA = codewordStrings[i];
-    for (let j = 0; j < codewordStrings.length; j++) {
+function linearCode(codewords: Array<string>) : boolean { 
+  for (let i = 0; i < codewords.length; i++) {
+    let codewordA = codewords[i];
+    for (let j = 0; j < codewords.length; j++) {
       if (i == j) continue;
-      let codewordB = codewordStrings[j];
-        if (codewordA.length != codewordB.length) {
-           return false;
-        }
+      let codewordB = codewords[j];
+      if (codewordA.length != codewordB.length) {
+          return false;
+      }
       let xorString = xorBinaryStrings(codewordA, codewordB);
 
-      if (!codewordStrings.includes(xorString)) {
+      if (!codewords.includes(xorString)) {
         return false;
       };
     }
@@ -112,14 +116,12 @@ function linearCode(codewords: string) : boolean {
   return true;
 }
 
-function cyclicCode(codewords: string) : boolean {
-  let codewordStrings = codewords.split("\n");
-
-  for (let i = 0; i < codewordStrings.length; i++) {
-    let codeword = codewordStrings[i];
-    for (let j = 0; j < codewordStrings.length; j++) {  
+function cyclicCode(codewords: Array<string>) : boolean {  
+  for (let i = 0; i < codewords.length; i++) {
+    let codeword = codewords[i];
+    for (let j = 0; j < codewords.length; j++) {  
       let shiftedCode = cyclicShiftString(codeword, j);
-      if (!codewordStrings.includes(shiftedCode)) {
+      if (!codewords.includes(shiftedCode)) {
         return false;
       };
     }
@@ -141,24 +143,6 @@ function xorBinaryStrings(a: string, b: string) {
     xorString += parseInt(a[i]) ^ parseInt(b[i]);
   }
   return xorString;
-}
-
-function createTable() {
-  let hammingMatrix = document.getElementById("hammingMatrix");
-  let table = document.createElement("table");
-
-  for (let row = 0; row < 4; row++) {
-    let tr = document.createElement("tr");
-
-    for (let col = 0; col < 4; col++) {
-      tr.appendChild( document.createElement("td") ); 
-      tr.cells[0].appendChild( document.createTextNode('Text1') ) 
-    }
-  
-    table.appendChild(tr);
-  }
-
-  hammingMatrix.appendChild(table);
 }
 
 </script>
