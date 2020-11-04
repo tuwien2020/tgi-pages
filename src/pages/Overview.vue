@@ -50,8 +50,15 @@
     </li>
   </ul>
 
-  <h3>EAN 13</h3>
+  <h3>EAN 13 Barcode</h3>
   <ul>
+    <li>
+      <a
+        href="https://online-barcode-reader.inliteresearch.com/"
+        target="_blank"
+        >EAN 13 Barcode Leser</a
+      >
+    </li>
     <li>
       <a
         href="https://www.arndt-bruenner.de/mathe/scripts/pruefziffern.htm"
@@ -76,10 +83,15 @@
     <li><router-link to="/hamming-distance">Hamming Distance</router-link></li>
   </ul>
 
-  <!-- <h3>Polynom Code</h3>
+  <h3>Polynom Code</h3>
   <ul>
-    <li><router-link to="/polynom-code">Polynom Code</router-link></li>
-  </ul>-->
+    <!--  <li><router-link to="/polynom-code">Polynom Code</router-link></li>-->
+    <li>
+      <a href="http://public.hochschule-trier.de/~knorr/crc.php" target="_blank"
+        >Polynomcode</a
+      >
+    </li>
+  </ul>
 
   <h3>Wahrscheinlichkeitsrechner</h3>
   <ul>
