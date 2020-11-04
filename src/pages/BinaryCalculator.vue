@@ -5,26 +5,28 @@
     <h2>Codierungen</h2>
     <p>Gebe hier ein Bitmuster ein:</p>
     <math-input
-      v-model="bitUserInput"
+      v-model="userInput"
       :mathParser="parseBinary"
-      @mathJson="(value) => (bitPattern = value)"
+      @mathJson="(value) => (mathJsonNumber = value)"
     ></math-input>
 
-    <p>Bitmuster interpretiert als</p>
-
-    <!-- TODO: Interpret bitpattern as ... -->
-    <!--
-    <select>
-      <option value="sign-bit">VZ und Betrag</option>
-      <option value="ones-complement">Einerkomplement</option>
-      <option value="twos-complement">Zweierkomplement</option>
-      <option value="excess-e">Exzessdarstellung</option>
-      <option value="fixed-point">Festpunkt</option>
-    </select>
--->
-    <!--TODO: Length -->
-
-    <!--TODO: Print out the results -->
+    <table>
+      <thead>
+        <tr>
+          <th>Bitmuster interpretiert als</th>
+          <th>Bin&auml;r-Decoded</th>
+          <th>Dezimal-Decoded</th>
+          <th>Hexadezimal-Decoded</th>
+          <th>mit Einstellungen</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(item, index) in formats" :key="index">
+          <td>{{ item.name }}</td>
+          <td>{{ item.name }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -36,10 +38,12 @@ import {
   watch,
   computed,
   shallowRef,
+  readonly,
 } from "vue";
-import { MathJson } from "../MathJson";
+import { MathJson, MathJsonNumber } from "../MathJson";
 import MathInput from "./../components/MathInput.vue";
 import { tryParseNumber } from "./../assets/grammar-math";
+import { BinaryNumber } from "../math/binary-number";
 
 function useBinaryParsing() {
   function toMathJsonRecursive(ast: any) {
@@ -76,13 +80,52 @@ export default defineComponent({
   components: { MathInput },
   setup() {
     const { parseBinary } = useBinaryParsing();
-    const bitUserInput = ref("");
-    const bitPattern = shallowRef<MathJson>();
+    const userInput = ref("");
+    const mathJsonNumber = shallowRef<MathJson>();
+    const bitPattern = computed(() =>
+      (bitPattern.value as MathJsonNumber).value
+        .split("")
+        .map((v) => (v === "0" ? false : true))
+    );
+
+    const formats = readonly([
+      {
+        name: "VZ und Betrag",
+        binaryNumber: computed(() =>
+          BinaryNumber.fromSignMagnitude(bitPattern)
+        ),
+      },
+      {
+        name: "Einerkomplement",
+        binaryNumber: computed(() =>
+          BinaryNumber.fromOnesComplement(bitPattern)
+        ),
+      },
+      {
+        name: "Zweierkomplement",
+        binaryNumber: computed(() =>
+          BinaryNumber.fromTwosComplement(bitPattern)
+        ),
+      },
+      {
+        name: "Exzessdarstellung",
+      },
+      {
+        name: "Festpunkt",
+      },
+    ]);
+
+    function binaryNumberToString(value: BinaryNumber) {
+      return `${value.isNegative ? "-" : "+"}${value.value
+        .map((v) => (v ? "1" : "0"))
+        .join("")}`;
+    }
 
     return {
-      bitUserInput,
-      bitPattern,
       parseBinary,
+      userInput,
+      mathJsonNumber,
+      formats,
     };
   },
 });

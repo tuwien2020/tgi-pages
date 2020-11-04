@@ -59,9 +59,15 @@ export function useMathPrinting() {
       if (ast.base === 2) {
         const [beforeComma, afterComma] = ast.value.split(".");
 
-        return `\\mathtt{${splitIntoChunks(beforeComma ?? "", 4, true).join(
-          "\\,"
-        )}.${splitIntoChunks(afterComma ?? "", 4).join("\\,")}}`;
+        if (afterComma !== undefined) {
+          return `\\mathtt{${splitIntoChunks(beforeComma ?? "", 4, true).join(
+            "\\,"
+          )}.${splitIntoChunks(afterComma ?? "", 4).join("\\,")}}`;
+        } else {
+          return `\\mathtt{${splitIntoChunks(beforeComma ?? "", 4, true).join(
+            "\\,"
+          )}}`;
+        }
       } else {
         return ast.value;
       }
