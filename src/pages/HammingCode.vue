@@ -21,11 +21,15 @@
     
     <p>Wie viele Paritybits werden für einen Hamming-Code mit d Datenbits benötigt?</p>
     <input v-model="givenDataBits" pattern="[0-9]+">
-    <pre>mindestens {{minParityBits}} Paritybits</pre>    
+    <pre>mindestens {{minParityBitsForDatabits}} Paritybits</pre>    
 
     <p>Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn dieser p Paritybits hat?</p>
     <input v-model="givenParityBits" pattern="[0-9]+">
     <pre>maximal {{maxCodebits}} Code- und {{maxDatabits}} Datenbits  </pre>
+
+    <p>Wie viele Paritybits brauche ich für einen Hamming-Code mit c Codebits?</p>
+    <input v-model="givenCodeBits" pattern="[0-9]+">
+    <pre>mindestens {{minParityBitsForCodebits}} Paritybits</pre>
 
 </template>
 
@@ -55,9 +59,11 @@ export default defineComponent({
 
     let givenParityBits = ref(""); 
     let givenDataBits = ref("");
+    let givenCodeBits = ref("");
     let maxCodebits = ref(0);
     let maxDatabits = ref(0);
-    let minParityBits = ref(0);
+    let minParityBitsForDatabits = ref(0);
+    let minParityBitsForCodebits = ref(0);
 
     watch(givenParityBits, (value) => {
         givenParityBits.value = givenParityBits.value.replace(/[^0-9]+$/, "");
@@ -73,7 +79,7 @@ export default defineComponent({
     watch(givenDataBits, (value) => {
         givenDataBits.value = givenDataBits.value.replace(/[^0-9]+$/, "");
          if (value == "") {
-            minParityBits.value = 0;
+            minParityBitsForDatabits.value = 0;
             return;
         }
         let parityBits = 0;
@@ -87,18 +93,25 @@ export default defineComponent({
             }
             codeBitIndex++;
         }
-        minParityBits.value = parityBits;
+        minParityBitsForDatabits.value = parityBits;
+    })
+
+    watch(givenCodeBits, (value) => {
+        givenParityBits.value = givenParityBits.value.replace(/[^0-9]+$/, "");
+        minParityBitsForCodebits.value = Math.floor(Math.log2(parseInt(value))) + 1;
     })
 
     return {
       code,
       data,
       hammingCode, 
+      givenCodeBits,
       givenParityBits,
       givenDataBits,
       maxCodebits,
       maxDatabits,
-      minParityBits,
+      minParityBitsForDatabits,
+      minParityBitsForCodebits,
     };
   },
 });
