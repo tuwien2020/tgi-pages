@@ -67,7 +67,7 @@ function compareBinaryArray(
   a: ReadonlyArray<boolean>,
   b: ReadonlyArray<boolean>
 ) {
-  // a < b would be rewritten as compareBinaryArray(a,b) < 0
+  // a > b would be rewritten as compareBinaryArray(a,b) > 0
 
   let flipped = false;
   if (b.length > a.length) {
@@ -82,7 +82,7 @@ function compareBinaryArray(
   for (let i = 0; i < aDiff; i++) {
     const bitA = a[i];
     if (bitA) {
-      return flipped ? 1 : -1;
+      return flipped ? -1 : 1;
     }
   }
 
@@ -90,10 +90,10 @@ function compareBinaryArray(
     const bitA = a[i + aDiff];
     const bitB = b[i];
     if (bitA && !bitB) {
-      return flipped ? 1 : -1;
+      return flipped ? -1 : 1;
     }
     if (bitB && !bitA) {
-      return flipped ? -1 : 1;
+      return flipped ? 1 : -1;
     }
   }
 
@@ -112,7 +112,7 @@ export class BinaryNumber implements LogicalExpression {
   }
 
   static fromSize(size: number) {
-    return new BinaryNumber(true, new Array(size).fill(false));
+    return new BinaryNumber(false, new Array(size).fill(false));
   }
 
   static fromSignMagnitude(value: ReadonlyArray<boolean>) {
@@ -147,6 +147,15 @@ export class BinaryNumber implements LogicalExpression {
     } else {
       return new BinaryNumber(isNegative, bitArray);
     }
+  }
+
+  static fromOffsetBinary(
+    value: ReadonlyArray<boolean>,
+    offset: ReadonlyArray<boolean>
+  ) {
+    return new BinaryNumber(false, value).subtract(
+      new BinaryNumber(false, offset)
+    );
   }
 
   clone() {

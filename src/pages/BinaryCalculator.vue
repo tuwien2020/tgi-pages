@@ -20,10 +20,29 @@
           <th>mit Einstellungen</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="monospace">
         <tr v-for="(item, index) in formats" :key="index">
           <td>{{ item.name }}</td>
-          <td>{{ binaryNumberToString(item.binaryNumber) }}</td>
+          <td style="text-align: right">
+            {{ binaryToString(item.binaryNumber) }}
+          </td>
+          <td>-</td>
+          <td>-</td>
+          <td>
+            <label
+              v-for="(option, optionName) in item.options"
+              :key="optionName"
+              >{{ optionName }}
+              <input
+                type="text"
+                :modelValue="option.value"
+                @update:modelValue="(event) => (option.value = event)"
+                @input="
+                  (event) =>
+                    (option.value = event.target.value.replace(/[^01]/, ''))
+                "
+            /></label>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -40,7 +59,10 @@ import {
   shallowRef,
   readonly,
   ComputedRef,
+  reactive,
+  unref,
 } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { MathJson, MathJsonNumber } from "../MathJson";
 import MathInput from "./../components/MathInput.vue";
 import { tryParseNumber } from "./../assets/grammar-math";
@@ -72,63 +94,112 @@ function useBinaryParsing() {
     }
   }
 
+  // TODO: Consider reworking the function above ^
+  function parseBinarySimple(value: string): boolean[] {
+    return (value ?? "").split("").map((v) => (v === "0" ? false : true));
+  }
+
+  function binaryToString(value: BinaryNumber) {
+    return `${unref(value).isNegative ? "-" : "+"}${unref(value)
+      .value.map((v) => (v ? "1" : "0"))
+      .join("")}`;
+  }
+
   return {
     parseBinary,
+    parseBinarySimple,
+    binaryToString,
   };
 }
 
 export default defineComponent({
   components: { MathInput },
   setup() {
-    const { parseBinary } = useBinaryParsing();
-    const userInput = ref("");
+    const router = useRouter();
+    const route = useRoute();
+
+    const {
+      parseBinary,
+      parseBinarySimple,
+      binaryToString,
+    } = useBinaryParsing();
+    const userInput = ref("" + (route.query["input"] ?? "0"));
     const mathJsonNumber = shallowRef<MathJson>();
+
     const bitPattern: ComputedRef<boolean[]> = computed(() =>
-      ((mathJsonNumber.value as MathJsonNumber)?.value ?? "")
-        .split("")
-        .map((v) => (v === "0" ? false : true))
+      parseBinarySimple((mathJsonNumber.value as MathJsonNumber)?.value)
     );
 
-    const formats = readonly([
-      {
-        name: "VZ und Betrag",
+    function defineFormat<T extends object>(
+      name: string,
+      getBinaryNumber: (
+        value: ReadonlyArray<boolean>,
+        options: T
+      ) => BinaryNumber,
+      options: T
+    ) {
+      return {
+        name,
         binaryNumber: computed(() =>
-          BinaryNumber.fromSignMagnitude(bitPattern.value)
+          getBinaryNumber(bitPattern.value, options)
         ),
-      },
-      {
-        name: "Einerkomplement",
-        binaryNumber: computed(() =>
-          BinaryNumber.fromOnesComplement(bitPattern.value)
-        ),
-      },
-      {
-        name: "Zweierkomplement",
-        binaryNumber: computed(() =>
-          BinaryNumber.fromTwosComplement(bitPattern.value)
-        ),
-      },
-      /*TODO:{
-        name: "Exzessdarstellung",
-      },
+        options,
+      };
+    }
+
+    const formats = [
+      defineFormat(
+        "VZ und Betrag",
+        (value, options) => BinaryNumber.fromSignMagnitude(value),
+        {}
+      ),
+      defineFormat(
+        "Einerkomplement",
+        (value, options) => BinaryNumber.fromOnesComplement(bitPattern.value),
+        {}
+      ),
+      defineFormat(
+        "Zweierkomplement",
+        (value, options) => BinaryNumber.fromTwosComplement(bitPattern.value),
+        {}
+      ),
+      defineFormat(
+        "Exzessdarstellung",
+        (value, options) =>
+          BinaryNumber.fromOffsetBinary(
+            bitPattern.value,
+            parseBinarySimple(options.e.value)
+          ),
+        {
+          e: ref(""),
+        }
+      ),
+      /*TODO:
       {
         name: "Festpunkt",
       },*/
-    ]);
+    ];
 
-    function binaryNumberToString(value: BinaryNumber) {
-      return `${value.isNegative ? "-" : "+"}${value.value
-        .map((v) => (v ? "1" : "0"))
-        .join("")}`;
-    }
+    watch(userInput, (value) => {
+      router.replace({ query: { input: value } });
+    });
 
     return {
       parseBinary,
       userInput,
       mathJsonNumber,
       formats,
-      binaryNumberToString,
+      binaryToString,
     };
   },
 });
 </script>
+
+<style scoped>
+.monospace {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+}
+.monospace input {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+}
+</style>
