@@ -23,7 +23,7 @@
       <tbody>
         <tr v-for="(item, index) in formats" :key="index">
           <td>{{ item.name }}</td>
-          <td>{{ item.name }}</td>
+          <td>{{ binaryNumberToString(item.binaryNumber) }}</td>
         </tr>
       </tbody>
     </table>
@@ -39,6 +39,7 @@ import {
   computed,
   shallowRef,
   readonly,
+  ComputedRef,
 } from "vue";
 import { MathJson, MathJsonNumber } from "../MathJson";
 import MathInput from "./../components/MathInput.vue";
@@ -82,8 +83,8 @@ export default defineComponent({
     const { parseBinary } = useBinaryParsing();
     const userInput = ref("");
     const mathJsonNumber = shallowRef<MathJson>();
-    const bitPattern = computed(() =>
-      (bitPattern.value as MathJsonNumber).value
+    const bitPattern: ComputedRef<boolean[]> = computed(() =>
+      ((mathJsonNumber.value as MathJsonNumber)?.value ?? "")
         .split("")
         .map((v) => (v === "0" ? false : true))
     );
@@ -92,27 +93,27 @@ export default defineComponent({
       {
         name: "VZ und Betrag",
         binaryNumber: computed(() =>
-          BinaryNumber.fromSignMagnitude(bitPattern)
+          BinaryNumber.fromSignMagnitude(bitPattern.value)
         ),
       },
       {
         name: "Einerkomplement",
         binaryNumber: computed(() =>
-          BinaryNumber.fromOnesComplement(bitPattern)
+          BinaryNumber.fromOnesComplement(bitPattern.value)
         ),
       },
       {
         name: "Zweierkomplement",
         binaryNumber: computed(() =>
-          BinaryNumber.fromTwosComplement(bitPattern)
+          BinaryNumber.fromTwosComplement(bitPattern.value)
         ),
       },
-      {
+      /*TODO:{
         name: "Exzessdarstellung",
       },
       {
         name: "Festpunkt",
-      },
+      },*/
     ]);
 
     function binaryNumberToString(value: BinaryNumber) {
@@ -126,6 +127,7 @@ export default defineComponent({
       userInput,
       mathJsonNumber,
       formats,
+      binaryNumberToString,
     };
   },
 });

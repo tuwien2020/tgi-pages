@@ -6,6 +6,8 @@ function xor(a: boolean, b: boolean) {
   return a ? !b : b;
 }
 
+// TODO: Maybe write a "addOne" function
+
 /**
  * Adds two binary arrays that have the same length
  * TODO: Handle overflow?
@@ -119,7 +121,7 @@ export class BinaryNumber implements LogicalExpression {
 
   static fromOnesComplement(value: ReadonlyArray<boolean>) {
     const isNegative = value[0];
-    const bitArray = value.slice(1);
+    const bitArray = value.slice();
     if (isNegative) {
       for (let i = 0; i < bitArray.length; i++) {
         bitArray[i] = !bitArray[i];
@@ -130,13 +132,18 @@ export class BinaryNumber implements LogicalExpression {
 
   static fromTwosComplement(value: ReadonlyArray<boolean>) {
     const isNegative = value[0];
-    const bitArray = value.slice(1);
+    const bitArray = value.slice();
     if (isNegative) {
       for (let i = 0; i < bitArray.length; i++) {
         bitArray[i] = !bitArray[i];
       }
+
       const oneInBinary = new BinaryNumber(false, [true]);
-      return new BinaryNumber(isNegative, bitArray).add(oneInBinary);
+      const bitArrayPlusOne = new BinaryNumber(false, bitArray).add(
+        oneInBinary
+      );
+
+      return new BinaryNumber(isNegative, bitArrayPlusOne.value);
     } else {
       return new BinaryNumber(isNegative, bitArray);
     }
