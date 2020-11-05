@@ -217,7 +217,21 @@ export class BinaryNumber {
     return this.add(negatedOther);
   }
 
-  setSign(sign: boolean): BinaryNumber {
-    return new BinaryNumber(sign, this.value);
+  compareTo(other: BinaryNumber): number {
+    // a < b gets rewritten as a.compareTo(b) < 0
+    if (this.isNegative == other.isNegative) {
+      const comparison = compareBinaryArray(this.value, other.value);
+      if (comparison == 0) {
+        return 0;
+      } else {
+        return this.isNegative ? -comparison : comparison;
+      }
+    } else {
+      return this.isNegative ? -1 : 1;
+    }
+  }
+
+  setSign(isNegative: boolean): BinaryNumber {
+    return new BinaryNumber(isNegative, this.value);
   }
 }

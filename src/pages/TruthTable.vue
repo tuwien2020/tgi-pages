@@ -232,7 +232,7 @@ function useLogicalMath() {
     getters: Map<string, boolean>
   ): boolean {
     if (Array.isArray(ast)) {
-      const op = mathJsonOperatorMap.get(ast[0]);
+      const op = mathJsonOperatorMap.get(ast[0] as MathJsonLogicalOperator);
       if (!op) throw new Error("Unknown operation " + ast);
 
       if (ast.length === 3) {

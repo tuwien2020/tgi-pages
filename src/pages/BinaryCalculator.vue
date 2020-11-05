@@ -5,6 +5,13 @@
     :mathParser="parseBinaryOperation"
     @mathJson="(value) => (mathJsonExpression = value)"
   ></math-input>
+
+  <br />
+  <math-single-op
+    :operator="mathJsonExpression?.[0]"
+    :valueA="mathJsonExpression?.[1]"
+    :valueB="mathJsonExpression?.[2]"
+  ></math-single-op>
 </template>
 
 <script lang="ts">
@@ -23,6 +30,7 @@ import { useUrlRef } from "../url-ref";
 import { tryParse as tryParseAst } from "./../assets/grammar-single-op";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
+import MathSingleOp from "./../components/MathSingleOp.vue";
 
 function useBinaryParsing() {
   function toMathJsonRecursive(ast: any): MathJson {
@@ -58,7 +66,7 @@ function useBinaryParsing() {
 }
 
 export default defineComponent({
-  components: { MathInput, MathOutput },
+  components: { MathInput, MathOutput, MathSingleOp },
   setup() {
     const router = useRouter();
     const route = useRoute();
