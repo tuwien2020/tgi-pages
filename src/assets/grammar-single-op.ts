@@ -22,20 +22,25 @@ function operator<S extends string>(value: { operator: S; match: RegExp }) {
     .map((v) => value.operator);
 }
 
-const pBitArrayNumber = bnb.match(/[0-1]+/).map(
-  (str) =>
-    new BinaryNumberLiteral(
-      new BinaryNumber(
-        false,
-        str
-          .replace(/,/, ".")
-          .split("")
-          .map((v) => (v === "0" ? false : true))
-      )
-    )
-);
+const binaryNumberRegex = /([+-])?([0-1]+)([.,][0-1]+)?/;
+function stringToBinaryNumber(value: string): BinaryNumber {
+  const matchResults = (value ?? "").match(binaryNumberRegex);
+  if (matchResults === null) return new BinaryNumber(false, []);
 
-const mathSingleOperator: bnb.Parser<MathExpression> = pBitArrayNumber.chain(
+  const [_, sign, numberValue, fractionalPart] = matchResults;
+
+  if (fractionalPart) throw new Error("Fractional numbers not yet supported");
+  return new BinaryNumber(
+    sign === "-",
+    (numberValue ?? "").split("").map((v) => (v === "0" ? false : true))
+  );
+}
+
+const pBinaryNumber = bnb
+  .match(binaryNumberRegex)
+  .map((str) => new BinaryNumberLiteral(stringToBinaryNumber(str)));
+
+const mathSingleOperator: bnb.Parser<MathExpression> = pBinaryNumber.chain(
   (expr) => {
     return bnb
       .choice(
@@ -44,12 +49,16 @@ const mathSingleOperator: bnb.Parser<MathExpression> = pBitArrayNumber.chain(
         operator({ operator: "add" as const, match: /\+/ }),
         operator({ operator: "subtract" as const, match: /-/ })
       )
-      .and(pBitArrayNumber)
+      .and(pBinaryNumber)
       .map(([operator, nextExpr]) => {
         return new BinaryOperator(operator, expr, nextExpr);
       });
   }
 );
+
+export function tryParseBinaryNumber(value: string): BinaryNumber {
+  return pBinaryNumber.tryParse(value).value;
+}
 
 export function tryParse(value: string) {
   return mathSingleOperator.tryParse(value);

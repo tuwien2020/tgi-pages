@@ -114,6 +114,7 @@ function useBinaryParsing() {
     }
   }
 
+  // TODO: Replace this with tryParseBinaryNumber() from grammar-single-op.ts
   function stringToBinaryNumber(value: string): BinaryNumber {
     const matchResults = (value ?? "").match(/([+-])?([0-1]+)([.,][0-1]+)?/);
     if (matchResults === null) return new BinaryNumber(false, []);
