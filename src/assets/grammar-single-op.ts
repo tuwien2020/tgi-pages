@@ -2,8 +2,11 @@ import * as bnb from "bread-n-butter";
 import { BinaryNumber } from "./../math/binary-number";
 import { MathExpression, BinaryOperator } from "./grammar-math";
 
-class BinaryNumberExpression extends BinaryNumber implements MathExpression {
-  kind: "math-expression" = "math-expression";
+export class BinaryNumberLiteral implements MathExpression {
+  public value: BinaryNumber;
+  constructor(value: BinaryNumber) {
+    this.value = value;
+  }
 }
 
 let mathWS = bnb.match(/\s*/);
@@ -21,12 +24,14 @@ function operator<S extends string>(value: { operator: S; match: RegExp }) {
 
 const pBitArrayNumber = bnb.match(/[0-1]+/).map(
   (str) =>
-    new BinaryNumberExpression(
-      false,
-      str
-        .replace(/,/, ".")
-        .split("")
-        .map((v) => (v === "0" ? false : true))
+    new BinaryNumberLiteral(
+      new BinaryNumber(
+        false,
+        str
+          .replace(/,/, ".")
+          .split("")
+          .map((v) => (v === "0" ? false : true))
+      )
     )
 );
 

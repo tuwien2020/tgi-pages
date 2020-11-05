@@ -1,7 +1,8 @@
-import { MathJson, MathJsonLogicalOperator } from "./MathJson";
+import { BinaryNumber } from "./binary-number";
+import { MathJson, MathJsonOperator } from "./MathJson";
 
 export function useMathPrinting() {
-  const mathJsonOperatorMap = new Map<MathJsonLogicalOperator, string>([
+  const mathJsonOperatorMap = new Map<MathJsonOperator, string>([
     ["not", "\\neg"],
     ["implies", "\\implies"],
     ["and", "\\land"],
@@ -10,6 +11,11 @@ export function useMathPrinting() {
     ["nand", "\\mathbin{\\mathtt{nand}}"],
     ["nor", "\\mathbin{\\mathtt{nor}}"],
     ["equals", "\\Leftrightarrow"],
+
+    ["add", "+"],
+    ["subtract", "-"],
+    ["multiply", "\\cdot"],
+    ["divide", "\\div"],
   ]);
 
   function needsBrackets(ast: MathJson) {
@@ -21,7 +27,7 @@ export function useMathPrinting() {
     }
   }
 
-  function toLatexRecursive(ast: MathJson) {
+  function toLatexRecursive(ast: MathJson): string {
     if (Array.isArray(ast)) {
       const op = mathJsonOperatorMap.get(ast[0]);
       if (!op) {
@@ -55,6 +61,12 @@ export function useMathPrinting() {
       return "\\mathtt{0}";
     } else if (typeof ast === "string") {
       return ast.replace(/^([^_]+)_([^]+)$/, "$1_{$2}");
+    } else if (ast instanceof BinaryNumber) {
+      return `\\mathtt{${ast.isNegative ? "-" : ""}${splitIntoChunks(
+        ast.value.map((v) => (v ? "1" : "0")).join(""),
+        4,
+        true
+      ).join("\\,")}}`;
     } else if (ast.kind == "number") {
       if (ast.base === 2) {
         const [beforeComma, afterComma] = ast.value.split(".");
@@ -71,6 +83,8 @@ export function useMathPrinting() {
       } else {
         return ast.value;
       }
+    } else {
+      throw new Error("Unknown ast element " + ast);
     }
   }
 
@@ -100,7 +114,7 @@ export function useMathPrinting() {
         const output = toLatexRecursive(value.mathJson);
         return output;
       } catch (e) {
-        value.error = e;
+        value.error = "" + e;
       }
     }
 
@@ -114,7 +128,7 @@ export function useMathPrinting() {
         .replace(/~/g, "{\\textasciitilde}")
         .replace(/\^/g, "{\\textasciicircum}")
         .replace(/[^\x00-\x7F]/g, function (c) {
-          return `\\char"${c.codePointAt(0).toString(16)}`;
+          return `\\char"${c.codePointAt(0)!.toString(16)}`;
         });
       // TODO: Prevent KaTeX warnings when encountering Unicode symbols
       return `\\textcolor{red}{\\texttt{${escaped}}}`;

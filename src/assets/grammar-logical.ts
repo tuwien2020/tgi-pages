@@ -16,19 +16,13 @@
 
 import * as bnb from "bread-n-butter";
 
-export interface LogicalExpression {
-  kind: "logical-expression";
-}
+export interface LogicalExpression {}
 
 export class UnaryOperator implements LogicalExpression {
-  kind: "logical-expression" = "logical-expression";
-
   constructor(public operator: string, public right: LogicalExpression) {}
 }
 
 export class BinaryOperator implements LogicalExpression {
-  kind: "logical-expression" = "logical-expression";
-
   constructor(
     public operator: string,
     public left: LogicalExpression,
@@ -37,14 +31,10 @@ export class BinaryOperator implements LogicalExpression {
 }
 
 export class BooleanLiteral implements LogicalExpression {
-  kind: "logical-expression" = "logical-expression";
-
   constructor(public value: boolean) {}
 }
 
 export class VariableLiteral implements LogicalExpression {
-  kind: "logical-expression" = "logical-expression";
-
   constructor(public value: string) {}
 }
 

@@ -16,19 +16,13 @@
 
 import * as bnb from "bread-n-butter";
 
-export interface MathExpression {
-  kind: "math-expression";
-}
+export interface MathExpression {}
 
 export class UnaryOperator implements MathExpression {
-  kind: "math-expression" = "math-expression";
-
   constructor(public operator: string, public right: MathExpression) {}
 }
 
 export class BinaryOperator implements MathExpression {
-  kind: "math-expression" = "math-expression";
-
   constructor(
     public operator: string,
     public left: MathExpression,
@@ -37,7 +31,6 @@ export class BinaryOperator implements MathExpression {
 }
 
 export class NumberLiteral implements MathExpression {
-  kind: "math-expression" = "math-expression";
   public value: { kind: string; value: string; base?: number };
   constructor(number: string, base?: number) {
     this.value = {
@@ -49,8 +42,6 @@ export class NumberLiteral implements MathExpression {
 }
 
 export class VariableLiteral implements MathExpression {
-  kind: "math-expression" = "math-expression";
-
   constructor(public value: string) {}
 }
 

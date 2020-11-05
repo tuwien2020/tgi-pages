@@ -1,9 +1,11 @@
+import { BinaryNumber } from "./binary-number";
+
 export type MathJsonNumber = {
   kind: "number";
   value: string;
   base: number;
 };
-export type MathJsonData = boolean | "string" | MathJsonNumber;
+export type MathJsonData = boolean | "string" | MathJsonNumber | BinaryNumber;
 
 export type MathJsonLogicalOperator =
   | "not"
@@ -25,6 +27,11 @@ export type MathJsonMathOperator =
   | "subtract"
   | "equals";
 
+export type MathJsonOperator = MathJsonLogicalOperator | MathJsonMathOperator;
+
 export type MathJson =
-  | [operator: MathJsonLogicalOperator, ...args: MathJson[]]
+  | [
+      operator: MathJsonLogicalOperator | MathJsonMathOperator,
+      ...args: MathJson[]
+    ]
   | MathJsonData;
