@@ -1,6 +1,5 @@
-<template>
-  <h1>Bin&auml;r Rechner</h1>
-</template>
+<template></template>
+
 
 <script lang="ts">
 import {
@@ -11,21 +10,14 @@ import {
   computed,
   shallowRef,
 } from "vue";
-import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
 import { MathJson, MathJsonLogicalOperator } from "../math/MathJson";
-import { useUrlRef } from "../url-ref";
 import { tryParse as tryParseAst } from "./../assets/grammar-single-op";
-import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
 
 export default defineComponent({
-  components: { MathInput, MathOutput },
+  components: { MathOutput },
   setup() {
-    const router = useRouter();
-    const route = useRoute();
-    const { urlRef } = useUrlRef(router, route);
-
     return {};
   },
 });

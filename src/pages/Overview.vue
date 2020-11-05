@@ -21,7 +21,7 @@
   <h3>Bin&auml;r Rechner</h3>
   <ul>
     <li>
-      <router-link to="/binary-coding">Bin&auml;r Codierung</router-link>
+      <router-link to="/binary-coding">Bin&auml;re Codierung</router-link>
     </li>
     <li>
       <router-link to="/binary-calculator">Bin&auml;r Rechner</router-link>

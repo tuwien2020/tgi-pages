@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Bin&auml;r Rechner</h1>
+    <h1>Bin&auml;re Codierungen</h1>
 
     <h2>Decoding</h2>
     <p>Gebe hier ein Bitmuster ein:</p>
@@ -46,8 +46,8 @@
       </tbody>
     </table>
 
-    <h2>Encoding</h2>
-    <p>Gebe hier eine Bin&auml;re Zahl ein:</p>
+    <!--<h2>Encoding</h2>
+    <p>Gebe hier eine Bin&auml;re Zahl ein:</p>-->
   </div>
 </template>
 
@@ -115,13 +115,14 @@ function useBinaryParsing() {
   }
 
   function stringToBinaryNumber(value: string): BinaryNumber {
-    const [_, sign, numberValue, fractionalPart] =
-      (value ?? "").match(/([+-])?([0-1]+)([.,][0-1]+)?/g) ?? [];
+    const matchResults = (value ?? "").match(/([+-])?([0-1]+)([.,][0-1]+)?/);
+    if (matchResults === null) return new BinaryNumber(false, []);
+
+    const [_, sign, numberValue, fractionalPart] = matchResults;
 
     let x = (value ?? "").matchAll(/([+-])?([0-1]+)([.,][0-1]+)?/g);
 
     if (fractionalPart) throw new Error("Fractional numbers not yet supported");
-
     return new BinaryNumber(
       sign === "-",
       (numberValue ?? "").split("").map((v) => (v === "0" ? false : true))

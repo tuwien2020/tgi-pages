@@ -100,9 +100,7 @@ function compareBinaryArray(
   return 0;
 }
 
-export class BinaryNumber implements LogicalExpression {
-  kind: "logical-expression" = "logical-expression";
-
+export class BinaryNumber {
   public readonly isNegative: boolean;
   public readonly value: ReadonlyArray<boolean>;
 
