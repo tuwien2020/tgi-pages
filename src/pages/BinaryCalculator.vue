@@ -32,11 +32,10 @@
             <label
               v-for="(option, optionName) in item.options"
               :key="optionName"
-              >{{ optionName }}
+              >{{ optionName }} =
               <input
                 type="text"
-                :modelValue="option.value"
-                @update:modelValue="(event) => (option.value = event)"
+                :value="option.value"
                 @input="
                   (event) =>
                     (option.value = event.target.value.replace(/[^01]/, ''))
@@ -61,12 +60,19 @@ import {
   ComputedRef,
   reactive,
   unref,
+  Ref,
 } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import {
+  RouteLocationNormalized,
+  Router,
+  useRoute,
+  useRouter,
+} from "vue-router";
 import { MathJson, MathJsonNumber } from "../MathJson";
 import MathInput from "./../components/MathInput.vue";
 import { tryParseNumber } from "./../assets/grammar-math";
 import { BinaryNumber } from "../math/binary-number";
+import { useUrlRef } from "../url-ref";
 
 function useBinaryParsing() {
   function toMathJsonRecursive(ast: any) {
@@ -117,13 +123,14 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
 
     const {
       parseBinary,
       parseBinarySimple,
       binaryToString,
     } = useBinaryParsing();
-    const userInput = ref("" + (route.query["input"] ?? "0"));
+    const userInput = urlRef("input", "0");
     const mathJsonNumber = shallowRef<MathJson>();
 
     const bitPattern: ComputedRef<boolean[]> = computed(() =>
@@ -171,7 +178,7 @@ export default defineComponent({
             parseBinarySimple(options.e.value)
           ),
         {
-          e: ref(""),
+          e: urlRef("input-offset", "0"),
         }
       ),
       /*TODO:
@@ -179,10 +186,6 @@ export default defineComponent({
         name: "Festpunkt",
       },*/
     ];
-
-    watch(userInput, (value) => {
-      router.replace({ query: { input: value } });
-    });
 
     return {
       parseBinary,

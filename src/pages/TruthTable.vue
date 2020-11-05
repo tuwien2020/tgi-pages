@@ -113,6 +113,7 @@ import {
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
 import { MathJson, MathJsonLogicalOperator } from "../MathJson";
+import { useUrlRef } from "../url-ref";
 import { tryParse as tryParseAstLogical } from "./../assets/grammar-logical";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
@@ -273,12 +274,12 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
+
     const { parseLogical } = useLogicalParsing();
     const logicalMath = useLogicalMath();
 
-    const logicalUserInput = ref(
-      "" + (route.query["input"] ?? "a and (b xor 1)")
-    );
+    const logicalUserInput = urlRef("input", "a and (b xor 1)");
     const logicalMathJson = shallowRef<MathJson>();
 
     const tableHeaders = shallowRef<MathJson[]>([]);
@@ -331,10 +332,6 @@ export default defineComponent({
     watch(logicalMathJson, (value) => {
       console.log(value);
       createTable(value);
-    });
-
-    watch(logicalUserInput, (value) => {
-      router.replace({ query: { input: value } });
     });
 
     watch(flipBits, (value) => {

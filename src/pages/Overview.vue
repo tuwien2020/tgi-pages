@@ -39,6 +39,14 @@
       >
     </li>
     <li>
+      <!-- TODO: Investigate this one -->
+      <a
+        href="https://www.exploringbinary.com/binary-calculator/"
+        target="_blank"
+        >Binär Operationen (+, -, *, /)</a
+      >
+    </li>
+    <li>
       <a href="http://weitz.de/ieee/">IEEE Rechner</a>
     </li>
     <li>
