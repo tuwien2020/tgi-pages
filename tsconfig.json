@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "checkJs": true,
+    "baseUrl": ".",
+    "isolatedModules": true,
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.vue"],
+  "exclude": ["node_modules"]
+}

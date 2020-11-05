@@ -16,7 +16,7 @@ import {
   nextTick,
   PropType,
 } from "vue";
-import { MathJson, MathJsonLogicalOperator } from "./../MathJson";
+import { MathJson, MathJsonLogicalOperator } from "./../math/MathJson";
 import Katex from "katex";
 import { useMathPrinting } from "./../math/math-printing";
 

@@ -1,4 +1,4 @@
-import { MathJson, MathJsonLogicalOperator } from "./../MathJson";
+import { MathJson, MathJsonLogicalOperator } from "./MathJson";
 
 export function useMathPrinting() {
   const mathJsonOperatorMap = new Map<MathJsonLogicalOperator, string>([

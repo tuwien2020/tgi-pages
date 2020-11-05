@@ -96,6 +96,10 @@ const pBinaryNumber = bnb
   .match(/[+-]?[0-1]+([.,][0-1]+)?/)
   .map((str) => new NumberLiteral(str.replace(/,/, "."), 2));
 
+const pBitArrayNumber = bnb
+  .match(/[0-1]+/)
+  .map((str) => new NumberLiteral(str.replace(/,/, "."), 2));
+
 // Next level
 const mathBasic: bnb.Parser<MathExpression> = bnb.lazy(() => {
   return mathExpr
@@ -174,13 +178,15 @@ const mathExpr = mathEqualsOp;
 
 export function tryParseNumber(
   value: string,
-  options?: { type?: "number" | "binary" | "any-base" }
+  options?: { type?: "number" | "binary" | "bit-array" | "any-base" }
 ) {
   const numberType = options?.type ?? "number";
   if (numberType == "number") {
     return pNumber.tryParse(value);
   } else if (numberType == "binary") {
     return pBinaryNumber.tryParse(value);
+  } else if (numberType == "bit-array") {
+    return pBitArrayNumber.tryParse(value);
   } else if (numberType == "any-base") {
     return pAnyBaseNumber.tryParse(value);
   } else {

@@ -112,14 +112,14 @@ import {
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
-import { MathJson, MathJsonLogicalOperator } from "../MathJson";
+import { MathJson, MathJsonLogicalOperator } from "../math/MathJson";
 import { useUrlRef } from "../url-ref";
 import { tryParse as tryParseAstLogical } from "./../assets/grammar-logical";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
 
 function useLogicalParsing() {
-  function toMathJsonRecursive(ast: any) {
+  function toMathJsonRecursive(ast: any): MathJson {
     if (ast.left) {
       return [
         ast.operator,
@@ -172,7 +172,7 @@ function useLogicalMath() {
   }
 
   function extractOperations(ast: MathJson): MathJson[] {
-    const operations = [];
+    const operations: MathJson[] = [];
 
     // TODO: Use this function
     function isPrimitive(ast: MathJson) {
@@ -215,7 +215,7 @@ function useLogicalMath() {
 
   const mathJsonOperatorMap = new Map<
     MathJsonLogicalOperator,
-    (a: boolean, b?: boolean) => boolean
+    (a: boolean, b: boolean) => boolean
   >([
     ["not", (a) => !a],
     ["implies", (a, b) => !a || b],
@@ -241,7 +241,7 @@ function useLogicalMath() {
           evaluateRecursive(ast[2], getters)
         );
       } else if (ast.length === 2) {
-        return op(evaluateRecursive(ast[1], getters));
+        return op(evaluateRecursive(ast[1], getters), false);
       } else {
         throw new Error("Unable to evaluate " + ast);
       }
@@ -287,7 +287,9 @@ export default defineComponent({
     const flipBits = ref<boolean>(false);
     const tableThickBorderIndex = ref(0);
 
-    function createTable(value: MathJson) {
+    function createTable(value: MathJson | undefined) {
+      if (value === undefined) return;
+
       const getterNames = logicalMath.extractGetters(value);
       let operations = logicalMath.extractOperations(value);
 
