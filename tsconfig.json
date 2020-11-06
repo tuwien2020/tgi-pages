@@ -9,6 +9,7 @@
     "sourceMap": true,
     "allowJs": true,
     "checkJs": true,
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "isolatedModules": true,
     "lib": ["esnext", "dom", "dom.iterable"],

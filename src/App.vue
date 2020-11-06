@@ -1,6 +1,10 @@
 <template>
   <div class="header">
-    <div><router-link to="/" class="home-link">TGI Pages</router-link></div>
+    <div>
+      <router-link to="/" class="home-link"
+        >TGI Pages - {{ version }}
+      </router-link>
+    </div>
   </div>
   <div class="content">
     <router-view></router-view>
@@ -9,10 +13,15 @@
 
 <script lang="ts">
 import { ref, defineComponent, watchEffect, watch, computed } from "vue";
+import { version } from "./../package.json";
 
 export default defineComponent({
   components: {},
-  setup() {},
+  setup() {
+    return {
+      version,
+    };
+  },
 });
 </script>
 
