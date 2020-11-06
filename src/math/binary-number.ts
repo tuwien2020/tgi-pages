@@ -273,7 +273,7 @@ export class BinaryNumber {
     // Multiply the remaining numbers
     for (let i = 1 + skipZeros; i < other.value.length; i++) {
       const bitB = other.value[i];
-      resultBits = resultBits.multiplyByTwo();
+      resultBits = resultBits.multiplyByPowerOfTwo(1);
       if (bitB) {
         resultBits = resultBits.add(thisValueBits);
       }
@@ -286,19 +286,25 @@ export class BinaryNumber {
     );
   }
 
-  multiplyByTwo() {
-    if (this.decimalPoint > 0) {
-      return new BinaryNumber(
-        this.isNegative,
-        this.value,
-        this.decimalPoint - 1
-      );
+  multiplyByPowerOfTwo(value: number) {
+    if (value == 0) return this;
+    if (value > 0) {
+      if (this.decimalPoint - value >= 0) {
+        return new BinaryNumber(
+          this.isNegative,
+          this.value,
+          this.decimalPoint - value
+        );
+      } else {
+        const paddingArray = new Array(value - this.decimalPoint).fill(false);
+        return new BinaryNumber(
+          this.isNegative,
+          this.value.concat(paddingArray),
+          0
+        );
+      }
     } else {
-      return new BinaryNumber(
-        this.isNegative,
-        this.value.concat(false),
-        this.decimalPoint
-      );
+      throw new Error("Negative powers of two are not supported yet");
     }
   }
 
