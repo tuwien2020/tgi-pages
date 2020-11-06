@@ -254,6 +254,42 @@ export class BinaryNumber {
     return this.add(negatedOther);
   }
 
+  multiply(other: BinaryNumber): BinaryNumber {
+    if (other.value.length == 0) return new BinaryNumber(false, [false], 0);
+
+    let resultBits = new BinaryNumber(false, this.value, 0);
+    let thisValueBits = new BinaryNumber(false, this.value, 0);
+    for (let i = 1; i < other.value.length; i++) {
+      const bitB = other.value[i];
+      resultBits = resultBits.multiplyByTwo();
+      if (bitB) {
+        resultBits = resultBits.add(thisValueBits);
+      }
+    }
+
+    return new BinaryNumber(
+      xor(this.isNegative, other.isNegative),
+      resultBits.value,
+      this.decimalPoint + other.decimalPoint
+    );
+  }
+
+  multiplyByTwo() {
+    if (this.decimalPoint > 0) {
+      return new BinaryNumber(
+        this.isNegative,
+        this.value,
+        this.decimalPoint - 1
+      );
+    } else {
+      return new BinaryNumber(
+        this.isNegative,
+        this.value.concat(false),
+        this.decimalPoint
+      );
+    }
+  }
+
   compareTo(other: BinaryNumber): number {
     // a < b gets rewritten as a.compareTo(b) < 0
     if (this.isNegative == other.isNegative) {

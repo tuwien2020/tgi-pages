@@ -44,7 +44,7 @@ export default defineComponent({
       } else if (props.operator == "subtract") {
         return props.valueA.subtract(props.valueB);
       } else if (props.operator == "multiply") {
-        //return props.valueA.multiply(props.valueB);
+        return props.valueA.multiply(props.valueB);
       } else if (props.operator == "divide") {
         //return props.valueA.divide(props.valueB);
       } else {
@@ -52,14 +52,15 @@ export default defineComponent({
       }
     });
 
+    function printBitArray(value: readonly boolean[] | undefined) {
+      return (value ?? []).map((v) => (v ? "1" : "0")).join("");
+    }
+
     const output = computed(() => {
       if (props.operator == "add" || props.operator == "subtract") {
         let valueA = props.valueA;
         let valueB = props.valueB;
         let output = "";
-
-        const printBitArray = (value: readonly boolean[] | undefined) =>
-          (value ?? []).map((v) => (v ? "1" : "0")).join("");
 
         const printLatexNumber = (
           op: string,
@@ -136,6 +137,80 @@ export default defineComponent({
         )}`;
 
         output = `\\begin{alignedat}{3}\n${output}\n\\end{alignedat}`;
+        return output;
+      } else if (props.operator == "multiply") {
+        let valueA = props.valueA;
+        let valueB = props.valueB;
+        let output = "";
+
+        const lastLineLength = valueA.value.length + valueB.value.length - 1;
+        const resultLength = result.value?.value?.length ?? 0;
+
+        const requiredPadding =
+          resultLength > lastLineLength ? resultLength - lastLineLength : 0;
+
+        const printLatexNumber = (
+          op: string,
+          beforeDecimal: string,
+          afterDecimal: string
+        ) =>
+          `\\mathtt{\\llap{${op}}} \\mathtt{${beforeDecimal}} \\mathtt{${
+            afterDecimal.length > 0
+              ? "\\clap{\\raisebox{-0.1em}{.}}" + afterDecimal
+              : ""
+          }}`;
+
+        const phantomPadding = (value: number) =>
+          `\\phantom{\\mathtt{${"0".repeat(value)}}}`;
+
+        output += `& ${phantomPadding(requiredPadding)} ${printLatexNumber(
+          valueA.isNegative ? "-" : "",
+          printBitArray(valueA.getValueBeforeDecimal()),
+          printBitArray(valueA.getValueAfterDecimal())
+        )} \\times ${printLatexNumber(
+          valueB.isNegative ? "-" : "",
+          printBitArray(valueB.getValueBeforeDecimal()),
+          printBitArray(valueB.getValueAfterDecimal())
+        )} \\\\\n`;
+
+        output += `\\hline \\\\\n`;
+
+        // Additions
+        const aBits = `\\mathtt{${printBitArray(valueA.value)}}`;
+
+        let extraZeros = 0;
+        for (let i = 0; i < valueB.value.length; i++) {
+          const bitB = valueB.value[i];
+          if (bitB) {
+            output += `&${phantomPadding(
+              i - extraZeros + requiredPadding
+            )} \\mathtt{${"0".repeat(extraZeros)}} ${aBits} \\\\\n`;
+            extraZeros = 0;
+          } else {
+            extraZeros++;
+          }
+        }
+
+        // If the last line is "missing", add it
+        if (extraZeros) {
+          extraZeros--;
+          output += `&${phantomPadding(
+            valueB.value.length - 1 - extraZeros + requiredPadding
+          )} \\mathtt{${"0".repeat(extraZeros + valueA.value.length)}} \\\\\n`;
+        }
+
+        output += `\\hline \\\\\n`;
+
+        // Result
+
+        output += `&${phantomPadding(
+          lastLineLength - resultLength + requiredPadding
+        )} ${printLatexNumber(
+          result.value?.isNegative ? "-" : "",
+          printBitArray(result.value?.getValueBeforeDecimal()),
+          printBitArray(result.value?.getValueAfterDecimal())
+        )}`;
+        output = `\\def\\arraystretch{0.1}\n\\begin{alignedat}{1}\n${output}\n\\end{alignedat}`;
         return output;
       }
 
