@@ -259,7 +259,19 @@ export class BinaryNumber {
 
     let resultBits = new BinaryNumber(false, this.value, 0);
     let thisValueBits = new BinaryNumber(false, this.value, 0);
-    for (let i = 1; i < other.value.length; i++) {
+    // Skip the zeros at the beginning of number b
+    let skipZeros = 0;
+    for (let i = 0; i < other.value.length; i++) {
+      const bitB = other.value[skipZeros];
+      if (bitB) {
+        break;
+      } else {
+        skipZeros++;
+      }
+    }
+
+    // Multiply the remaining numbers
+    for (let i = 1 + skipZeros; i < other.value.length; i++) {
       const bitB = other.value[i];
       resultBits = resultBits.multiplyByTwo();
       if (bitB) {

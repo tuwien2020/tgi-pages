@@ -154,7 +154,7 @@ export default defineComponent({
           beforeDecimal: string,
           afterDecimal: string
         ) =>
-          `\\mathtt{\\llap{${op}}} \\mathtt{${beforeDecimal}} \\mathtt{${
+          `\\mathtt{\\llap{${op}} ${beforeDecimal} ${
             afterDecimal.length > 0
               ? "\\clap{\\raisebox{-0.1em}{.}}" + afterDecimal
               : ""
@@ -246,5 +246,9 @@ export default defineComponent({
 <style>
 .katex .vlist-t2 .vlist-r:last-child {
   pointer-events: none;
+}
+.katex .vlist-s {
+  pointer-events: none;
+  user-select: none;
 }
 </style>
