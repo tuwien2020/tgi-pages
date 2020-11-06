@@ -2,10 +2,10 @@
   <h1>Hamming-Code</h1>
 
   <p>Gebe hier einen Hamming-Code ein:</p>
-  <input v-model="code" pattern="[01]+" />
+  <input v-model="codeBits" pattern="[01]+" />
 
   <p>Gebe hier die Datenbits für einen Hamming-Code ein:</p>
-  <input v-model="data" pattern="[01]+" />
+  <input v-model="dataBits" pattern="[01]+" />
 
   <!-- parity bits !-->
   <pre>Hamming-Code: {{ hammingCode.code }}</pre>
@@ -37,52 +37,81 @@ Fehler an der Stelle: {{ hammingCode.errorBit }}</pre
   <p>
     Wie viele Paritybits werden für einen Hamming-Code mit d Datenbits benötigt?
   </p>
-  <input v-model="givenDataBits" pattern="[0-9]+" />
+  <input
+    v-model="givenDataBits"
+    pattern="[0-9]+"
+    placeholder="Daten Bit Anzahl"
+  />
   <pre>mindestens {{ minParityBitsForDatabits }} Paritybits</pre>
 
   <p>
     Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn
     dieser p Paritybits hat?
   </p>
-  <input v-model="givenParityBits" pattern="[0-9]+" />
+  <input
+    v-model="givenParityBits"
+    pattern="[0-9]+"
+    placeholder="Parity Bit Anzahl"
+  />
   <pre>maximal {{ maxCodebits }} Code- und {{ maxDatabits }} Datenbits  </pre>
 
   <p>Wie viele Paritybits brauche ich für einen Hamming-Code mit c Codebits?</p>
-  <input v-model="givenCodeBits" pattern="[0-9]+" />
+  <input
+    v-model="givenCodeBits"
+    pattern="[0-9]+"
+    placeholder="Code Bit Anzahl"
+  />
   <pre>mindestens {{ minParityBitsForCodebits }} Paritybits</pre>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useUrlRef } from "../url-ref";
 
 export default defineComponent({
   components: {},
   setup() {
+    const router = useRouter();
+    const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
+
     let hammingCode = ref(new HammingCode(""));
-    let code = ref("");
-    let data = ref("");
+    let codeBits = urlRef("hamming-code-bits", "");
+    let dataBits = urlRef("hamming-data-bits", "");
 
     let showCalulations = ref(false);
 
-    watch(data, (value) => {
-      data.value = data.value.replace(/[^01]+$/, "");
-      hammingCode.value = new HammingCode(data.value, true);
-      code.value = "";
+    watch(codeBits, (value) => {
+      codeBits.value = codeBits.value.replace(/[^01]+$/, "");
+      hammingCode.value = new HammingCode(codeBits.value, false);
+      dataBits.value = "";
     });
 
-    watch(code, (value) => {
-      code.value = code.value.replace(/[^01]+$/, "");
-      hammingCode.value = new HammingCode(code.value, false);
-      data.value = "";
+    watch(dataBits, (value) => {
+      dataBits.value = dataBits.value.replace(/[^01]+$/, "");
+      hammingCode.value = new HammingCode(dataBits.value, true);
+      codeBits.value = "";
     });
 
-    let givenParityBits = ref("");
     let givenDataBits = ref("");
+    let givenParityBits = ref("");
     let givenCodeBits = ref("");
     let maxCodebits = ref(0);
     let maxDatabits = ref(0);
     let minParityBitsForDatabits = ref(0);
     let minParityBitsForCodebits = ref(0);
+
+    watch(givenDataBits, (value) => {
+      givenDataBits.value = givenDataBits.value.replace(/[^0-9]+$/, "");
+      if (value != "") {
+        minParityBitsForDatabits.value = calculateMinimumAmountOfParityBits(
+          parseInt(givenDataBits.value)
+        );
+      } else {
+        minParityBitsForDatabits.value = 0;
+      }
+    });
 
     watch(givenParityBits, (value) => {
       givenParityBits.value = givenParityBits.value.replace(/[^0-9]+$/, "");
@@ -95,15 +124,6 @@ export default defineComponent({
       maxDatabits.value = maxCodebits.value - parseInt(value);
     });
 
-    watch(givenDataBits, (value) => {
-      givenDataBits.value = givenDataBits.value.replace(/[^0-9]+$/, "");
-      if (value != "") {
-        minParityBitsForDatabits.value = calculateMinimumAmountOfParityBits(parseInt(givenDataBits.value));
-      } else {
-        minParityBitsForDatabits.value = 0;
-      }
-    });
-
     watch(givenCodeBits, (value) => {
       givenParityBits.value = givenParityBits.value.replace(/[^0-9]+$/, "");
       minParityBitsForCodebits.value =
@@ -111,8 +131,8 @@ export default defineComponent({
     });
 
     return {
-      code,
-      data,
+      codeBits,
+      dataBits,
       hammingCode,
       givenCodeBits,
       givenParityBits,

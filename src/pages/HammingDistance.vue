@@ -114,6 +114,7 @@ class CodewordsData {
         );
       }
     }
+
     let smollestDistance = distances[0];
     for (let i = 1; i < distances.length; i++) {
       if (smollestDistance > distances[i]) {
@@ -171,7 +172,7 @@ class CodewordsData {
 
   private hammingDistanceMatrix(distances: Array<number>): string[][] {
     let matrix = Array.from(
-      Array(this.codewords.length + 1),
+      new Array(this.codewords.length + 1),
       () => new Array(this.codewords.length + 1)
     );
     let indexDistanceData = 0;
