@@ -8,6 +8,7 @@
   <pre>Ist ein linearer Code: {{ codewordsData.isLinearCode }}</pre>
   <pre>Ist ein zyklischer Code: {{ codewordsData.isCyclicCode }}</pre>
 
+  <br>
   <table class="hammingMatrix" v-if="codewordsData.isBlockCode">
     <tr
       v-for="(row, index) in codewordsData.distanceMatrixData"
@@ -19,6 +20,7 @@
       </td>
     </tr>
   </table>
+ 
 </template>
 
 <script lang="ts">
@@ -64,7 +66,7 @@ class CodewordsData {
   readonly isBlockCode: boolean;
   readonly isLinearCode: boolean;
   readonly isCyclicCode: boolean;
-
+ 
   readonly hammingDistance: number;
   readonly distanceMatrixData: string[][];
 
@@ -79,14 +81,19 @@ class CodewordsData {
       this.distanceMatrixData = [[]];
       return;
     }
-
-    let hammingDistanceData = this.getHammingDistances();
-    this.hammingDistance = hammingDistanceData.hammingDistance;
-    this.distanceMatrixData = hammingDistanceData.distanceMatrix;
-
+    
     this.isBlockCode = this.blockCode();
     this.isLinearCode = this.isBlockCode && this.linearCode();
     this.isCyclicCode = this.isLinearCode && this.cyclicCode();
+    
+    if (this.isBlockCode) {
+      let hammingDistanceData = this.getHammingDistances();
+      this.hammingDistance = hammingDistanceData.hammingDistance;
+      this.distanceMatrixData = hammingDistanceData.distanceMatrix;
+    } else {
+      this.hammingDistance = 0;
+      this.distanceMatrixData = [[]];
+    } 
   }
 
   private getHammingDistances() {
@@ -101,10 +108,15 @@ class CodewordsData {
         );
       }
     }
-    let sortedDistances = distances.sort();
+    let smollestDistance = distances[0];
+    for (let i = 1; i < distances.length; i++) {
+      if (smollestDistance > distances[i]) {
+        smollestDistance = distances[i];
+      }
+    }
 
     return {
-      hammingDistance: sortedDistances[0],
+      hammingDistance: smollestDistance,
       distanceMatrix: this.hammingDistanceMatrix(distances),
     };
   }
