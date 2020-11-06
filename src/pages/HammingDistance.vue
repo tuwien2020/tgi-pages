@@ -8,7 +8,7 @@
   <pre>Ist ein linearer Code: {{ codewordsData.isLinearCode }}</pre>
   <pre>Ist ein zyklischer Code: {{ codewordsData.isCyclicCode }}</pre>
 
-  <table class="hammingMatrix">
+  <table class="hammingMatrix" v-if="codewordsData.isBlockCode">
     <tr
       v-for="(row, index) in codewordsData.distanceMatrixData"
       :key="index"
@@ -165,7 +165,6 @@ class CodewordsData {
           indexDistanceData++;
         }
       }
-      console.log(matrix[row]);
     }
     return matrix;
   }
