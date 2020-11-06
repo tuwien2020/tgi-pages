@@ -91,7 +91,7 @@
   <h3>Hamming Code</h3>
   <ul>
     <li><router-link to="/hamming-code">Hamming Code</router-link></li>
-    <li><router-link to="/hamming-distance">Hamming Distance</router-link></li>
+    <li><router-link to="/hamming-distance">Hamming Distanz</router-link></li>
   </ul>
 
   <h3>Polynom Code</h3>

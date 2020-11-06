@@ -3,131 +3,172 @@
 
   <p>Gebe hier die Codewörter ein (getrennt durch einen Linienumbruch):</p>
   <textarea rows="4" cols="50" v-model="codewords"></textarea>
-  <pre>Hamming-Distanz: {{ hammingDistance }}</pre>
-  <pre>Ist ein Blockcode: {{ isBlockCode }}</pre>
-  <pre>Ist ein linearer Code: {{ isBlockCode && isLinearCode }}</pre>
-  <pre>
-Ist ein zyklischer Code: {{ isBlockCode && isLinearCode && isCyclicCode }}</pre
-  >
+  <pre>Hamming-Distanz: {{ codewordsData.hammingDistance }}</pre>
+  <pre>Ist ein Blockcode: {{ codewordsData.isBlockCode }}</pre>
+  <pre>Ist ein linearer Code: {{ codewordsData.isLinearCode }}</pre>
+  <pre>Ist ein zyklischer Code: {{ codewordsData.isCyclicCode }}</pre>
 
-  <div id="hammingMatrix"></div>
+  <table class="hammingMatrix">
+    <tr
+      v-for="(row, index) in codewordsData.distanceMatrixData"
+      :key="index"
+      tabindex="0"
+    >
+      <td v-for="(item, itemIndex) in row" :key="itemIndex">
+        {{ item }}
+      </td>
+    </tr>
+  </table>
 </template>
 
 <script lang="ts">
+import { match } from "bread-n-butter";
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 
 export default defineComponent({
   components: {},
   setup() {
     let codewords = ref("");
-    let isBlockCode = ref(false);
-    let isLinearCode = ref(false);
-    let isCyclicCode = ref(false);
-    let hammingDistance = ref("");
-    let minHammingDistance = ref("");
+    let codewordsData = ref(new CodewordsData(new Array<string>()));
+
+    let hammingMatrix = ref<string[][]>([[]]);
 
     watch(codewords, (value) => {
       let codewordStrings = value.split("\n");
 
-      if (codewordStrings.length < 2) {
-        return 0;
-      }
+      codewordStrings = codewordStrings.filter(function (string) {
+        return string != null && string.trim() !== "";
+      });
 
-      if (blockCode(codewordStrings)) {
-        let hammingDistanceData = getHammingDistance(codewordStrings);
-
-        if (linearCode(codewordStrings)) {
-          isLinearCode.value = true;
-          isCyclicCode.value = cyclicCode(codewordStrings);
-        } else {
-          isLinearCode.value = false;
-          isCyclicCode.value = false;
-        }
-        hammingDistance.value = hammingDistanceData.hammingDistance.toString();
-        isBlockCode.value = true;
-      } else {
-        isLinearCode.value = false;
-        isCyclicCode.value = false;
-        isBlockCode.value = false;
-        minHammingDistance.value = 0 + "";
-      }
+      codewordsData.value = new CodewordsData(codewordStrings);
     });
 
     return {
       codewords,
-      isBlockCode,
-      isLinearCode,
-      isCyclicCode,
-      hammingDistance,
+      codewordsData,
     };
   },
 });
 
-function bitCount(n: number): number {
-  n = n - ((n >> 1) & 0x55555555);
-  n = (n & 0x33333333) + ((n >> 2) & 0x33333333);
-  return (((n + (n >> 4)) & 0xf0f0f0f) * 0x1010101) >> 24;
-}
+class CodewordsData {
+  private readonly codewords: Array<string>;
 
-function getHammingDistance(codewords: Array<string>) {
-  let distances = new Array<number>();
-  for (let i = 0; i < codewords.length; i++) {
-    let codewordA = codewords[i];
-    for (let j = 0; j < codewords.length; j++) {
-      if (i == j) continue;
-      let codewordB = codewords[j];
-      distances.push(bitCount(parseInt(codewordA, 2) ^ parseInt(codewordB, 2)));
+  readonly isBlockCode: boolean;
+  readonly isLinearCode: boolean;
+  readonly isCyclicCode: boolean;
+
+  readonly hammingDistance: number;
+  readonly distanceMatrixData: string[][];
+
+  constructor(codewords: Array<string>) {
+    this.codewords = codewords;
+
+    if (codewords.length < 2) {
+      this.hammingDistance = undefined;
+      this.isBlockCode = false;
+      this.isLinearCode = false;
+      this.isCyclicCode = false;
+      return;
     }
+
+    let hammingDistanceData = this.getHammingDistances();
+    this.hammingDistance = hammingDistanceData.hammingDistance;
+    this.distanceMatrixData = hammingDistanceData.distanceMatrix;
+
+    this.isBlockCode = this.blockCode();
+    this.isLinearCode = this.isBlockCode && this.linearCode();
+    this.isCyclicCode = this.isLinearCode && this.cyclicCode();
   }
-  let sortedDistances = distances.sort();
 
-  return {
-    hammingDistance: sortedDistances[0],
-    distances: distances,
-  };
-}
-
-function blockCode(codewords: Array<string>): boolean {
-  let codewordLength = codewords[0].length;
-  for (let i = 1; i < codewords.length; i++) {
-    if (codewords[i].trim().length == 0) continue;
-    if (codewords[i].length != codewordLength) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function linearCode(codewords: Array<string>): boolean {
-  for (let i = 0; i < codewords.length; i++) {
-    let codewordA = codewords[i];
-    for (let j = 0; j < codewords.length; j++) {
-      if (i == j) continue;
-      let codewordB = codewords[j];
-      if (codewordA.length != codewordB.length) {
-        return false;
-      }
-      let xorString = xorBinaryStrings(codewordA, codewordB);
-
-      if (!codewords.includes(xorString)) {
-        return false;
+  private getHammingDistances() {
+    let distances = new Array<number>();
+    for (let i = 0; i < this.codewords.length; i++) {
+      let codewordA = this.codewords[i];
+      for (let j = 0; j < this.codewords.length; j++) {
+        if (i == j) continue;
+        let codewordB = this.codewords[j];
+        distances.push(
+          bitCount(parseInt(codewordA, 2) ^ parseInt(codewordB, 2))
+        );
       }
     }
-  }
-  return true;
-}
+    let sortedDistances = distances.sort();
 
-function cyclicCode(codewords: Array<string>): boolean {
-  for (let i = 0; i < codewords.length; i++) {
-    let codeword = codewords[i];
-    for (let j = 0; j < codewords.length; j++) {
-      let shiftedCode = cyclicShiftString(codeword, j);
-      if (!codewords.includes(shiftedCode)) {
+    return {
+      hammingDistance: sortedDistances[0],
+      distanceMatrix: this.hammingDistanceMatrix(distances),
+    };
+  }
+
+  private blockCode(): boolean {
+    let codewordLength = this.codewords[0].length;
+    for (let i = 1; i < this.codewords.length; i++) {
+      if (this.codewords[i].length != codewordLength) {
         return false;
       }
     }
+    return true;
   }
-  return true;
+
+  private linearCode(): boolean {
+    for (let i = 0; i < this.codewords.length; i++) {
+      let codewordA = this.codewords[i];
+      for (let j = 0; j < this.codewords.length; j++) {
+        if (i == j) continue;
+        let codewordB = this.codewords[j];
+        if (codewordA.length != codewordB.length) {
+          return false;
+        }
+        let xorString = xorBinaryStrings(codewordA, codewordB);
+
+        if (!this.codewords.includes(xorString)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private cyclicCode(): boolean {
+    for (let i = 0; i < this.codewords.length; i++) {
+      let codeword = this.codewords[i];
+      for (let j = 0; j < this.codewords.length; j++) {
+        let shiftedCode = cyclicShiftString(codeword, j);
+        if (!this.codewords.includes(shiftedCode)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private hammingDistanceMatrix(distances: Array<number>): string[][] {
+    let matrix = Array.from(
+      Array(this.codewords.length + 1),
+      () => new Array(this.codewords.length + 1)
+    );
+    let indexDistanceData = 0;
+
+    matrix[0][0] = "";
+    for (let i = 0; i < this.codewords.length; i++) {
+      matrix[i + 1][0] = this.codewords[i];
+      matrix[0][i + 1] = this.codewords[i];
+    }
+
+    for (let row = 1; row <= this.codewords.length; row++) {
+      let rowArray = new Array<string>(this.codewords.length);
+      for (let col = 1; col <= this.codewords.length; col++) {
+        if (row == col) {
+          matrix[row][col] = "-";
+        } else {
+          matrix[row][col] = distances[indexDistanceData].toString();
+          indexDistanceData++;
+        }
+      }
+      console.log(matrix[row]);
+    }
+    return matrix;
+  }
 }
 
 function cyclicShiftString(s: String, n: number) {
@@ -145,4 +186,24 @@ function xorBinaryStrings(a: string, b: string) {
   }
   return xorString;
 }
+
+function bitCount(n: number): number {
+  n = n - ((n >> 1) & 0x55555555);
+  n = (n & 0x33333333) + ((n >> 2) & 0x33333333);
+  return (((n + (n >> 4)) & 0xf0f0f0f) * 0x1010101) >> 24;
+}
 </script>
+
+<style scoped>
+
+.hammingMatrix td:hover,
+.hammingMatrix td:focus {
+  background-color: #f1f1f1;
+}
+
+.hammingMatrix {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+  text-align: center;
+  overflow: hidden;
+}
+</style>
