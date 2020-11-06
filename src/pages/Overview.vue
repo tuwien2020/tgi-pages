@@ -157,6 +157,14 @@
     <li><router-link to="/truth-table">Wahrheitstabelle</router-link></li>
   </ul>
 
+  <h3>Schaltkreise</h3>
+  <ul>
+    <li>
+      <a href="http://falstad.com/circuit/circuitjs.html" target="_blank"
+        >Schaltkreise</a
+      >
+    </li>
+  </ul>
   <!-- Stuff and thingies -->
   <h3>GitHub</h3>
   <ul>
