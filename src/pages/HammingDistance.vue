@@ -34,6 +34,14 @@ export default defineComponent({
     let hammingMatrix = ref<string[][]>([[]]);
 
     watch(codewords, (value) => {
+      let cleanedCodewords;
+      cleanedCodewords = codewords.value.replace(/ /, ""); 
+      cleanedCodewords = cleanedCodewords.replace(/[^01\n]+$/, ""); 
+      
+      if (cleanedCodewords != value) {
+        codewords.value = cleanedCodewords;
+        return;
+      }
       let codewordStrings = value.split("\n");
 
       codewordStrings = codewordStrings.filter(function (string) {
@@ -64,10 +72,11 @@ class CodewordsData {
     this.codewords = codewords;
 
     if (codewords.length < 2) {
-      this.hammingDistance = undefined;
+      this.hammingDistance = 0;
       this.isBlockCode = false;
       this.isLinearCode = false;
       this.isCyclicCode = false;
+      this.distanceMatrixData = [[]];
       return;
     }
 
