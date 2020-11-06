@@ -22,17 +22,19 @@ function operator<S extends string>(value: { operator: S; match: RegExp }) {
     .map((v) => value.operator);
 }
 
-const binaryNumberRegex = /([+-])?([0-1]+)([.,][0-1]+)?/;
+const binaryNumberRegex = /([+-])?([0-1]+)([.,]([0-1]+))?/;
 function stringToBinaryNumber(value: string): BinaryNumber {
   const matchResults = (value ?? "").match(binaryNumberRegex);
-  if (matchResults === null) return new BinaryNumber(false, []);
+  if (matchResults === null) return new BinaryNumber(false, [], 0);
 
-  const [_, sign, numberValue, fractionalPart] = matchResults;
+  const [_, sign, numberValue, __, fractionalPart] = matchResults;
 
-  if (fractionalPart) throw new Error("Fractional numbers not yet supported");
   return new BinaryNumber(
     sign === "-",
-    (numberValue ?? "").split("").map((v) => (v === "0" ? false : true))
+    ((numberValue ?? "") + (fractionalPart ?? ""))
+      .split("")
+      .map((v) => (v === "0" ? false : true)),
+    fractionalPart?.length ?? 0
   );
 }
 

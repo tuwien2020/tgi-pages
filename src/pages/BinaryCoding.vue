@@ -117,7 +117,7 @@ function useBinaryParsing() {
   // TODO: Replace this with tryParseBinaryNumber() from grammar-single-op.ts
   function stringToBinaryNumber(value: string): BinaryNumber {
     const matchResults = (value ?? "").match(/([+-])?([0-1]+)([.,][0-1]+)?/);
-    if (matchResults === null) return new BinaryNumber(false, []);
+    if (matchResults === null) return new BinaryNumber(false, [], 0);
 
     const [_, sign, numberValue, fractionalPart] = matchResults;
 
@@ -126,10 +126,12 @@ function useBinaryParsing() {
     if (fractionalPart) throw new Error("Fractional numbers not yet supported");
     return new BinaryNumber(
       sign === "-",
-      (numberValue ?? "").split("").map((v) => (v === "0" ? false : true))
+      (numberValue ?? "").split("").map((v) => (v === "0" ? false : true)),
+      0
     );
   }
 
+  // TODO: Handle fractional binary numbers
   function binaryToString(value: BinaryNumber) {
     return `${unref(value).isNegative ? "-" : "+"}${unref(value)
       .value.map((v) => (v ? "1" : "0"))
