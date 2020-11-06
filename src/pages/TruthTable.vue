@@ -300,7 +300,7 @@ export default defineComponent({
 
       let binaryNumber = BinaryNumber.fromSize(getters.length);
       const oneInBinary = BinaryNumber.fromSize(getters.length).add(
-        new BinaryNumber(true, [true])
+        new BinaryNumber(true, [true], 0)
       );
 
       const tableWidth = tableHeaders.value.length;

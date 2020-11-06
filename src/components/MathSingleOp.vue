@@ -22,12 +22,12 @@ export default defineComponent({
   props: {
     valueA: {
       type: Object as PropType<BinaryNumber>,
-      default: () => new BinaryNumber(false, []),
+      default: () => new BinaryNumber(false, [], 0),
     },
 
     valueB: {
       type: Object as PropType<BinaryNumber>,
-      default: () => new BinaryNumber(false, []),
+      default: () => new BinaryNumber(false, [], 0),
     },
     operator: {
       type: String as PropType<MathJsonMathOperator>,
@@ -48,7 +48,7 @@ export default defineComponent({
       } else if (props.operator == "divide") {
         //return props.valueA.divide(props.valueB);
       } else {
-        return new BinaryNumber(false, []);
+        return new BinaryNumber(false, [], 0);
       }
     });
 
@@ -79,8 +79,8 @@ export default defineComponent({
           // Addition
           let firstNumber = printLatexNumber(
             "",
-            printBitArray(valueA.value),
-            ""
+            printBitArray(valueA.getValueBeforeDecimal()),
+            printBitArray(valueA.getValueAfterDecimal())
           );
           if (result.value?.isNegative) {
             // Slap a minus sign around the operation
@@ -93,8 +93,8 @@ export default defineComponent({
           output += "\\\\\n";
           let secondNumber = printLatexNumber(
             "+",
-            printBitArray(valueB.value),
-            ""
+            printBitArray(valueB.getValueBeforeDecimal()),
+            printBitArray(valueB.getValueAfterDecimal())
           );
           output += secondNumber;
         } else {
@@ -109,8 +109,8 @@ export default defineComponent({
           }
           let firstNumber = printLatexNumber(
             "",
-            printBitArray(valueA.value),
-            ""
+            printBitArray(valueA.getValueBeforeDecimal()),
+            printBitArray(valueA.getValueAfterDecimal())
           );
           if (result.value?.isNegative) {
             // Slap a minus sign around the operation
@@ -123,20 +123,19 @@ export default defineComponent({
           output += "\\\\\n";
           let secondNumber = printLatexNumber(
             "-",
-            printBitArray(valueB.value),
-            ""
+            printBitArray(valueB.getValueBeforeDecimal()),
+            printBitArray(valueB.getValueAfterDecimal())
           );
           output += secondNumber;
         }
 
         output += `\\\\\n\\hline ${printLatexNumber(
           result.value?.isNegative ? "-" : "",
-          printBitArray(result.value?.value),
-          ""
+          printBitArray(result.value?.getValueBeforeDecimal()),
+          printBitArray(result.value?.getValueAfterDecimal())
         )}`;
 
         output = `\\begin{alignedat}{3}\n${output}\n\\end{alignedat}`;
-        console.log(output);
         return output;
       }
 

@@ -62,21 +62,34 @@ export function useMathPrinting() {
     } else if (typeof ast === "string") {
       return ast.replace(/^([^_]+)_([^]+)$/, "$1_{$2}");
     } else if (ast instanceof BinaryNumber) {
-      return `\\mathtt{${ast.isNegative ? "-" : ""}${splitIntoChunks(
-        ast.value.map((v) => (v ? "1" : "0")).join(""),
-        4,
-        true
-      ).join("\\,")}}`;
+      const beforeDecimal = ast
+        .getValueBeforeDecimal()
+        .map((v) => (v ? "1" : "0"))
+        .join("");
+      const afterDecimal = ast
+        .getValueAfterDecimal()
+        .map((v) => (v ? "1" : "0"))
+        .join("");
+
+      if (afterDecimal !== undefined && afterDecimal.length > 0) {
+        return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
+          "\\,"
+        )}.${splitIntoChunks(afterDecimal ?? "", 4).join("\\,")}}`;
+      } else {
+        return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
+          "\\,"
+        )}}`;
+      }
     } else if (ast.kind == "number") {
       if (ast.base === 2) {
-        const [beforeComma, afterComma] = ast.value.split(".");
+        const [beforeDecimal, afterDecimal] = ast.value.split(".");
 
-        if (afterComma !== undefined) {
-          return `\\mathtt{${splitIntoChunks(beforeComma ?? "", 4, true).join(
+        if (afterDecimal !== undefined && afterDecimal.length > 0) {
+          return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
             "\\,"
-          )}.${splitIntoChunks(afterComma ?? "", 4).join("\\,")}}`;
+          )}.${splitIntoChunks(afterDecimal ?? "", 4).join("\\,")}}`;
         } else {
-          return `\\mathtt{${splitIntoChunks(beforeComma ?? "", 4, true).join(
+          return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
             "\\,"
           )}}`;
         }

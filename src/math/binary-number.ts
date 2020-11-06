@@ -1,5 +1,3 @@
-import { LogicalExpression } from "../assets/grammar-logical";
-
 function xor(a: boolean, b: boolean) {
   // Alternatively, you could use
   // return (a || b) && !(a && b)
@@ -9,13 +7,13 @@ function xor(a: boolean, b: boolean) {
 // TODO: Maybe write a "addOne" function
 
 /**
- * Adds two binary arrays that have the same length
- * TODO: Handle overflow?
+ * Adds two binary arrays that have the same length.
+ * Returns a larger array if there was an overflow
  */
 function addBitArray(a: ReadonlyArray<boolean>, b: ReadonlyArray<boolean>) {
   if (a.length !== b.length) throw new Error("Not equal lengths");
 
-  const result = new Array(a.length).fill(false);
+  const result: boolean[] = new Array(a.length).fill(false);
 
   // Adding binary numbers requires you to visit them backwards
   let carry = false;
@@ -27,6 +25,10 @@ function addBitArray(a: ReadonlyArray<boolean>, b: ReadonlyArray<boolean>) {
     const aXorB = xor(bitA, bitB);
     result[i] = xor(aXorB, carry);
     carry = (bitA && bitB) || (aXorB && carry);
+  }
+
+  if (carry) {
+    result.unshift(true);
   }
 
   return result;
@@ -65,56 +67,65 @@ function subtractBitArray(
  */
 function compareBinaryArray(
   a: ReadonlyArray<boolean>,
-  b: ReadonlyArray<boolean>
+  aDecimalPoint: number,
+  b: ReadonlyArray<boolean>,
+  bDecimalPoint: number
 ) {
   // a > b would be rewritten as compareBinaryArray(a,b) > 0
+  const aBeforeDecimal = a.length - aDecimalPoint;
+  const bBeforeDecimal = b.length - bDecimalPoint;
+  const maxBeforeDecimal = Math.max(aBeforeDecimal, bBeforeDecimal);
+  const aOffset = maxBeforeDecimal - aBeforeDecimal;
+  const bOffset = maxBeforeDecimal - bBeforeDecimal;
 
-  let flipped = false;
-  if (b.length > a.length) {
-    const temp = a;
-    a = b;
-    b = temp;
-    flipped = true;
-  }
-
-  // a is longer than b, now check the first few bits of a
-  const aDiff = a.length - b.length;
-  for (let i = 0; i < aDiff; i++) {
-    const bitA = a[i];
-    if (bitA) {
-      return flipped ? -1 : 1;
-    }
-  }
-
-  for (let i = 0; i < b.length; i++) {
-    const bitA = a[i + aDiff];
-    const bitB = b[i];
+  const until = Math.max(a.length + aOffset, b.length + bOffset);
+  for (let i = 0; i < until; i++) {
+    const aIndex = i - aOffset;
+    const bIndex = i - bOffset;
+    const bitA = 0 <= aIndex && aIndex < a.length ? a[i - aOffset] : false;
+    const bitB = 0 <= bIndex && bIndex < b.length ? b[i - bOffset] : false;
     if (bitA && !bitB) {
-      return flipped ? -1 : 1;
+      return 1;
     }
     if (bitB && !bitA) {
-      return flipped ? 1 : -1;
+      return -1;
     }
   }
-
   return 0;
 }
 
 export class BinaryNumber {
+  /**
+   * The sign
+   */
   public readonly isNegative: boolean;
+
+  /**
+   * The bits
+   */
   public readonly value: ReadonlyArray<boolean>;
 
-  constructor(isNegative: boolean, value: ReadonlyArray<boolean>) {
+  /**
+   * Tells you where the decimal point is
+   */
+  public readonly decimalPoint: number;
+
+  constructor(
+    isNegative: boolean,
+    value: ReadonlyArray<boolean>,
+    decimalPoint: number
+  ) {
     this.isNegative = isNegative;
     this.value = value.slice();
+    this.decimalPoint = Math.round(decimalPoint);
   }
 
-  static fromSize(size: number) {
-    return new BinaryNumber(false, new Array(size).fill(false));
+  static fromSize(size: number, decimalPoint: number = 0) {
+    return new BinaryNumber(false, new Array(size).fill(false), decimalPoint);
   }
 
   static fromSignMagnitude(value: ReadonlyArray<boolean>) {
-    return new BinaryNumber(value[0], value.slice(1));
+    return new BinaryNumber(value[0], value.slice(1), 0);
   }
 
   static fromOnesComplement(value: ReadonlyArray<boolean>) {
@@ -125,7 +136,7 @@ export class BinaryNumber {
         bitArray[i] = !bitArray[i];
       }
     }
-    return new BinaryNumber(isNegative, bitArray);
+    return new BinaryNumber(isNegative, bitArray, 0);
   }
 
   static fromTwosComplement(value: ReadonlyArray<boolean>) {
@@ -136,14 +147,14 @@ export class BinaryNumber {
         bitArray[i] = !bitArray[i];
       }
 
-      const oneInBinary = new BinaryNumber(false, [true]);
-      const bitArrayPlusOne = new BinaryNumber(false, bitArray).add(
+      const oneInBinary = new BinaryNumber(false, [true], 0);
+      const bitArrayPlusOne = new BinaryNumber(false, bitArray, 0).add(
         oneInBinary
       );
 
-      return new BinaryNumber(isNegative, bitArrayPlusOne.value);
+      return new BinaryNumber(isNegative, bitArrayPlusOne.value, 0);
     } else {
-      return new BinaryNumber(isNegative, bitArray);
+      return new BinaryNumber(isNegative, bitArray, 0);
     }
   }
 
@@ -151,22 +162,40 @@ export class BinaryNumber {
     value: ReadonlyArray<boolean>,
     offset: ReadonlyArray<boolean>
   ) {
-    return new BinaryNumber(false, value).subtract(
-      new BinaryNumber(false, offset)
+    return new BinaryNumber(false, value, 0).subtract(
+      new BinaryNumber(false, offset, 0)
     );
   }
 
-  clone() {
-    return new BinaryNumber(this.isNegative, this.value);
+  getValueBeforeDecimal() {
+    return this.value.slice(0, this.value.length - this.decimalPoint);
   }
 
-  extend(length: number) {
-    if (length > this.value.length) {
-      const padding: boolean[] = new Array(length - this.value.length).fill(
-        false
-      );
+  getValueAfterDecimal() {
+    return this.value.slice(this.value.length - this.decimalPoint);
+  }
 
-      return new BinaryNumber(this.isNegative, padding.concat(this.value));
+  clone() {
+    return new BinaryNumber(this.isNegative, this.value, this.decimalPoint);
+  }
+
+  extend(length: number, lengthOfFractional: number = 0) {
+    if (
+      length > this.value.length - this.decimalPoint ||
+      lengthOfFractional > this.decimalPoint
+    ) {
+      const paddingLeft: boolean[] = new Array(
+        length - (this.value.length - this.decimalPoint)
+      ).fill(false);
+      const paddingRight: boolean[] = new Array(
+        lengthOfFractional - this.decimalPoint
+      ).fill(false);
+
+      return new BinaryNumber(
+        this.isNegative,
+        paddingLeft.concat(this.value).concat(paddingRight),
+        lengthOfFractional
+      );
     } else {
       return this;
     }
@@ -176,16 +205,22 @@ export class BinaryNumber {
     let a = this as BinaryNumber;
     let b = other;
 
-    // Pad the smaller number
-    if (a.value.length > b.value.length) {
-      b = b.extend(a.value.length);
-    } else if (a.value.length < b.value.length) {
-      a = a.extend(b.value.length);
-    }
+    // Pad the numbers
+    const paddingBeforeDecimal = Math.max(
+      a.value.length - a.decimalPoint,
+      b.value.length - b.decimalPoint
+    );
+    const paddingAfterDecimal = Math.max(a.decimalPoint, b.decimalPoint);
+    a = a.extend(paddingBeforeDecimal, paddingAfterDecimal);
+    b = b.extend(paddingBeforeDecimal, paddingAfterDecimal);
 
     if (a.isNegative == b.isNegative) {
       // a and b have the same sign
-      return new BinaryNumber(a.isNegative, addBitArray(a.value, b.value));
+      return new BinaryNumber(
+        a.isNegative,
+        addBitArray(a.value, b.value),
+        a.decimalPoint
+      );
     } else {
       // Test cases
       // -10 + 1   => -
@@ -193,20 +228,22 @@ export class BinaryNumber {
       // 10 + (-1) => +
       // -1 + 10   => +
       // -10 + 10  => 0
-      const comparison = compareBinaryArray(a.value, b.value);
+      const comparison = compareBinaryArray(a.value, 0, b.value, 0);
       if (comparison === 0) {
-        return BinaryNumber.fromSize(a.value.length);
+        return BinaryNumber.fromSize(a.value.length, a.decimalPoint);
       } else if (comparison > 0) {
         // a is larger than b
         return new BinaryNumber(
           a.isNegative,
-          subtractBitArray(a.value, b.value)
+          subtractBitArray(a.value, b.value),
+          a.decimalPoint
         );
       } else {
         // b is larger than a
         return new BinaryNumber(
           b.isNegative,
-          subtractBitArray(b.value, a.value)
+          subtractBitArray(b.value, a.value),
+          b.decimalPoint
         );
       }
     }
@@ -220,7 +257,12 @@ export class BinaryNumber {
   compareTo(other: BinaryNumber): number {
     // a < b gets rewritten as a.compareTo(b) < 0
     if (this.isNegative == other.isNegative) {
-      const comparison = compareBinaryArray(this.value, other.value);
+      const comparison = compareBinaryArray(
+        this.value,
+        this.decimalPoint,
+        other.value,
+        other.decimalPoint
+      );
       if (comparison == 0) {
         return 0;
       } else {
@@ -232,6 +274,6 @@ export class BinaryNumber {
   }
 
   setSign(isNegative: boolean): BinaryNumber {
-    return new BinaryNumber(isNegative, this.value);
+    return new BinaryNumber(isNegative, this.value, this.decimalPoint);
   }
 }

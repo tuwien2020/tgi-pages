@@ -28,6 +28,13 @@
     </li>
     <li>
       <a
+        href="https://atozmath.com/NumberOperation.aspx?q=2&op=4#tblSolution"
+        target="_blank"
+        >Bin&auml;r Rechner</a
+      >
+    </li>
+    <li>
+      <a
         href="https://www.arndt-bruenner.de/mathe/scripts/Zahlensysteme.htm"
         target="_blank"
         >Bin&auml;r umrechnen (Bei direkten Umrechnungen kann es Rundungsfehler
