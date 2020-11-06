@@ -95,6 +95,15 @@
     </li>
   </ul>
 
+  <h3>NRZ und co</h3>
+  <ul>
+    <li>
+      <a href="http://www.ece.unb.ca/cgi-bin/tervo/encoding.pl" target="_blank"
+        >NRZ und co</a
+      >
+    </li>
+  </ul>
+
   <h3>Hamming Code</h3>
   <ul>
     <li><router-link to="/hamming-code">Hamming Code</router-link></li>

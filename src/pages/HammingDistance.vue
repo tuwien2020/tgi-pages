@@ -2,13 +2,23 @@
   <h1>Hamming-Distanz</h1>
 
   <p>Gebe hier die Codewörter ein (getrennt durch einen Linienumbruch):</p>
-  <textarea rows="4" cols="50" v-model="codewords"></textarea>
+  <textarea
+    rows="4"
+    cols="50"
+    :value="codewords"
+    @input="
+      (event) =>
+        (codewords = event.target.value
+          .replace(/ /g, '')
+          .replace(/[^01\n]/g, ''))
+    "
+  ></textarea>
   <pre>Hamming-Distanz: {{ codewordsData.hammingDistance }}</pre>
   <pre>Ist ein Blockcode: {{ codewordsData.isBlockCode }}</pre>
   <pre>Ist ein linearer Code: {{ codewordsData.isLinearCode }}</pre>
   <pre>Ist ein zyklischer Code: {{ codewordsData.isCyclicCode }}</pre>
 
-  <br>
+  <br />
   <table class="hammingMatrix" v-if="codewordsData.isBlockCode">
     <tr
       v-for="(row, index) in codewordsData.distanceMatrixData"
@@ -20,35 +30,31 @@
       </td>
     </tr>
   </table>
- 
 </template>
 
 <script lang="ts">
-import { match } from "bread-n-butter";
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useUrlRef } from "../url-ref";
 
 export default defineComponent({
   components: {},
   setup() {
-    let codewords = ref("");
+    const router = useRouter();
+    const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
+
+    let codewords = urlRef("input", "");
     let codewordsData = ref(new CodewordsData(new Array<string>()));
 
     let hammingMatrix = ref<string[][]>([[]]);
 
     watch(codewords, (value) => {
-      let cleanedCodewords;
-      cleanedCodewords = codewords.value.replace(/ /, ""); 
-      cleanedCodewords = cleanedCodewords.replace(/[^01\n]+$/, ""); 
-      
-      if (cleanedCodewords != value) {
-        codewords.value = cleanedCodewords;
-        return;
-      }
       let codewordStrings = value.split("\n");
 
-      codewordStrings = codewordStrings.filter(function (string) {
-        return string != null && string.trim() !== "";
-      });
+      codewordStrings = codewordStrings.filter(
+        (v) => v != null && v.trim() !== ""
+      );
 
       codewordsData.value = new CodewordsData(codewordStrings);
     });
@@ -66,7 +72,7 @@ class CodewordsData {
   readonly isBlockCode: boolean;
   readonly isLinearCode: boolean;
   readonly isCyclicCode: boolean;
- 
+
   readonly hammingDistance: number;
   readonly distanceMatrixData: string[][];
 
@@ -81,11 +87,11 @@ class CodewordsData {
       this.distanceMatrixData = [[]];
       return;
     }
-    
+
     this.isBlockCode = this.blockCode();
     this.isLinearCode = this.isBlockCode && this.linearCode();
     this.isCyclicCode = this.isLinearCode && this.cyclicCode();
-    
+
     if (this.isBlockCode) {
       let hammingDistanceData = this.getHammingDistances();
       this.hammingDistance = hammingDistanceData.hammingDistance;
@@ -93,7 +99,7 @@ class CodewordsData {
     } else {
       this.hammingDistance = 0;
       this.distanceMatrixData = [[]];
-    } 
+    }
   }
 
   private getHammingDistances() {
@@ -215,7 +221,6 @@ function bitCount(n: number): number {
 </script>
 
 <style scoped>
-
 .hammingMatrix td:hover,
 .hammingMatrix td:focus {
   background-color: #f1f1f1;

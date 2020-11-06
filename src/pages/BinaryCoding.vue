@@ -23,10 +23,10 @@
       <tbody class="monospace">
         <tr v-for="(item, index) in formats" :key="index">
           <td>{{ item.name }}</td>
-          <td style="text-align: right">
+          <td class="align-right">
             {{ binaryToString(item.binaryNumber) }}
           </td>
-          <td>-</td>
+          <td class="align-right">{{ binaryToDecimal(item.binaryNumber) }}</td>
           <td>-</td>
           <td>
             <label
@@ -185,6 +185,29 @@ export default defineComponent({
       };
     }
 
+    function binaryToDecimal(value: BinaryNumber): BigInt {
+      value = unref(value);
+      let result = BigInt(0);
+      for (let i = 0; i < value.value.length; i++) {
+        const bit = value.value[i];
+        result = result * 2n;
+        if (bit) {
+          result += 1n;
+        }
+      }
+
+      if (value.isNegative) {
+        result *= -1n;
+      }
+
+      if (value.decimalPoint > 0) {
+        // TODO: Support decimal points > 0
+        console.warn("not supported");
+      }
+
+      return result;
+    }
+
     const formats = [
       defineFormat(
         "VZ und Betrag",
@@ -225,6 +248,7 @@ export default defineComponent({
       mathJsonNumber,
       formats,
       binaryToString,
+      binaryToDecimal,
     };
   },
 });
@@ -236,5 +260,8 @@ export default defineComponent({
 }
 .monospace input {
   font-family: "Consolas", "Courier New", Courier, monospace;
+}
+.align-right {
+  text-align: right;
 }
 </style>
