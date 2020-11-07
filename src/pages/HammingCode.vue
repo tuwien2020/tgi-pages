@@ -167,7 +167,7 @@ class HammingCode {
       this.code = this.correctCodeWord();
       this.data = this.getDataBitsFromCodeWord();
     } else {
-      this.code = this.correctCodeWord();
+      this.code = this.placeParityBitsInCodeWord();
       this.data = data;
     }
   }
@@ -227,7 +227,7 @@ class HammingCode {
     return code;
   }
 
-  private correctCodeWord() : string {
+  private placeParityBitsInCodeWord() : string {
     let correctedCode = "";
     let parityBitIndex = 0;
     for (let i = 1; i <= this.numCodeBits; i++) {
@@ -251,6 +251,10 @@ class HammingCode {
       }
     }
     return error;
+  }
+
+  private correctCodeWord() {
+    return replaceCharAt(this.code, this.errorBit-1, (flipBinaryString(this.code[this.errorBit-1])));
   }
 
   private getDataBitsFromCodeWord() : string { 
@@ -324,7 +328,7 @@ class CodeBitCalculation {
 }
 
 function binaryCharacterToNumber(character: string) : number {
-  if (character.length > 1 || character.length == 0) return -1;
+  if (character.length != 1) return -1;
   return character.charCodeAt(0) - 48; // '0' is ascii 48
 }
 
@@ -335,4 +339,20 @@ function toSizedBinaryString(number: number, length: number): string {
 function isPowerOfTwo(n: number): boolean {
   return (n & (n - 1)) == 0;
 }
+
+function flipBinaryString(character: string) : string {
+  if (character.length != 1) return character;
+  if (character[0] == "0") {
+    return "1";
+  } else if (character[0] == "1") {
+    return "0";
+  }
+  return character; 
+}
+
+function replaceCharAt(value: string, index: number, replacement: string) : string {
+  if (replacement.length != 1) return value; 
+  return value.substring(0, index) + replacement + value.substring(index + replacement.length);
+}
+
 </script>
