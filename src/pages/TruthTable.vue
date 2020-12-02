@@ -284,7 +284,7 @@ export default defineComponent({
 
     const tableHeaders = shallowRef<MathJson[]>([]);
     const tableRows = ref<boolean[][]>([[]]);
-    const flipBits = ref<boolean>(false);
+    const flipBits = ref<boolean>(false); // TODO: Make urlRef
     const tableThickBorderIndex = ref(0);
 
     function createTable(value: MathJson | undefined) {

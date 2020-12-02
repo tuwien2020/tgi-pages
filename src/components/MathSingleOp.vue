@@ -36,7 +36,6 @@ export default defineComponent({
   },
   setup(props, context) {
     const mathoutput = ref<HTMLElement>();
-    // TODO: Allow numbers with a sign as input
 
     const result = computed(() => {
       if (props.operator == "add") {
@@ -46,7 +45,9 @@ export default defineComponent({
       } else if (props.operator == "multiply") {
         return props.valueA.multiply(props.valueB);
       } else if (props.operator == "divide") {
-        //return props.valueA.divide(props.valueB);
+        // TODO: Make the number of decimal places configureable
+        let division = props.valueA.divide(props.valueB, 5);
+        return division.result;
       } else {
         return new BinaryNumber(false, [], 0);
       }
@@ -212,6 +213,13 @@ export default defineComponent({
         )}`;
         output = `\\def\\arraystretch{0.1}\n\\begin{alignedat}{1}\n${output}\n\\end{alignedat}`;
         return output;
+      } else if (props.operator == "divide") {
+        return (
+          (result.value?.isNegative ? "-" : "") +
+          printBitArray(result.value?.getValueBeforeDecimal()) +
+          "." +
+          printBitArray(result.value?.getValueAfterDecimal())
+        );
       }
 
       return "";

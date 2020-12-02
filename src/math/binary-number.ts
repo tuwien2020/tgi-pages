@@ -201,6 +201,24 @@ export class BinaryNumber {
     }
   }
 
+  trimZerosBeforeDecimal() {
+    // Removes all zeros before the decimal
+    let skipZeros = 0;
+    for (let i = 0; i < this.value.length - this.decimalPoint; i++) {
+      const bit = this.value[skipZeros];
+      if (bit) {
+        break;
+      } else {
+        skipZeros++;
+      }
+    }
+    return new BinaryNumber(
+      this.isNegative,
+      this.value.slice(skipZeros),
+      this.decimalPoint
+    );
+  }
+
   add(other: BinaryNumber): BinaryNumber {
     let a = this as BinaryNumber;
     let b = other;
@@ -257,8 +275,6 @@ export class BinaryNumber {
   multiply(other: BinaryNumber): BinaryNumber {
     if (other.value.length == 0) return new BinaryNumber(false, [false], 0);
 
-    let resultBits = new BinaryNumber(false, this.value, 0);
-    let thisValueBits = new BinaryNumber(false, this.value, 0);
     // Skip the zeros at the beginning of number b
     let skipZeros = 0;
     for (let i = 0; i < other.value.length; i++) {
@@ -270,6 +286,8 @@ export class BinaryNumber {
       }
     }
 
+    let resultBits = new BinaryNumber(false, this.value, 0);
+    let thisValueBits = new BinaryNumber(false, this.value, 0);
     // Multiply the remaining numbers
     for (let i = 1 + skipZeros; i < other.value.length; i++) {
       const bitB = other.value[i];
@@ -308,6 +326,55 @@ export class BinaryNumber {
     }
   }
 
+  divide(
+    other: BinaryNumber,
+    placesAfterDecimal: number
+  ): { result: BinaryNumber; remainder?: boolean[] } {
+    if (other.value.length == 0) throw new Error("Division by zero");
+
+    // Shift the decimal points away
+    const maxDecimal = Math.max(this.decimalPoint, other.decimalPoint);
+    const a = this.setSign(false).multiplyByPowerOfTwo(maxDecimal);
+    let b = other
+      .setSign(false)
+      .multiplyByPowerOfTwo(maxDecimal)
+      .trimZerosBeforeDecimal();
+
+    if (b.value.length <= 0) {
+      throw new Error("Division by zero");
+    }
+
+    // Do the division like https://en.wikipedia.org/wiki/Division_algorithm#Integer_division_(unsigned)_with_remainder
+    let index = 0;
+    const maxLength = a.value.length + placesAfterDecimal;
+    const resultBits = new Array<boolean>(maxLength).fill(false);
+    let remainder = new BinaryNumber(false, [], 0);
+
+    while (!a.isZero() && index < maxLength) {
+      // Pull down the next bit
+      const newBit = index < a.value.length ? a.value[index] : false;
+      remainder = new BinaryNumber(false, remainder.value.concat(newBit), 0);
+
+      // If we can subtract, do so
+      if (remainder.compareTo(b) >= 0) {
+        remainder = remainder.subtract(b);
+        resultBits[index] = true;
+      } else {
+        resultBits[index] = false;
+      }
+      index += 1;
+    }
+
+    return {
+      result: new BinaryNumber(
+        xor(this.isNegative, other.isNegative),
+        resultBits,
+        placesAfterDecimal
+      ),
+      remainder: a.value.slice(),
+    };
+  }
+
   compareTo(other: BinaryNumber): number {
     // a < b gets rewritten as a.compareTo(b) < 0
     if (this.isNegative == other.isNegative) {
@@ -325,6 +392,10 @@ export class BinaryNumber {
     } else {
       return this.isNegative ? -1 : 1;
     }
+  }
+
+  isZero(): boolean {
+    return this.value.every((v) => !v);
   }
 
   setSign(isNegative: boolean): BinaryNumber {

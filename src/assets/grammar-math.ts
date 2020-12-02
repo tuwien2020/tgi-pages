@@ -129,7 +129,7 @@ const mathMulDiv: bnb.Parser<MathExpression> = mathUnaryPrefix.chain((expr) => {
       operator({ operator: "divide" as const, match: /\// })
     )
     .and(mathUnaryPrefix)
-    .many0()
+    .repeat(0)
     .map((pairs) => {
       return pairs.reduce((accum, [operator, expr]) => {
         return new BinaryOperator(operator, accum, expr);
@@ -145,7 +145,7 @@ const mathAddSub: bnb.Parser<MathExpression> = mathMulDiv.chain((expr) => {
       operator({ operator: "subtract", match: /-/ })
     )
     .and(mathMulDiv)
-    .many0()
+    .repeat(0)
     .map((pairs) => {
       return pairs.reduce((accum, [operator, expr]) => {
         return new BinaryOperator(operator, accum, expr);
@@ -156,7 +156,7 @@ const mathAddSub: bnb.Parser<MathExpression> = mathMulDiv.chain((expr) => {
 const mathEqualsOp: bnb.Parser<MathExpression> = mathAddSub.chain((expr) => {
   return operator({ operator: "equals", match: /equal(s)?|==?|<==?>|≡/i })
     .and(mathAddSub)
-    .many0()
+    .repeat(0)
     .map((pairs) => {
       return pairs.reduce((accum, [operator, expr]) => {
         return new BinaryOperator(operator, accum, expr);
