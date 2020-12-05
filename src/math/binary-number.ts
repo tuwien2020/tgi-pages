@@ -329,19 +329,20 @@ export class BinaryNumber {
   divide(
     other: BinaryNumber,
     placesAfterDecimal: number
-  ): { result: BinaryNumber; remainder?: boolean[] } {
-    if (other.value.length == 0) throw new Error("Division by zero");
-
+  ): { result: BinaryNumber; remainder?: boolean[]; divisionByZero: boolean } {
     // Shift the decimal points away
     const maxDecimal = Math.max(this.decimalPoint, other.decimalPoint);
     const a = this.setSign(false).multiplyByPowerOfTwo(maxDecimal);
-    let b = other
+    const b = other
       .setSign(false)
       .multiplyByPowerOfTwo(maxDecimal)
       .trimZerosBeforeDecimal();
 
     if (b.value.length <= 0) {
-      throw new Error("Division by zero");
+      return {
+        result: new BinaryNumber(false, [], 0),
+        divisionByZero: true,
+      };
     }
 
     // Do the division like https://en.wikipedia.org/wiki/Division_algorithm#Integer_division_(unsigned)_with_remainder
@@ -372,6 +373,7 @@ export class BinaryNumber {
         placesAfterDecimal
       ),
       remainder: a.value.slice(),
+      divisionByZero: false,
     };
   }
 

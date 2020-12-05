@@ -62,6 +62,8 @@ export function useMathPrinting() {
     } else if (typeof ast === "string") {
       return ast.replace(/^([^_]+)_([^]+)$/, "$1_{$2}");
     } else if (ast instanceof BinaryNumber) {
+      const sign = ast.isNegative ? "\\texttt{-}" : "";
+
       const beforeDecimal = ast
         .getValueBeforeDecimal()
         .map((v) => (v ? "1" : "0"))
@@ -72,13 +74,17 @@ export function useMathPrinting() {
         .join("");
 
       if (afterDecimal !== undefined && afterDecimal.length > 0) {
-        return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
-          "\\,"
-        )}.${splitIntoChunks(afterDecimal ?? "", 4).join("\\,")}}`;
+        return `${sign}\\mathtt{${splitIntoChunks(
+          beforeDecimal ?? "",
+          4,
+          true
+        ).join("\\,")}.${splitIntoChunks(afterDecimal ?? "", 4).join("\\,")}}`;
       } else {
-        return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
-          "\\,"
-        )}}`;
+        return `${sign}\\mathtt{${splitIntoChunks(
+          beforeDecimal ?? "",
+          4,
+          true
+        ).join("\\,")}}`;
       }
     } else if (ast.kind == "number") {
       if (ast.base === 2) {
