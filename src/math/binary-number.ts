@@ -372,7 +372,7 @@ export class BinaryNumber {
         resultBits,
         placesAfterDecimal
       ),
-      remainder: a.value.slice(),
+      remainder: remainder.value.slice(),
       divisionByZero: false,
     };
   }

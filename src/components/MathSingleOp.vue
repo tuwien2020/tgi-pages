@@ -15,7 +15,20 @@ import {
 } from "vue";
 import { BinaryNumber } from "../math/binary-number";
 import { MathJson, MathJsonMathOperator } from "../math/MathJson";
+import { useMathPrinting } from "../math/math-printing";
 import Katex from "katex";
+
+function useMathWithStepsPrinting() {
+  const mathPrinting = useMathPrinting();
+
+  function bitArray(value: readonly boolean[] | undefined) {
+    return (value ?? []).map((v) => (v ? "1" : "0")).join("");
+  }
+
+  function pad(value: number) {
+    return `\\phantom{\\mathtt{${"0".repeat(value)}}}`;
+  }
+}
 
 export default defineComponent({
   components: {},
@@ -37,29 +50,22 @@ export default defineComponent({
   setup(props, context) {
     const mathoutput = ref<HTMLElement>();
     const placesAfterDecimal = 7;
-
-    const result = computed(() => {
-      if (props.operator == "add") {
-        return props.valueA.add(props.valueB);
-      } else if (props.operator == "subtract") {
-        return props.valueA.subtract(props.valueB);
-      } else if (props.operator == "multiply") {
-        return props.valueA.multiply(props.valueB);
-      } else if (props.operator == "divide") {
-        // TODO: Make the number of decimal places configureable
-        let division = props.valueA.divide(props.valueB, placesAfterDecimal);
-        return division.result;
-      } else {
-        return new BinaryNumber(false, [], 0);
-      }
-    });
+    const mathPrinting = useMathPrinting();
 
     function printBitArray(value: readonly boolean[] | undefined) {
       return (value ?? []).map((v) => (v ? "1" : "0")).join("");
     }
 
     const output = computed(() => {
+      const phantomPadding = (value: number) =>
+        `\\phantom{\\mathtt{${"0".repeat(value)}}}`;
+
       if (props.operator == "add" || props.operator == "subtract") {
+        const result =
+          props.operator == "add"
+            ? props.valueA.add(props.valueB)
+            : props.valueA.subtract(props.valueB);
+
         let valueA = props.valueA;
         let valueB = props.valueB;
         let output = "";
@@ -87,7 +93,7 @@ export default defineComponent({
             valueA.getValueBeforeDecimal(),
             valueA.getValueAfterDecimal()
           );
-          if (result.value?.isNegative) {
+          if (result.isNegative) {
             // Slap a minus sign around the operation
             firstNumber =
               `\\smash{\\raisebox{-0.75em}{$-\\Bigg($}}` +
@@ -117,7 +123,7 @@ export default defineComponent({
             valueA.getValueBeforeDecimal(),
             valueA.getValueAfterDecimal()
           );
-          if (result.value?.isNegative) {
+          if (result.isNegative) {
             // Slap a minus sign around the operation
             firstNumber =
               `\\smash{\\raisebox{-0.75em}{$-\\Bigg($}}` +
@@ -135,50 +141,34 @@ export default defineComponent({
         }
 
         output += `\\\\\n\\hline ${formatLatexNumber(
-          result.value?.isNegative ? "-" : "",
-          result.value?.getValueBeforeDecimal(),
-          result.value?.getValueAfterDecimal()
+          result.isNegative ? "-" : "",
+          result.getValueBeforeDecimal(),
+          result.getValueAfterDecimal()
         )}`;
 
         output = `\\begin{alignedat}{3}\n${output}\n\\end{alignedat}`;
         return output;
       } else if (props.operator == "multiply") {
+        const result = props.valueA.multiply(props.valueB);
         let valueA = props.valueA;
         let valueB = props.valueB;
         let output = "";
 
         const lastLineLength = valueA.value.length + valueB.value.length - 1;
-        const resultLength = result.value?.value?.length ?? 0;
+        const resultLength = result.value.length ?? 0;
 
         const requiredPadding =
           resultLength > lastLineLength ? resultLength - lastLineLength : 0;
 
-        const formatLatexNumber = (
-          op: string,
-          beforeDecimal: boolean[],
-          afterDecimal: boolean[]
-        ) =>
-          `\\texttt{\\mathllap{${op}}} \\mathtt{${printBitArray(
-            beforeDecimal
-          )} ${
-            afterDecimal.length > 0
-              ? "\\mathclap{\\raisebox{-0.1em}{.}}" +
-                printBitArray(afterDecimal)
-              : ""
-          }}`;
-
-        const phantomPadding = (value: number) =>
-          `\\phantom{\\mathtt{${"0".repeat(value)}}}`;
-
-        output += `& ${phantomPadding(requiredPadding)} ${formatLatexNumber(
-          valueA.isNegative ? "-" : "",
-          valueA.getValueBeforeDecimal(),
-          valueA.getValueAfterDecimal()
-        )} \\times ${formatLatexNumber(
-          valueB.isNegative ? "-" : "",
-          valueB.getValueBeforeDecimal(),
-          valueB.getValueAfterDecimal()
-        )} \\\\\n`;
+        output += `& ${phantomPadding(
+          requiredPadding
+        )} ${mathPrinting.binaryNumberToLatex(valueA, {
+          zeroWidthDecimal: true,
+          groupZeros: false,
+        })} \\times ${mathPrinting.binaryNumberToLatex(valueB, {
+          zeroWidthDecimal: true,
+          groupZeros: false,
+        })} \\\\\n`;
 
         output += `\\hline \\\\\n`;
 
@@ -209,51 +199,33 @@ export default defineComponent({
         output += `\\hline \\\\\n`;
 
         // Result
-
         output += `&${phantomPadding(
           lastLineLength - resultLength + requiredPadding
-        )} ${formatLatexNumber(
-          result.value?.isNegative ? "-" : "",
-          result.value?.getValueBeforeDecimal(),
-          result.value?.getValueAfterDecimal()
-        )}`;
+        )} ${mathPrinting.binaryNumberToLatex(result, {
+          zeroWidthDecimal: true,
+          groupZeros: false,
+        })}`;
         output = `\\def\\arraystretch{0.1}\n\\begin{alignedat}{1}\n${output}\n\\end{alignedat}`;
         return output;
       } else if (props.operator == "divide") {
-        const formatLatexNumber = (
-          op: string,
-          beforeDecimal: boolean[],
-          afterDecimal: boolean[]
-        ) =>
-          `\\texttt{\\mathllap{${op}}} \\mathtt{${printBitArray(
-            beforeDecimal
-          )} ${
-            afterDecimal.length > 0
-              ? "\\mathclap{\\raisebox{-0.1em}{.}}" +
-                printBitArray(afterDecimal)
-              : ""
-          }}`;
-
-        const phantomPadding = (value: number) =>
-          `\\phantom{\\mathtt{${"0".repeat(value)}}}`;
-
         // TODO: Catch division by zero
         const result = props.valueA.divide(props.valueB, placesAfterDecimal);
         let valueA = props.valueA;
         let valueB = props.valueB;
         let output = "";
 
-        output += `&${phantomPadding(1)} ${formatLatexNumber(
-          valueA.isNegative ? "-" : "",
-          valueA.getValueBeforeDecimal(),
-          valueA.getValueAfterDecimal()
-        )}  ${phantomPadding(2)} \\mathllap{\\div} ${phantomPadding(
+        output += `&${phantomPadding(1)} ${mathPrinting.binaryNumberToLatex(
+          valueA,
+          {
+            zeroWidthDecimal: true,
+            groupZeros: false,
+          }
+        )} ${phantomPadding(2)} \\mathllap{\\div} ${phantomPadding(
           1
-        )} ${formatLatexNumber(
-          valueB.isNegative ? "-" : "",
-          valueB.getValueBeforeDecimal(),
-          valueB.getValueAfterDecimal()
-        )} ${phantomPadding(2)} \\mathllap{=} ${phantomPadding(1)}`;
+        )} ${mathPrinting.binaryNumberToLatex(valueB, {
+          zeroWidthDecimal: true,
+          groupZeros: false,
+        })} ${phantomPadding(2)} \\mathllap{=} ${phantomPadding(1)}`;
 
         // Binary division
         // Shift the decimal points away
@@ -267,11 +239,10 @@ export default defineComponent({
         if (b.value.length <= 0) {
           output += `\\text{Division by zero}`;
         } else {
-          output += ` ${formatLatexNumber(
-            result.result.isNegative ? "-" : "",
-            result.result.getValueBeforeDecimal(),
-            result.result.getValueAfterDecimal()
-          )}\\\\\n`;
+          output += ` ${mathPrinting.binaryNumberToLatex(result.result, {
+            zeroWidthDecimal: true,
+            groupZeros: false,
+          })}\\\\\n`;
 
           // Copy of binary-number.ts
           let index = 0;
@@ -335,11 +306,17 @@ export default defineComponent({
             index += 1;
           }
 
-          let remainderToPrint = result.remainder ?? [];
+          let remainderToPrint = new BinaryNumber(
+            false,
+            result.remainder ?? [],
+            0
+          )
+            .trimZerosBeforeDecimal()
+            .extend(1);
 
           output += printPadded(
-            printBitArray(remainderToPrint) + `\\mathrlap{R}`,
-            remainderToPrint.length,
+            printBitArray(remainderToPrint.value) + `\\mathrlap{R}`,
+            remainderToPrint.value.length,
             1 + remainder.value.length
           );
         }
