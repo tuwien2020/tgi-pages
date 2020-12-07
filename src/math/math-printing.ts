@@ -51,7 +51,7 @@ export function useMathPrinting() {
         if (needsBrackets(ast[2])) {
           right = `(${right})`;
         }
-        return `${left} ${op} ${right}`; // TODO:
+        return `${left} ${op} ${right}`;
       } else {
         throw new Error("Not well formed AST tree " + ast);
       }

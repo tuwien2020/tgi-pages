@@ -163,7 +163,7 @@ function useMathWithStepsPrinting() {
       output = `\\def\\arraystretch{0.1}\n\\begin{alignedat}{1}\n${output}\n\\end{alignedat}`;
       return output;
     } else if (operator == "divide") {
-      // TODO: Catch division by zero
+      // TODO: Stop after finding a value = 0
       const result = valueA.divide(valueB, placesAfterDecimal);
       let output = "";
 
