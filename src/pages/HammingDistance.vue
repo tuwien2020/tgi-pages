@@ -115,15 +115,15 @@ class CodewordsData {
       }
     }
 
-    let smollestDistance = distances[0];
+    let smallestDistance = distances[0];
     for (let i = 1; i < distances.length; i++) {
-      if (smollestDistance > distances[i]) {
-        smollestDistance = distances[i];
+      if (smallestDistance > distances[i]) {
+        smallestDistance = distances[i];
       }
     }
 
     return {
-      hammingDistance: smollestDistance,
+      hammingDistance: smallestDistance,
       distanceMatrix: this.hammingDistanceMatrix(distances),
     };
   }

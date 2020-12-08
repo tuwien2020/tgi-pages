@@ -9,6 +9,8 @@ import TruthTable from "./pages/TruthTable.vue";
 import HammingDistance from "./pages/HammingDistance.vue";
 import BinaryCalculator from "./pages/BinaryCalculator.vue";
 import BinaryCoding from "./pages/BinaryCoding.vue";
+import IfThenElse from "./pages/IfThenElse.vue";
+import KarnaughVeitchDiagram from "./pages/KarnaughVeitchDiagram.vue";
 import { name, version } from "./../package.json";
 
 /** @type {import("vue-router").RouteRecordRaw[]} */
@@ -19,6 +21,8 @@ const routes = [
   { path: "/hamming-distance", component: HammingDistance },
   { path: "/binary-calculator", component: BinaryCalculator },
   { path: "/binary-coding", component: BinaryCoding },
+  { path: "/ifthenelse", component: IfThenElse },
+  { path: "/kvdiagramm", component: KarnaughVeitchDiagram },
 ];
 
 if (import.meta.env.PROD) {
