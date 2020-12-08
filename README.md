@@ -68,6 +68,7 @@ TGI Test
   - Full Adder
   - 1 zu 2^n Kodierung und Dichte Kodierung
   - Multiplexer, Demultiplexer
+  - **Gatterschaltung Brute Force**
 - Verlauf der Signale (Diagramm)
 - Latches und Flipflops
   - RS Latch
