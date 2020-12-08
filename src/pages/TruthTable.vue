@@ -15,6 +15,7 @@
   <table class="truth-table">
     <thead>
       <tr>
+        <!-- TODO: Allow reordering? -->
         <th
           v-for="(item, index) in tableHeaders"
           :key="index"

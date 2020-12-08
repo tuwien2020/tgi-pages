@@ -12,7 +12,7 @@
     <label><input type="checkbox" v-model="flipBits" /> Flip the bits </label>
   </div>
 
-  <div id="kv-diagram"></div>
+  <div ref="kvDiagramElement"></div>
 
   <br />
   <br />
@@ -96,6 +96,7 @@ import {
   extend as SVGextend,
   Element as SVGElement,
   Text as SVGText,
+  Svg,
 } from "@svgdotjs/svg.js";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
@@ -104,6 +105,10 @@ import {
   KVBlock,
   findBlocksInKVDiagram,
 } from "./../assets/kv-diagram";
+
+const width = 240;
+const height = 240;
+const cellSize = width / 4;
 
 function rainbow(numOfSteps: number, step: number) {
   // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
@@ -156,6 +161,71 @@ function rainbow(numOfSteps: number, step: number) {
   return c;
 }
 
+function drawKvDiagram(value: MathJson, kvDiagram: Svg) {
+  console.log(value);
+  kvDiagram.clear();
+  //logicalMath.evaluate();
+
+  const testDiagram = new KVDiagram([
+    "0",
+    "1",
+    "1",
+    "0",
+    "1",
+    "1",
+    "1",
+    "1",
+    "0",
+    "1",
+    "1",
+    "1",
+    "0",
+    "0",
+    "1",
+    "0",
+  ]);
+
+  let blocks = findBlocksInKVDiagram(testDiagram);
+
+  let colors: string[] = [];
+  for (let i = 0; i < blocks.length; i++) {
+    colors.push(rainbow(blocks.length, i));
+  }
+  console.log(blocks);
+
+  const textsInGrid = new Array<SVGText>(16);
+
+  for (let row = 0; row < 4; row++) {
+    for (let col = 0; col < 4; col++) {
+      let updateText = () =>
+        textsInGrid[row * 4 + col].text(testDiagram.values[col * 4 + row]);
+
+      let cell = kvDiagram
+        .rect(cellSize, cellSize)
+        .move(cellSize * row, cellSize * col)
+        .fill("#ffffff")
+        .stroke("#000000");
+      cell.click(updateText);
+
+      for (let i = 0; i < blocks.length; i++) {
+        if (blocks[i].positions.includes(col * 4 + row)) {
+          let block = kvDiagram
+            .rect(cellSize, cellSize)
+            .move(cellSize * row, cellSize * col)
+            .fill(colors[i] + "99");
+        }
+      }
+
+      textsInGrid[row * 4 + col] = kvDiagram
+        .text(testDiagram.values[col * 4 + row])
+        .font({ size: 30, family: "Consolas" })
+        .center(cellSize * row + cellSize / 2, cellSize * col + cellSize / 2)
+        .size(100)
+        .click(updateText);
+    }
+  }
+}
+
 export default defineComponent({
   components: { MathInput, MathOutput },
   setup() {
@@ -174,84 +244,33 @@ export default defineComponent({
     const flipBits = ref<boolean>(false);
     const tableThickBorderIndex = ref(0);
 
-    // TODO: Stefan, do your thing
+    const kvDiagramElement = ref<HTMLElement>();
+    const kvDiagram = ref<Svg>();
+
+    // TODO: Maybe there is a far more elegant way of doing this?
     onMounted(() => {
-      const width = 240,
-        height = 240;
-      const cellSize = width / 4;
+      watch(
+        kvDiagramElement,
+        (value, oldValue) => {
+          oldValue?.remove();
+          if (value) {
+            kvDiagram.value = SVG().addTo(value).size(width, height);
+            kvDiagram.value.viewbox(0, 0, width, height);
 
-      const kvDiagram = SVG().addTo("#kv-diagram").size(width, height);
-      kvDiagram.viewbox(0, 0, width, height);
-
-      watch(logicalMathJson, (value) => {
-        console.log(value);
-        kvDiagram.clear();
-        //logicalMath.evaluate();
-
-        const testDiagram = new KVDiagram([
-          "0",
-          "1",
-          "1",
-          "0",
-          "1",
-          "1",
-          "1",
-          "1",
-          "0",
-          "1",
-          "1",
-          "1",
-          "0",
-          "0",
-          "1",
-          "0",
-        ]);
-
-        let blocks = findBlocksInKVDiagram(testDiagram);
-
-        let colors: string[] = [];
-        for (let i = 0; i < blocks.length; i++) {
-          colors.push(rainbow(blocks.length, i));
-        }
-        console.log(blocks);
-
-        const textsInGrid = new Array<SVGText>(16);
-
-        for (let row = 0; row < 4; row++) {
-          for (let col = 0; col < 4; col++) {
-            let updateText = () =>
-              textsInGrid[row * 4 + col].text(
-                testDiagram.values[col * 4 + row]
-              );
-
-            let cell = kvDiagram
-              .rect(cellSize, cellSize)
-              .move(cellSize * row, cellSize * col)
-              .fill("#ffffff")
-              .stroke("#000000");
-            cell.click(updateText);
-
-            for (let i = 0; i < blocks.length; i++) {
-              if (blocks[i].positions.includes(col * 4 + row)) {
-                let block = kvDiagram
-                  .rect(cellSize, cellSize)
-                  .move(cellSize * row, cellSize * col)
-                  .fill(colors[i] + "99");
-              }
-            }
-
-            textsInGrid[row * 4 + col] = kvDiagram
-              .text(testDiagram.values[col * 4 + row])
-              .font({ size: 30, family: "Consolas" })
-              .center(
-                cellSize * row + cellSize / 2,
-                cellSize * col + cellSize / 2
-              )
-              .size(100)
-              .click(updateText);
+            if (logicalMathJson.value)
+              drawKvDiagram(logicalMathJson.value, kvDiagram.value);
+          } else {
+            kvDiagram.value = undefined;
           }
+        },
+        {
+          immediate: true,
         }
-      });
+      );
+    });
+
+    watch(logicalMathJson, (value) => {
+      if (value && kvDiagram.value) drawKvDiagram(value, kvDiagram.value);
     });
 
     watch(flipBits, (value) => {});
@@ -264,6 +283,7 @@ export default defineComponent({
       tableRows,
       flipBits,
       tableThickBorderIndex,
+      kvDiagramElement,
     };
   },
 });

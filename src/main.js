@@ -22,7 +22,7 @@ const routes = [
   { path: "/binary-calculator", component: BinaryCalculator },
   { path: "/binary-coding", component: BinaryCoding },
   { path: "/ifthenelse", component: IfThenElse },
-  { path: "/kv-diagramm", component: KarnaughVeitchDiagram },
+  { path: "/kv-diagram", component: KarnaughVeitchDiagram },
 ];
 
 if (import.meta.env.PROD) {
