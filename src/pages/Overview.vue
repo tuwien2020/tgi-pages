@@ -157,6 +157,11 @@
     <li><router-link to="/truth-table">Wahrheitstabelle</router-link></li>
   </ul>
 
+  <h3>KV Diagramme</h3>
+  <ul>
+    <li><router-link to="/ifthenelse">If Then Else</router-link></li>
+  </ul>
+
   <h3>Schaltkreise</h3>
   <ul>
     <li>
@@ -178,6 +183,9 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
+
+// import * as cat from "./../assets/grammar-ite";
+// console.log(cat);
 
 export default defineComponent({
   components: {},

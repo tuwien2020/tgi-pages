@@ -7,6 +7,7 @@
     "deploy": "vite build --base=/tgi-pages/ && node utils/publish.js"
   },
   "dependencies": {
+    "@svgdotjs/svg.js": "^3.0.16",
     "bread-n-butter": "^0.4.1",
     "katex": "^0.12.0",
     "vue": "^3.0.2",
