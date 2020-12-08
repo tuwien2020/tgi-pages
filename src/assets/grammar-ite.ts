@@ -1,10 +1,10 @@
 // ITE(b, ITE(!c, ITE(!b, c, !c), ITE(!c, 1, 0)), ITE(!c, 1, !a))
 
-export class VariableLiteral {
+class VariableLiteral {
   constructor(public value: string, public isNegated: boolean) {}
 }
 
-export class IteNode {
+class IteNode {
   constructor(public children: any[]) {}
 }
 

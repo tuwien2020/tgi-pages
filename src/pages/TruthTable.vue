@@ -171,36 +171,34 @@ function useLogicalMath() {
     return getters;
   }
 
-  function extractOperations(ast: MathJson): MathJson[] {
-    const operations: MathJson[] = [];
-
-    // TODO: Use this function
-    function isPrimitive(ast: MathJson) {
-      if (Array.isArray(ast)) {
-        if (ast.length >= 3) {
+  function isPrimitive(ast: MathJson) {
+    if (Array.isArray(ast)) {
+      if (ast.length >= 3) {
+        return false;
+      } else if (ast.length == 2) {
+        if (!isPrimitive(ast[1])) {
           return false;
-        } else if (ast.length == 2) {
-          if (!isPrimitive(ast[1])) {
-            return false;
-          } else {
-            return true;
-          }
         } else {
           return true;
         }
       } else {
         return true;
       }
+    } else {
+      return true;
     }
+  }
 
-    // TODO: Don't output `!c` when the input is `(not (a and b)) or (a xor not c) => 0`
+  function extractOperations(ast: MathJson): MathJson[] {
+    const operations: MathJson[] = [];
+
     function extractOperationsRecursive(ast: MathJson) {
       if (Array.isArray(ast)) {
         const [functionName, ...args] = ast;
 
         for (let i = 0; i < args.length; i++) {
           extractOperationsRecursive(args[i]);
-          if (ast.length === 3 && Array.isArray(args[i])) {
+          if (!isPrimitive(args[i])) {
             operations.push(args[i]);
           }
         }
@@ -284,7 +282,7 @@ export default defineComponent({
 
     const tableHeaders = shallowRef<MathJson[]>([]);
     const tableRows = ref<boolean[][]>([[]]);
-    const flipBits = ref<boolean>(false);
+    const flipBits = ref<boolean>(false); // TODO: Make urlRef
     const tableThickBorderIndex = ref(0);
 
     function createTable(value: MathJson | undefined) {

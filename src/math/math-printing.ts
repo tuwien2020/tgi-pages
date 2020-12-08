@@ -51,7 +51,7 @@ export function useMathPrinting() {
         if (needsBrackets(ast[2])) {
           right = `(${right})`;
         }
-        return `${left} ${op} ${right}`; // TODO:
+        return `${left} ${op} ${right}`;
       } else {
         throw new Error("Not well formed AST tree " + ast);
       }
@@ -62,24 +62,7 @@ export function useMathPrinting() {
     } else if (typeof ast === "string") {
       return ast.replace(/^([^_]+)_([^]+)$/, "$1_{$2}");
     } else if (ast instanceof BinaryNumber) {
-      const beforeDecimal = ast
-        .getValueBeforeDecimal()
-        .map((v) => (v ? "1" : "0"))
-        .join("");
-      const afterDecimal = ast
-        .getValueAfterDecimal()
-        .map((v) => (v ? "1" : "0"))
-        .join("");
-
-      if (afterDecimal !== undefined && afterDecimal.length > 0) {
-        return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
-          "\\,"
-        )}.${splitIntoChunks(afterDecimal ?? "", 4).join("\\,")}}`;
-      } else {
-        return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
-          "\\,"
-        )}}`;
-      }
+      return binaryNumberToLatex(ast);
     } else if (ast.kind == "number") {
       if (ast.base === 2) {
         const [beforeDecimal, afterDecimal] = ast.value.split(".");
@@ -121,6 +104,7 @@ export function useMathPrinting() {
     return chunks;
   }
 
+  // TODO: Pass formatting options?
   function mathToLatex(value: { mathJson?: MathJson; error?: string }): string {
     if (value.mathJson) {
       try {
@@ -150,7 +134,60 @@ export function useMathPrinting() {
     return "";
   }
 
+  function binaryNumberToLatex(
+    value: BinaryNumber,
+    options?: {
+      showSign?: "always" | "minus" | "never";
+      zeroWidthDecimal?: boolean;
+      groupZeros?: boolean;
+    }
+  ) {
+    let printOptions = {
+      showSign: "minus",
+      zeroWidthDecimal: false,
+      groupZeros: true,
+      ...options,
+    };
+
+    const sign =
+      printOptions.showSign === "never"
+        ? ""
+        : value.isNegative
+        ? "-"
+        : printOptions.showSign === "always"
+        ? "+"
+        : "";
+
+    let beforeDecimal = value
+      .getValueBeforeDecimal()
+      .map((v) => (v ? "1" : "0"))
+      .join("");
+
+    let afterDecimal = value
+      .getValueAfterDecimal()
+      .map((v) => (v ? "1" : "0"))
+      .join("");
+
+    if (printOptions.groupZeros) {
+      beforeDecimal = splitIntoChunks(beforeDecimal, 4, true).join("\\,");
+      afterDecimal = splitIntoChunks(afterDecimal, 4, false).join("\\,");
+    }
+
+    let output = `\\texttt{\\mathllap{${sign}}}` + `\\mathtt{${beforeDecimal}}`;
+
+    if (afterDecimal !== undefined && afterDecimal.length > 0) {
+      const decimalPoint = printOptions.zeroWidthDecimal
+        ? "\\mathclap{\\raisebox{-0.1em}{.}}"
+        : "\\mathtt{.}";
+
+      output += decimalPoint + `\\mathtt{${afterDecimal}}`;
+    }
+
+    return output;
+  }
+
   return {
     mathToLatex,
+    binaryNumberToLatex,
   };
 }

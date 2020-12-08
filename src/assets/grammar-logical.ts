@@ -69,6 +69,7 @@ const pVar = bnb
   .match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/)
   .map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
 
+// TODO: Reconsider allowing a single f as false
 const pBooleanFalse = bnb
   .match(/[Ff]([Aa][Ll][Ss]([Ee]|[Cc][Hh]))?|0/)
   .map((x) => new BooleanLiteral(false));
@@ -106,7 +107,7 @@ const logicalAndOps: bnb.Parser<LogicalExpression> = mathUnaryPrefix.chain(
         operator({ operator: "nand" as const, match: /nand|!&&?|↑/i })
       )
       .and(mathUnaryPrefix)
-      .many0()
+      .repeat(0)
       .map((pairs) => {
         return pairs.reduce((accum, [operator, expr]) => {
           return new BinaryOperator(operator, accum, expr);
@@ -124,7 +125,7 @@ const logicalOrOps: bnb.Parser<LogicalExpression> = logicalAndOps.chain(
         operator({ operator: "xor" as const, match: /xor|\^|⊕/i })
       )
       .and(logicalAndOps)
-      .many0()
+      .repeat(0)
       .map((pairs) => {
         return pairs.reduce((accum, [operator, expr]) => {
           return new BinaryOperator(operator, accum, expr);
@@ -137,7 +138,7 @@ const logicalImpliesOp: bnb.Parser<LogicalExpression> = logicalOrOps.chain(
   (expr) => {
     return operator({ operator: "implies", match: /impl(y|ies)|==?>|⇒/i })
       .and(logicalOrOps)
-      .many0()
+      .repeat(0)
       .map((pairs) => {
         return pairs.reduce((accum, [operator, expr]) => {
           return new BinaryOperator(operator, accum, expr);
@@ -150,7 +151,7 @@ const logicalEqualsOp: bnb.Parser<LogicalExpression> = logicalImpliesOp.chain(
   (expr) => {
     return operator({ operator: "equals", match: /equal(s)?|==?|<==?>|≡/i })
       .and(logicalImpliesOp)
-      .many0()
+      .repeat(0)
       .map((pairs) => {
         return pairs.reduce((accum, [operator, expr]) => {
           return new BinaryOperator(operator, accum, expr);

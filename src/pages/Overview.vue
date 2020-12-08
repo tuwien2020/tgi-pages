@@ -157,14 +157,12 @@
     <li><router-link to="/truth-table">Wahrheitstabelle</router-link></li>
   </ul>
 
-  <h3>KV Diagramme</h3>
-  <ul>
-    <li><router-link to="/ifthenelse">If Then Else</router-link></li>
-  </ul>
-
-  <h3>Schaltkreise</h3>
+  <h3>Schaltungen</h3>
   <ul>
     <li>
+      <a href="https://simulator.io/board" target="_blank"
+        >Digitalschaltungen Simulator</a
+      >
       <a href="http://falstad.com/circuit/circuitjs.html" target="_blank"
         >Schaltkreise</a
       >

@@ -58,3 +58,29 @@ TGI Test
 - Wahrheitstabelle (Bool'sche Algebra)
   - Fancy Truth Table
   - Truth Table with NAND, Implies, XOR
+- KV Diagramme
+  - ITE
+  - Konjunktive und Disjunktive Normalform
+  - Wahrheitstabelle
+- BDD
+- Gatterschaltung
+  - Gatter mit anderen ersetzen
+  - Full Adder
+  - 1 zu 2^n Kodierung und Dichte Kodierung
+  - Multiplexer, Demultiplexer
+- Verlauf der Signale (Diagramm)
+- Latches und Flipflops
+  - RS Latch
+  - D Latch, D Flipflop
+  - JK Flipflop
+  - Universalregister
+- Tabellenspeicher
+  - ROM
+  - RAM
+- Funktionsspeicher
+  - PLA und PAL
+- Automaten
+  - Moore
+  - Mealey
+  - Maximale Taktfrequenz
+- Micro16
