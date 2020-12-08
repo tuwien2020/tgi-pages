@@ -4,7 +4,7 @@
   <math-input
     type="logical"
     v-model="logicalUserInput"
-    :mathParser="parseLogical"
+    :mathParser="parse"
     @mathJson="(value) => (logicalMathJson = value)"
   ></math-input>
 
@@ -112,65 +112,17 @@ import {
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
-import { MathJson, MathJsonLogicalOperator } from "../math/MathJson";
+import { MathJson } from "../math/MathJson";
+import {
+  useBooleanExpressions,
+  useBooleanExpressionParsing,
+} from "../math/boolean-expression";
 import { useUrlRef } from "../url-ref";
-import { tryParse as tryParseAstLogical } from "./../assets/grammar-logical";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
 
-function useLogicalParsing() {
-  function toMathJsonRecursive(ast: any): MathJson {
-    if (ast.left) {
-      return [
-        ast.operator,
-        toMathJsonRecursive(ast.left),
-        toMathJsonRecursive(ast.right),
-      ];
-    } else if (ast.right && ast.operator) {
-      return [ast.operator, toMathJsonRecursive(ast.right)];
-    } else if (ast.right) {
-      return toMathJsonRecursive(ast.right);
-    } else {
-      return ast.value;
-    }
-  }
-
-  function parseLogical(
-    value: string
-  ): { mathJson?: MathJson; error?: string } {
-    // Doesn't have a AND before OR order of operations (yet)
-    try {
-      const parsed = tryParseAstLogical(value);
-      return { mathJson: toMathJsonRecursive(parsed) };
-    } catch (e) {
-      return { error: "" + e };
-    }
-  }
-
-  return {
-    parseLogical,
-  };
-}
-
 function useLogicalMath() {
-  function extractGetters(ast: MathJson) {
-    const getters = new Set<string>();
-
-    function extractGettersRecursive(ast: MathJson) {
-      if (Array.isArray(ast)) {
-        const [functionName, ...args] = ast;
-        for (let i = 0; i < args.length; i++) {
-          extractGettersRecursive(args[i]);
-        }
-      } else if (typeof ast === "string") {
-        getters.add(ast);
-      }
-    }
-    extractGettersRecursive(ast);
-
-    return getters;
-  }
-
+  const logicalExpression = useBooleanExpressions();
   function isPrimitive(ast: MathJson) {
     if (Array.isArray(ast)) {
       if (ast.length >= 3) {
@@ -211,59 +163,10 @@ function useLogicalMath() {
     return operations;
   }
 
-  const mathJsonOperatorMap = new Map<
-    MathJsonLogicalOperator,
-    (a: boolean, b: boolean) => boolean
-  >([
-    ["not", (a) => !a],
-    ["implies", (a, b) => !a || b],
-    ["and", (a, b) => a && b],
-    ["or", (a, b) => a || b],
-    ["xor", (a, b) => (a ? !b : b)],
-    ["nand", (a, b) => !(a && b)],
-    ["nor", (a, b) => !(a || b)],
-    ["equals", (a, b) => a == b],
-  ]);
-
-  function evaluateRecursive(
-    ast: MathJson,
-    getters: Map<string, boolean>
-  ): boolean {
-    if (Array.isArray(ast)) {
-      const op = mathJsonOperatorMap.get(ast[0] as MathJsonLogicalOperator);
-      if (!op) throw new Error("Unknown operation " + ast);
-
-      if (ast.length === 3) {
-        return op(
-          evaluateRecursive(ast[1], getters),
-          evaluateRecursive(ast[2], getters)
-        );
-      } else if (ast.length === 2) {
-        return op(evaluateRecursive(ast[1], getters), false);
-      } else {
-        throw new Error("Unable to evaluate " + ast);
-      }
-    } else if (ast === true) {
-      return true;
-    } else if (ast === false) {
-      return false;
-    } else if (typeof ast === "string") {
-      const result = getters.get(ast);
-      if (result === undefined) throw new Error("Unable to evaluate " + ast);
-      return result;
-    } else {
-      throw new Error("Unable to evaluate " + ast);
-    }
-  }
-
-  function evaluate(ast: MathJson, getters?: Map<string, boolean>): boolean {
-    return evaluateRecursive(ast, getters ?? new Map());
-  }
-
   return {
-    extractGetters,
+    extractGetters: logicalExpression.extractGetters,
     extractOperations,
-    evaluate,
+    evaluate: logicalExpression.evaluate,
   };
 }
 
@@ -274,7 +177,7 @@ export default defineComponent({
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
 
-    const { parseLogical } = useLogicalParsing();
+    const { parse } = useBooleanExpressionParsing();
     const logicalMath = useLogicalMath();
 
     const logicalUserInput = urlRef("input", "a and (b xor 1)");
@@ -339,7 +242,7 @@ export default defineComponent({
     });
 
     return {
-      parseLogical,
+      parse,
       logicalUserInput,
       logicalMathJson,
       tableHeaders,

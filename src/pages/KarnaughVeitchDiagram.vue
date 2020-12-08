@@ -4,7 +4,7 @@
   <math-input
     type="logical"
     v-model="logicalUserInput"
-    :mathParser="parseLogical"
+    :mathParser="parse"
     @mathJson="(value) => (logicalMathJson = value)"
   ></math-input>
 
@@ -13,37 +13,6 @@
   </div>
 
   <div id="kv-diagram"></div>
-
-
-  <!-- <table class="truth-table">
-    <thead>
-      <tr>
-        <th
-          v-for="(item, index) in tableHeaders"
-          :key="index"
-          :class="{
-            'right-thick-border': index === tableThickBorderIndex,
-          }"
-        >
-          <math-output :value="item"></math-output>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(row, index) in tableRows" :key="index" tabindex="0">
-        <td
-          v-for="(item, itemIndex) in row"
-          :key="itemIndex"
-          :class="{
-            'faded-text': item === false,
-            'right-thick-border': itemIndex === tableThickBorderIndex,
-          }"
-        >
-          {{ item === true ? 1 : item === false ? 0 : item }}
-        </td>
-      </tr>
-    </tbody>
-  </table> -->
 
   <br />
   <br />
@@ -116,15 +85,18 @@ import {
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
-import { MathJson, MathJsonLogicalOperator } from "../math/MathJson";
+import { MathJson } from "../math/MathJson";
 import { useUrlRef } from "../url-ref";
-import { tryParse as tryParseAstLogical } from "./../assets/grammar-logical";
+import {
+  useBooleanExpressions,
+  useBooleanExpressionParsing,
+} from "../math/boolean-expression";
 import {
   SVG,
   extend as SVGextend,
   Element as SVGElement,
+  Text as SVGText,
 } from "@svgdotjs/svg.js";
-
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
 import {
@@ -184,157 +156,6 @@ function rainbow(numOfSteps: number, step: number) {
   return c;
 }
 
-function useLogicalMath() {
-  function extractGetters(ast: MathJson) {
-    const getters = new Set<string>();
-
-    function extractGettersRecursive(ast: MathJson) {
-      if (Array.isArray(ast)) {
-        const [functionName, ...args] = ast;
-        for (let i = 0; i < args.length; i++) {
-          extractGettersRecursive(args[i]);
-        }
-      } else if (typeof ast === "string") {
-        getters.add(ast);
-      }
-    }
-    extractGettersRecursive(ast);
-
-    return getters;
-  }
-
-  function extractOperations(ast: MathJson): MathJson[] {
-    const operations: MathJson[] = [];
-
-    // TODO: Use this function
-    function isPrimitive(ast: MathJson) {
-      if (Array.isArray(ast)) {
-        if (ast.length >= 3) {
-          return false;
-        } else if (ast.length == 2) {
-          if (!isPrimitive(ast[1])) {
-            return false;
-          } else {
-            return true;
-          }
-        } else {
-          return true;
-        }
-      } else {
-        return true;
-      }
-    }
-
-    // TODO: Don't output `!c` when the input is `(not (a and b)) or (a xor not c) => 0`
-    function extractOperationsRecursive(ast: MathJson) {
-      if (Array.isArray(ast)) {
-        const [functionName, ...args] = ast;
-
-        for (let i = 0; i < args.length; i++) {
-          extractOperationsRecursive(args[i]);
-          if (ast.length === 3 && Array.isArray(args[i])) {
-            operations.push(args[i]);
-          }
-        }
-      }
-    }
-
-    extractOperationsRecursive(ast);
-    operations.push(ast);
-
-    return operations;
-  }
-
-  const mathJsonOperatorMap = new Map<
-    MathJsonLogicalOperator,
-    (a: boolean, b: boolean) => boolean
-  >([
-    ["not", (a) => !a],
-    ["implies", (a, b) => !a || b],
-    ["and", (a, b) => a && b],
-    ["or", (a, b) => a || b],
-    ["xor", (a, b) => (a ? !b : b)],
-    ["nand", (a, b) => !(a && b)],
-    ["nor", (a, b) => !(a || b)],
-    ["equals", (a, b) => a == b],
-  ]);
-
-  function evaluateRecursive(
-    ast: MathJson,
-    getters: Map<string, boolean>
-  ): boolean {
-    if (Array.isArray(ast)) {
-      const op = mathJsonOperatorMap.get(ast[0] as MathJsonLogicalOperator);
-      if (!op) throw new Error("Unknown operation " + ast);
-
-      if (ast.length === 3) {
-        return op(
-          evaluateRecursive(ast[1], getters),
-          evaluateRecursive(ast[2], getters)
-        );
-      } else if (ast.length === 2) {
-        return op(evaluateRecursive(ast[1], getters), false);
-      } else {
-        throw new Error("Unable to evaluate " + ast);
-      }
-    } else if (ast === true) {
-      return true;
-    } else if (ast === false) {
-      return false;
-    } else if (typeof ast === "string") {
-      const result = getters.get(ast);
-      if (result === undefined) throw new Error("Unable to evaluate " + ast);
-      return result;
-    } else {
-      throw new Error("Unable to evaluate " + ast);
-    }
-  }
-
-  function evaluate(ast: MathJson, getters?: Map<string, boolean>): boolean {
-    return evaluateRecursive(ast, getters ?? new Map());
-  }
-
-  return {
-    extractGetters,
-    extractOperations,
-    evaluate,
-  };
-}
-
-function useLogicalParsing() {
-  function toMathJsonRecursive(ast: any): MathJson {
-    if (ast.left) {
-      return [
-        ast.operator,
-        toMathJsonRecursive(ast.left),
-        toMathJsonRecursive(ast.right),
-      ];
-    } else if (ast.right && ast.operator) {
-      return [ast.operator, toMathJsonRecursive(ast.right)];
-    } else if (ast.right) {
-      return toMathJsonRecursive(ast.right);
-    } else {
-      return ast.value;
-    }
-  }
-
-  function parseLogical(
-    value: string
-  ): { mathJson?: MathJson; error?: string } {
-    // Doesn't have a AND before OR order of operations (yet)
-    try {
-      const parsed = tryParseAstLogical(value);
-      return { mathJson: toMathJsonRecursive(parsed) };
-    } catch (e) {
-      return { error: "" + e };
-    }
-  }
-
-  return {
-    parseLogical,
-  };
-}
-
 export default defineComponent({
   components: { MathInput, MathOutput },
   setup() {
@@ -342,8 +163,8 @@ export default defineComponent({
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
 
-    const { parseLogical } = useLogicalParsing();
-    const logicalMath = useLogicalMath();
+    const { parse } = useBooleanExpressionParsing();
+    const logicalMath = useBooleanExpressions();
 
     const logicalUserInput = urlRef("input", "a and (b xor 1)");
     const logicalMathJson = shallowRef<MathJson>();
@@ -353,85 +174,90 @@ export default defineComponent({
     const flipBits = ref<boolean>(false);
     const tableThickBorderIndex = ref(0);
 
-    const testDiagram = new KVDiagram([
-      "0",
-      "1",
-      "1",
-      "0",
-      "1",
-      "1",
-      "1",
-      "1",
-      "0",
-      "1",
-      "1",
-      "1",
-      "0",
-      "0",
-      "1",
-      "0",
-    ]);
-
-    let blocks = findBlocksInKVDiagram(testDiagram);
-
-    let colors: string[] = [];
-    for (let i = 0; i < blocks.length; i++) {
-      colors.push(rainbow(blocks.length, i));
-    }
-    console.log(blocks);
-
+    // TODO: Stefan, do your thing
     onMounted(() => {
       const width = 240,
         height = 240;
-      const kvDiagram = SVG().addTo("#kv-diagram").size(width, height);
-
-      kvDiagram.viewbox(0, 0, width, height);
       const cellSize = width / 4;
 
-      const textsInGrid = new Array(16);
+      const kvDiagram = SVG().addTo("#kv-diagram").size(width, height);
+      kvDiagram.viewbox(0, 0, width, height);
 
-      for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 4; col++) {
-          let updateText = () =>
-            textsInGrid[row * 4 + col].text(testDiagram.values[col * 4 + row]);
+      watch(logicalMathJson, (value) => {
+        console.log(value);
+        kvDiagram.clear();
+        //logicalMath.evaluate();
 
-          let cell = kvDiagram
-            .rect(cellSize, cellSize)
-            .move(cellSize * row, cellSize * col)
-            .fill("#ffffff")
-            .stroke("#000000");
-          cell.click(updateText);
+        const testDiagram = new KVDiagram([
+          "0",
+          "1",
+          "1",
+          "0",
+          "1",
+          "1",
+          "1",
+          "1",
+          "0",
+          "1",
+          "1",
+          "1",
+          "0",
+          "0",
+          "1",
+          "0",
+        ]);
 
-          for (let i = 0; i < blocks.length; i++) {
-            if (blocks[i].positions.includes(col * 4 + row)) {
-              let block = kvDiagram
-                .rect(cellSize, cellSize)
-                .move(cellSize * row, cellSize * col)
-                .fill(colors[i] + "99");
-            }
-          }
+        let blocks = findBlocksInKVDiagram(testDiagram);
 
-          textsInGrid[row * 4 + col] = kvDiagram
-            .text(testDiagram.values[col * 4 + row])
-            .font({ size: 30, family: "Consolas" })
-            .center(
-              cellSize * row + cellSize / 2,
-              cellSize * col + cellSize / 2
-            )
-            .size(100)
-            .click(updateText);
+        let colors: string[] = [];
+        for (let i = 0; i < blocks.length; i++) {
+          colors.push(rainbow(blocks.length, i));
         }
-      }
-    });
+        console.log(blocks);
 
-    watch(logicalMathJson, (value) => {
-      console.log(value);
+        const textsInGrid = new Array<SVGText>(16);
+
+        for (let row = 0; row < 4; row++) {
+          for (let col = 0; col < 4; col++) {
+            let updateText = () =>
+              textsInGrid[row * 4 + col].text(
+                testDiagram.values[col * 4 + row]
+              );
+
+            let cell = kvDiagram
+              .rect(cellSize, cellSize)
+              .move(cellSize * row, cellSize * col)
+              .fill("#ffffff")
+              .stroke("#000000");
+            cell.click(updateText);
+
+            for (let i = 0; i < blocks.length; i++) {
+              if (blocks[i].positions.includes(col * 4 + row)) {
+                let block = kvDiagram
+                  .rect(cellSize, cellSize)
+                  .move(cellSize * row, cellSize * col)
+                  .fill(colors[i] + "99");
+              }
+            }
+
+            textsInGrid[row * 4 + col] = kvDiagram
+              .text(testDiagram.values[col * 4 + row])
+              .font({ size: 30, family: "Consolas" })
+              .center(
+                cellSize * row + cellSize / 2,
+                cellSize * col + cellSize / 2
+              )
+              .size(100)
+              .click(updateText);
+          }
+        }
+      });
     });
 
     watch(flipBits, (value) => {});
 
     return {
-      parseLogical,
+      parse,
       logicalUserInput,
       logicalMathJson,
       tableHeaders,
