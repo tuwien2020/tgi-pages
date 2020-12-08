@@ -45,13 +45,12 @@ const pVar = bnb
   .match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/)
   .map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
 
-// TODO: Reconsider allowing a single f as false
 const pBooleanFalse = bnb
-  .match(/[Ff]([Aa][Ll][Ss]([Ee]|[Cc][Hh]))?|0/)
+  .match(/[Ff][Aa][Ll][Ss]([Ee]|[Cc][Hh])|0/)
   .map((x) => new BooleanLiteral(false));
 
 const pBooleanTrue = bnb
-  .match(/[Tt]([Rr][Uu][Ee])?|1|[Ww]([Aa][Hh][Rr])?/)
+  .match(/[Tt][Rr][Uu][Ee]|1|[Ww][Aa][Hh][Rr]/)
   .map((x) => new BooleanLiteral(true));
 
 const pBoolean = pBooleanFalse.or(pBooleanTrue);
