@@ -329,7 +329,7 @@ export class BinaryNumber {
   divide(
     other: BinaryNumber,
     placesAfterDecimal: number
-  ): { result: BinaryNumber; remainder?: boolean[]; divisionByZero: boolean } {
+  ): { result: BinaryNumber; remainder: boolean[]; divisionByZero: boolean } {
     // Shift the decimal points away
     const maxDecimal = Math.max(this.decimalPoint, other.decimalPoint);
     const a = this.setSign(false).multiplyByPowerOfTwo(maxDecimal);
@@ -341,6 +341,7 @@ export class BinaryNumber {
     if (b.value.length <= 0) {
       return {
         result: new BinaryNumber(false, [], 0),
+        remainder: [],
         divisionByZero: true,
       };
     }

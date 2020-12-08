@@ -189,10 +189,15 @@ function useMathWithStepsPrinting() {
       if (b.value.length <= 0) {
         output += `\\text{Division by zero}`;
       } else {
-        output += ` ${mathPrinting.binaryNumberToLatex(result.result, {
-          zeroWidthDecimal: true,
-          groupZeros: false,
-        })}\\\\\n`;
+        // Pretty print the result
+        const remainderIsZero = new BinaryNumber(
+          false,
+          result.remainder,
+          0
+        ).isZero();
+        output += ` ${mathPrinting.binaryNumberToLatex(result.result)} ${
+          remainderIsZero ? "" : "..."
+        }\\\\\n`;
 
         // Copy of binary-number.ts
         let index = 0;
