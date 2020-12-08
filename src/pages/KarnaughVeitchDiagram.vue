@@ -112,38 +112,76 @@ import {
   watch,
   computed,
   shallowRef,
-  onMounted
+  onMounted,
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
 import { MathJson, MathJsonLogicalOperator } from "../math/MathJson";
 import { useUrlRef } from "../url-ref";
 import { tryParse as tryParseAstLogical } from "./../assets/grammar-logical";
-import { SVG, extend as SVGextend, Element as SVGElement } from '@svgdotjs/svg.js'
+import {
+  SVG,
+  extend as SVGextend,
+  Element as SVGElement,
+} from "@svgdotjs/svg.js";
 
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
-import { KVDiagram, KVBlock, findBlocksInKVDiagram } from "./../assets/kv-diagram";
+import {
+  KVDiagram,
+  KVBlock,
+  findBlocksInKVDiagram,
+} from "./../assets/kv-diagram";
 
 function rainbow(numOfSteps: number, step: number) {
-    // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
-    // Adam Cole, 2011-Sept-14
-    // HSV to RBG adapted from: http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
-    var r = 0, g = 0, b = 0;
-    var h = step / numOfSteps;
-    var i = ~~(h * 6);
-    var f = h * 6 - i;
-    var q = 1 - f;
-    switch(i % 6){
-        case 0: r = 1; g = f; b = 0; break;
-        case 1: r = q; g = 1; b = 0; break;
-        case 2: r = 0; g = 1; b = f; break;
-        case 3: r = 0; g = q; b = 1; break;
-        case 4: r = f; g = 0; b = 1; break;
-        case 5: r = 1; g = 0; b = q; break;
-    }
-    var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
-    return (c);
+  // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
+  // Adam Cole, 2011-Sept-14
+  // HSV to RBG adapted from: http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
+  var r = 0,
+    g = 0,
+    b = 0;
+  var h = step / numOfSteps;
+  var i = ~~(h * 6);
+  var f = h * 6 - i;
+  var q = 1 - f;
+  switch (i % 6) {
+    case 0:
+      r = 1;
+      g = f;
+      b = 0;
+      break;
+    case 1:
+      r = q;
+      g = 1;
+      b = 0;
+      break;
+    case 2:
+      r = 0;
+      g = 1;
+      b = f;
+      break;
+    case 3:
+      r = 0;
+      g = q;
+      b = 1;
+      break;
+    case 4:
+      r = f;
+      g = 0;
+      b = 1;
+      break;
+    case 5:
+      r = 1;
+      g = 0;
+      b = q;
+      break;
+  }
+  var c =
+    "#" +
+    ("00" + (~~(r * 255)).toString(16)).slice(-2) +
+    ("00" + (~~(g * 255)).toString(16)).slice(-2) +
+    ("00" + (~~(b * 255)).toString(16)).slice(-2);
+  return c;
 }
 
 function useLogicalMath() {
@@ -316,61 +354,81 @@ export default defineComponent({
     const tableThickBorderIndex = ref(0);
 
     const testDiagram = new KVDiagram([
-        "0", "1", "1", "0",
-        "1", "1", "1", "1",
-        "0", "1", "1", "1",
-        "0", "0", "1", "0",
-    ]); 
+      "0",
+      "1",
+      "1",
+      "0",
+      "1",
+      "1",
+      "1",
+      "1",
+      "0",
+      "1",
+      "1",
+      "1",
+      "0",
+      "0",
+      "1",
+      "0",
+    ]);
 
     let blocks = findBlocksInKVDiagram(testDiagram);
 
-    let colors : string[] = []
+    let colors: string[] = [];
     for (let i = 0; i < blocks.length; i++) {
       colors.push(rainbow(blocks.length, i));
     }
     console.log(blocks);
-    
 
     onMounted(() => {
-      const width = 240, height = 240;
-      const kvDiagram = SVG().addTo('#kv-diagram').size(width, height);
+      const width = 240,
+        height = 240;
+      const kvDiagram = SVG().addTo("#kv-diagram").size(width, height);
 
-      kvDiagram.viewbox(0,0,width,height);
-      const cellSize = width / 4; 
+      kvDiagram.viewbox(0, 0, width, height);
+      const cellSize = width / 4;
 
-    const textsInGrid = new Array(16);
+      const textsInGrid = new Array(16);
 
       for (let row = 0; row < 4; row++) {
         for (let col = 0; col < 4; col++) {
-            let updateText = () => textsInGrid[row * 4 + col].text(testDiagram.values[col*4+row]);
+          let updateText = () =>
+            textsInGrid[row * 4 + col].text(testDiagram.values[col * 4 + row]);
 
-          let cell = kvDiagram.rect(cellSize, cellSize).move(cellSize * row, cellSize * col).fill('#ffffff').stroke('#000000');
-            cell.click(updateText);
-
+          let cell = kvDiagram
+            .rect(cellSize, cellSize)
+            .move(cellSize * row, cellSize * col)
+            .fill("#ffffff")
+            .stroke("#000000");
+          cell.click(updateText);
 
           for (let i = 0; i < blocks.length; i++) {
-            if (blocks[i].positions.includes(col*4+row)) {
-              let block = kvDiagram.rect(cellSize, cellSize).move(cellSize * row, cellSize * col).fill(colors[i] + "99")
+            if (blocks[i].positions.includes(col * 4 + row)) {
+              let block = kvDiagram
+                .rect(cellSize, cellSize)
+                .move(cellSize * row, cellSize * col)
+                .fill(colors[i] + "99");
             }
           }
 
-          textsInGrid[row * 4 + col] = kvDiagram.text(testDiagram.values[col*4+row])
-            .font({size: 30, family: 'Consolas'})
-            .center(cellSize * row + cellSize/2, cellSize *col + cellSize/2).size(100)
+          textsInGrid[row * 4 + col] = kvDiagram
+            .text(testDiagram.values[col * 4 + row])
+            .font({ size: 30, family: "Consolas" })
+            .center(
+              cellSize * row + cellSize / 2,
+              cellSize * col + cellSize / 2
+            )
+            .size(100)
             .click(updateText);
-          
-         
         }
       }
-    })
+    });
 
-  
     watch(logicalMathJson, (value) => {
       console.log(value);
     });
 
-    watch(flipBits, (value) => {
-    });
+    watch(flipBits, (value) => {});
 
     return {
       parseLogical,
