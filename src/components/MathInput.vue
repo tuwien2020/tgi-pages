@@ -1,7 +1,11 @@
 <template>
   <div class="math-input">
     <input type="text" v-model="mathinput" size="100" />
-    <div ref="mathoutput"></div>
+    <div
+      ref="mathoutput"
+      @mouseover="hoverOverMath($event)"
+      @mouseout="hoverOverMath($event)"
+    ></div>
   </div>
 </template>
 
@@ -43,6 +47,28 @@ export default defineComponent({
     const mathinput = ref("" + props.modelValue);
     const mathoutput = ref<HTMLElement>();
 
+    const lastTargets: HTMLElement[] = [];
+    function hoverOverMath(event: MouseEvent) {
+      lastTargets.forEach((t) => (t.style.color = ""));
+      lastTargets.length = 0;
+
+      if (event.target instanceof HTMLElement && event.type == "mouseover") {
+        if (event.target.innerText == "(" || event.target.innerText == ")") {
+          const bracketId = event.target.parentElement?.getAttribute(
+            "data-bracketid"
+          );
+          mathoutput.value
+            ?.querySelectorAll(`[data-bracketid='${bracketId}']`)
+            ?.forEach((v) => {
+              if (v instanceof HTMLElement) {
+                v.style.color = "red";
+                lastTargets.push(v);
+              }
+            });
+        }
+      }
+    }
+
     watch(
       () => props.modelValue,
       (value) => {
@@ -54,13 +80,18 @@ export default defineComponent({
         }
 
         nextTick(() => {
-          const latex = mathPrinting.mathToLatex(parsedAst);
+          const latex = mathPrinting.mathToLatex(parsedAst, {
+            bracketIds: true,
+          });
 
           if (mathoutput.value) {
             Katex.render(latex, mathoutput.value, {
               displayMode: true,
               throwOnError: false,
               output: "html",
+              trust: function (context) {
+                return context.command == "\\htmlData";
+              },
             });
           }
         });
@@ -77,6 +108,7 @@ export default defineComponent({
     return {
       mathinput,
       mathoutput,
+      hoverOverMath,
     };
   },
 });

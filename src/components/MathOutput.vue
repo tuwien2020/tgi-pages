@@ -40,7 +40,7 @@ export default defineComponent({
               Katex.render(latex, mathoutput.value, {
                 displayMode: true,
                 throwOnError: false,
-                output: "html",
+                output: "html"
               });
             }
           });

@@ -1,5 +1,11 @@
 import { BinaryNumber } from "./binary-number";
 import { MathJson, MathJsonOperator } from "./MathJson";
+// @ts-ignore
+import { v4 as uuidv4 } from "uuid";
+
+export interface MathFormattingOptions {
+  bracketIds?: boolean;
+}
 
 export function useMathPrinting() {
   const mathJsonOperatorMap = new Map<MathJsonOperator, string>([
@@ -27,7 +33,19 @@ export function useMathPrinting() {
     }
   }
 
-  function toLatexRecursive(ast: MathJson): string {
+  function brackets(value: string, bracketIds: boolean | undefined) {
+    if (bracketIds) {
+      const bracketId = uuidv4();
+      return `\\htmlData{bracketId=${bracketId}}{(}${value}\\htmlData{bracketId=${bracketId}}{)}`;
+    } else {
+      return `(${value})`;
+    }
+  }
+
+  function toLatexRecursive(
+    ast: MathJson,
+    options?: MathFormattingOptions
+  ): string {
     if (Array.isArray(ast)) {
       const op = mathJsonOperatorMap.get(ast[0]);
       if (!op) {
@@ -37,19 +55,19 @@ export function useMathPrinting() {
       if (ast.length == 0) {
         throw new Error("Not well formed AST tree " + ast);
       } else if (ast.length == 2) {
-        let right = toLatexRecursive(ast[1]);
+        let right = toLatexRecursive(ast[1], options);
         if (needsBrackets(ast[1])) {
-          right = `(${right})`;
+          right = brackets(right, options?.bracketIds);
         }
         return `${op} ${right}`;
       } else if (ast.length == 3) {
-        let left = toLatexRecursive(ast[1]);
+        let left = toLatexRecursive(ast[1], options);
         if (needsBrackets(ast[1])) {
-          left = `(${left})`;
+          left = brackets(left, options?.bracketIds);
         }
-        let right = toLatexRecursive(ast[2]);
+        let right = toLatexRecursive(ast[2], options);
         if (needsBrackets(ast[2])) {
-          right = `(${right})`;
+          right = brackets(right, options?.bracketIds);
         }
         return `${left} ${op} ${right}`;
       } else {
@@ -105,10 +123,13 @@ export function useMathPrinting() {
   }
 
   // TODO: Pass formatting options?
-  function mathToLatex(value: { mathJson?: MathJson; error?: string }): string {
+  function mathToLatex(
+    value: { mathJson?: MathJson; error?: string },
+    options?: MathFormattingOptions
+  ): string {
     if (value.mathJson) {
       try {
-        const output = toLatexRecursive(value.mathJson);
+        const output = toLatexRecursive(value.mathJson, options);
         return output;
       } catch (e) {
         value.error = "" + e;
