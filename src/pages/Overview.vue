@@ -13,7 +13,7 @@
     </li>
     <li>
       <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank"
-        >Nyehehe</a
+        >Updated Site</a
       >
     </li>
   </ul>
@@ -155,6 +155,25 @@
   <h3>Boolesche Algebra</h3>
   <ul>
     <li><router-link to="/truth-table">Wahrheitstabelle</router-link></li>
+    <li>
+      <a
+        href="https://www.dcode.fr/boolean-expressions-calculator"
+        target="_blank"
+        >Boolesche Ausdrücke</a
+      >
+    </li>
+    <li>
+      <a
+        href="https://www.mathematik.uni-marburg.de/~thormae/lectures/ti1/code/karnaughmap/"
+        target="_blank"
+        >KV Diagramm</a
+      >
+    </li>
+    <li>
+      <a href="https://kmio.de/logikrechner.html" target="_blank"
+        >KV Diagramm und BDD</a
+      >
+    </li>
   </ul>
 
   <h3>Schaltungen</h3>
