@@ -10,6 +10,7 @@
 
   <div>
     <label><input type="checkbox" v-model="flipBits" /> Flip the bits </label>
+    <label><input type="checkbox" v-model="hideColumns" /> Hide intermediate columns </label>
   </div>
 
   <table class="truth-table">
@@ -188,6 +189,7 @@ export default defineComponent({
     const tableHeaders = shallowRef<MathJson[]>([]);
     const tableRows = ref<boolean[][]>([[]]);
     const flipBits = ref<boolean>(false); // TODO: Make urlRef
+    const hideColumns = ref<boolean>(false); // TODO: Make urlRef
     const tableThickBorderIndex = ref(0);
 
     function createTable(value: MathJson | undefined) {
@@ -195,6 +197,9 @@ export default defineComponent({
 
       const getterNames = logicalMath.extractGetters(value);
       let operations = logicalMath.extractOperations(value);
+      if (hideColumns.value) {
+        operations = operations.slice(operations.length - 1);
+      }
 
       const getters = Array.from(logicalMath.extractGetters(value));
       getters.sort();
@@ -235,11 +240,14 @@ export default defineComponent({
       tableThickBorderIndex.value = getters.length - 1;
     }
     watch(logicalMathJson, (value) => {
-      console.log(value);
       createTable(value);
     });
 
     watch(flipBits, (value) => {
+      createTable(logicalMathJson.value);
+    });
+
+    watch(hideColumns, (value) => {
       createTable(logicalMathJson.value);
     });
 
@@ -250,6 +258,7 @@ export default defineComponent({
       tableHeaders,
       tableRows,
       flipBits,
+      hideColumns,
       tableThickBorderIndex,
     };
   },

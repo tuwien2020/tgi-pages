@@ -5,7 +5,7 @@ class VariableLiteral {
 }
 
 class IteNode {
-  constructor(public children: any[]) {}
+  constructor(public children: (VariableLiteral | IteNode)[]) {}
 }
 
 class TokenStream {

@@ -5,7 +5,6 @@
 
   <h3>Important cat pages</h3>
   <ul>
-    <li><a href="https://cataas.com/" target="_blank">Cat as a service</a></li>
     <li>
       <a href="https://stefnotch.github.io/shakespeares-cats/" target="_blank"
         >Shakespeare's Cats

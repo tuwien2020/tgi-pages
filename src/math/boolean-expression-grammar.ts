@@ -22,6 +22,10 @@ export class VariableLiteral implements LogicalExpression {
   constructor(public value: string) {}
 }
 
+export class ITELiteral implements LogicalExpression {
+  constructor(public params: LogicalExpression[]) {}
+}
+
 // ---[ Parser ]---
 let mathWS = bnb.match(/\s*/);
 
@@ -55,6 +59,32 @@ const pBooleanTrue = bnb
 
 const pBoolean = pBooleanFalse.or(pBooleanTrue);
 
+const logicalIte = bnb.lazy(() => {
+  return (
+    bnb
+      .match(/[iI][tT][eE]\(/)
+      .next(
+        mathUnaryPrefix.trim(mathWS).sepBy(bnb.text(","), 3, 3).trim(mathWS)
+      )
+      .skip(bnb.text(")"))
+      // Rewrite ITE(a, b, c) as (a and b) or (!a and c)
+      .map(
+        (params) =>
+          new BinaryOperator(
+            "or",
+            new BinaryOperator("and", params[0], params[1]),
+            new BinaryOperator(
+              "and",
+              new UnaryOperator("not", params[0]),
+              params[2]
+            )
+          )
+      )
+  );
+  // TODO: Actually implement ITEs instead of cheating
+  // .map((params) => new ITELiteral(params));
+});
+
 // Next level
 // Lazy is being used, because "booleanExpr" is defined all the way at the bottom of the file
 const mathBasic: bnb.Parser<LogicalExpression> = bnb.lazy(() => {
@@ -62,6 +92,7 @@ const mathBasic: bnb.Parser<LogicalExpression> = bnb.lazy(() => {
     .thru(token)
     .wrap(bnb.text("("), bnb.text(")"))
     .or(pBoolean)
+    .or(logicalIte)
     .or(pVar)
     .trim(mathWS);
 });
