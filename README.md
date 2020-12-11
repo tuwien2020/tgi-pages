@@ -47,7 +47,7 @@ TGI Test
   - Welcher Grad
   - Test 1, Beispiel 7)b)
 - NRZ-S und so
-  - Die Folie einfach
+  - Die Folie einfach oder [Online Binärcode zu NRZ-Rechner](http://www.ece.unb.ca/cgi-bin/tervo/encoding.pl)
 - Hamming
   - vielleicht wollen die später die ganzen formeln für die parity-bits vom hamming-code
     könnte sein dass sie so eine multiple choice frage machen wo wir die richtigen formeln ankreuzen sollen
