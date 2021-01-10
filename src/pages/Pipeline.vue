@@ -6,23 +6,25 @@
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 
 interface PipelineStage {
-  name: string;
-  isRead: boolean;
-  isWrite: boolean;
+  readonly name: string;
+  readonly isRead: boolean;
+  readonly isWrite: boolean;
 }
 
 interface PipelineCommand {
-  name: string;
-  readRegisters: number[];
-  writeRegisters: number[];
+  readonly name: string;
+  readonly readRegisters: readonly number[];
+  readonly writeRegisters: readonly number[];
 }
 
 function usePipelineSimulator(stages: PipelineStage[]) {
   const nextCommands = [] as PipelineCommand[];
   const pipeline = new Array<PipelineCommand | null>(stages.length).fill(null);
-  // TODO: Reading and writing at the same time
+  const canReadWhileWrite = false;
 
   function step() {
+    const oldPipeline = pipeline.slice();
+
     let isStalled = false;
 
     for (let i = pipeline.length - 2; i >= 0; i--) {
@@ -31,9 +33,11 @@ function usePipelineSimulator(stages: PipelineStage[]) {
         const registersToRead = pipeline[i]?.readRegisters ?? [];
 
         for (let j = i + 1; j < pipeline.length; j++) {
-          const registersToWrite = pipeline[j]?.writeRegisters ?? [];
-          const hasReadAfterWrite = registersToRead.some((v) =>
-            registersToWrite.includes(v)
+          const registersToWrite =
+            (canReadWhileWrite ? pipeline : oldPipeline)[j]?.writeRegisters ??
+            [];
+          const hasReadAfterWrite = registersToWrite.some((v) =>
+            registersToRead.includes(v)
           );
 
           if (hasReadAfterWrite) {
@@ -70,8 +74,8 @@ function usePipelineSimulator(stages: PipelineStage[]) {
   ): PipelineCommand {
     return {
       name: name,
-      readRegisters: readRegisters.map((v) => +v.replace(/rR/, "")),
-      writeRegisters: writeRegisters.map((v) => +v.replace(/rR/, "")),
+      readRegisters: readRegisters.map((v) => +v.replace(/r|R/, "")),
+      writeRegisters: writeRegisters.map((v) => +v.replace(/r|R/, "")),
     };
   }
 
@@ -100,10 +104,10 @@ export default defineComponent({
     ]);
 
     pipelineSimulator.nextCommands.push(
+      pipelineSimulator.parseCommand("PUSH", ["R2"], []),
       pipelineSimulator.parseCommand("ADD", ["R1", "R2"], ["R1"]),
-      pipelineSimulator.parseCommand("PUSH", [], ["R2"]),
-      pipelineSimulator.parseCommand("INC", [], ["R1"]),
       pipelineSimulator.parseCommand("DIV", ["R3", "R4"], ["R5"]),
+      pipelineSimulator.parseCommand("INC", ["R1"], ["R1"]),
       pipelineSimulator.parseCommand("SUB", ["R5", "R1"], ["R6"]),
       pipelineSimulator.parseCommand("MULT", ["R5", "R6"], ["R1"]),
       pipelineSimulator.parseCommand("POP", [], ["R3"])
