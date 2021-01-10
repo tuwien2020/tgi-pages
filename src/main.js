@@ -10,6 +10,7 @@ import HammingDistance from "./pages/HammingDistance.vue";
 import BinaryCalculator from "./pages/BinaryCalculator.vue";
 import BinaryCoding from "./pages/BinaryCoding.vue";
 import KarnaughVeitchDiagram from "./pages/KarnaughVeitchDiagram.vue";
+import Pipeline from "./pages/Pipeline.vue";
 import { name, version } from "./../package.json";
 
 /** @type {import("vue-router").RouteRecordRaw[]} */
@@ -21,6 +22,7 @@ const routes = [
   { path: "/binary-calculator", component: BinaryCalculator },
   { path: "/binary-coding", component: BinaryCoding },
   { path: "/kv-diagram", component: KarnaughVeitchDiagram },
+  { path: "/pipeline", component: Pipeline },
 ];
 
 if (import.meta.env.PROD) {
