@@ -1,13 +1,10 @@
 import * as bnb from "bread-n-butter";
 import { BinaryNumber } from "./../math/binary-number";
-import { MathExpression, BinaryOperator } from "./grammar-math";
-
-export class BinaryNumberLiteral implements MathExpression {
-  public value: BinaryNumber;
-  constructor(value: BinaryNumber) {
-    this.value = value;
-  }
-}
+import {
+  MathExpression,
+  BinaryOperator,
+  BinaryNumberLiteral,
+} from "./grammar-math";
 
 let mathWS = bnb.match(/\s*/);
 

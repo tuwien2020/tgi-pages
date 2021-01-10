@@ -181,6 +181,8 @@
       <a href="https://simulator.io/board" target="_blank"
         >Digitalschaltungen Simulator</a
       >
+    </li>
+    <li>
       <a href="http://falstad.com/circuit/circuitjs.html" target="_blank"
         >Schaltkreise</a
       >

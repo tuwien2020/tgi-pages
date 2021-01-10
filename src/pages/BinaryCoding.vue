@@ -73,9 +73,10 @@ import {
 } from "vue-router";
 import { MathJson, MathJsonNumber } from "../math/MathJson";
 import MathInput from "./../components/MathInput.vue";
-import { tryParseNumber } from "./../assets/grammar-math";
+import { tryParseBinaryNumber, tryParseNumber } from "./../assets/grammar-math";
 import { BinaryNumber } from "../math/binary-number";
 import { useUrlRef } from "../url-ref";
+import { useMathPrinting } from "../math/math-printing";
 
 function useBinaryParsing() {
   function toMathJsonRecursive(ast: any): MathJson {
@@ -98,7 +99,10 @@ function useBinaryParsing() {
     value: string
   ): { mathJson?: MathJson; error?: string } {
     try {
-      const parsed = tryParseNumber(value, { type: "bit-array" });
+      const parsed = tryParseBinaryNumber(value);
+      if (parsed.value.decimalPoint > 0) {
+        return { error: "Bit array cannot have a decimal point" };
+      }
       return { mathJson: toMathJsonRecursive(parsed) };
     } catch (e) {
       return { error: "" + e };
@@ -107,7 +111,7 @@ function useBinaryParsing() {
 
   function parseBinary(value: string): { mathJson?: MathJson; error?: string } {
     try {
-      const parsed = tryParseNumber(value, { type: "binary" });
+      const parsed = tryParseBinaryNumber(value);
       return { mathJson: toMathJsonRecursive(parsed) };
     } catch (e) {
       return { error: "" + e };
@@ -152,6 +156,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
+    const mathPrinting = useMathPrinting();
 
     const {
       parseBitArray,

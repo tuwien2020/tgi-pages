@@ -1,20 +1,5 @@
-/**
- * This is a simple yet powerful parser for mathematical expressions meant to demonstrate the power of Parjs.
- * It takes in a string such as:
- *      1 + 3 * 2
- * And outputs a AST such as:
- *      +(1, *(3, 2))
- * It can then evaluate the AST to get the result.
- * Some important features:
- *  1. Supports floating point numbers
- *  2. Maintains precedence and order of operations
- *  3. Maintains associativity
- *  4. Allows the use of parentheses
- *  5. Implemented using LR parsing techniques by using user state.
- *  6. Easily extendable by the addition of custom functions, variables, and more operators.
- */
-
 import * as bnb from "bread-n-butter";
+import { BinaryNumber } from "./../math/binary-number";
 
 export interface MathExpression {}
 
@@ -28,6 +13,13 @@ export class BinaryOperator implements MathExpression {
     public left: MathExpression,
     public right: MathExpression
   ) {}
+}
+
+export class BinaryNumberLiteral implements MathExpression {
+  public value: BinaryNumber;
+  constructor(value: BinaryNumber) {
+    this.value = value;
+  }
 }
 
 export class NumberLiteral implements MathExpression {
@@ -75,28 +67,32 @@ const pVar = bnb
   .match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/)
   .map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
 
-const pNumber = bnb
-  .match(/[+-]?[0-9]+([.,][0-9]+)?/)
-  .map((str) => new NumberLiteral(str.replace(/,/, ".")));
+const binaryNumberRegex = /([+-])?([0-1]+)([.,]([0-1]+))?/;
+function stringToBinaryNumber(value: string): BinaryNumber {
+  const matchResults = (value ?? "").match(binaryNumberRegex);
+  if (matchResults === null) return new BinaryNumber(false, [], 0);
 
-const pAnyBaseNumber = bnb
-  .match(/[+-]?[0-9a-zA-Z]+([.,][0-9a-zA-Z]+)?/)
-  .map((str) => new NumberLiteral(str.replace(/,/, ".")));
+  const [_, sign, numberValue, __, fractionalPart] = matchResults;
+
+  return new BinaryNumber(
+    sign === "-",
+    ((numberValue ?? "") + (fractionalPart ?? ""))
+      .split("")
+      .map((v) => (v === "0" ? false : true)),
+    fractionalPart?.length ?? 0
+  );
+}
 
 const pBinaryNumber = bnb
-  .match(/[+-]?[0-1]+([.,][0-1]+)?/)
-  .map((str) => new NumberLiteral(str.replace(/,/, "."), 2));
-
-const pBitArrayNumber = bnb
-  .match(/[0-1]+/)
-  .map((str) => new NumberLiteral(str.replace(/,/, "."), 2));
+  .match(binaryNumberRegex)
+  .map((str) => new BinaryNumberLiteral(stringToBinaryNumber(str)));
 
 // Next level
 const mathBasic: bnb.Parser<MathExpression> = bnb.lazy(() => {
   return mathExpr
     .thru(token)
     .wrap(bnb.text("("), bnb.text(")"))
-    .or(pNumber)
+    .or(pBinaryNumber)
     .or(pVar)
     .trim(mathWS);
 });
@@ -167,22 +163,32 @@ const mathEqualsOp: bnb.Parser<MathExpression> = mathAddSub.chain((expr) => {
 // Lowest level
 const mathExpr = mathEqualsOp;
 
+const pNumber = bnb
+  .match(/[+-]?[0-9]+([.,][0-9]+)?/)
+  .map((str) => new NumberLiteral(str.replace(/,/, ".")));
+
+const pAnyBaseNumber = bnb
+  .match(/[+-]?[0-9a-zA-Z]+([.,][0-9a-zA-Z]+)?/)
+  .map((str) => new NumberLiteral(str.replace(/,/, ".")));
+
 export function tryParseNumber(
   value: string,
-  options?: { type?: "number" | "binary" | "bit-array" | "any-base" }
+  options?: { type?: "number" | "binary" | "any-base" }
 ) {
-  const numberType = options?.type ?? "number";
+  const numberType = options?.type ?? "binary";
   if (numberType == "number") {
     return pNumber.tryParse(value);
   } else if (numberType == "binary") {
     return pBinaryNumber.tryParse(value);
-  } else if (numberType == "bit-array") {
-    return pBitArrayNumber.tryParse(value);
   } else if (numberType == "any-base") {
     return pAnyBaseNumber.tryParse(value);
   } else {
     throw new Error("Unknown number type");
   }
+}
+
+export function tryParseBinaryNumber(value: string) {
+  return pBinaryNumber.tryParse(value);
 }
 
 export function tryParse(value: string) {
