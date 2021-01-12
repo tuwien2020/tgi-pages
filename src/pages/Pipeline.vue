@@ -104,10 +104,10 @@ export default defineComponent({
     ]);
 
     pipelineSimulator.nextCommands.push(
-      pipelineSimulator.parseCommand("PUSH", ["R2"], []),
       pipelineSimulator.parseCommand("ADD", ["R1", "R2"], ["R1"]),
-      pipelineSimulator.parseCommand("DIV", ["R3", "R4"], ["R5"]),
+      pipelineSimulator.parseCommand("PUSH", ["R2"], []),
       pipelineSimulator.parseCommand("INC", ["R1"], ["R1"]),
+      pipelineSimulator.parseCommand("DIV", ["R3", "R4"], ["R5"]),
       pipelineSimulator.parseCommand("SUB", ["R5", "R1"], ["R6"]),
       pipelineSimulator.parseCommand("MULT", ["R5", "R6"], ["R1"]),
       pipelineSimulator.parseCommand("POP", [], ["R3"])
