@@ -87,6 +87,7 @@ TGI Test
 - Micro16
 
 - Code ausführen
+  - Automatically identify dependencies
 - Stack
 - Interleaving
 - Pipelining
