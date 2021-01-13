@@ -85,3 +85,9 @@ TGI Test
   - Mealey
   - Maximale Taktfrequenz
 - Micro16
+
+- Code ausführen
+- Stack
+- Interleaving
+- Pipelining
+- Amdahls Gesetz
