@@ -90,4 +90,5 @@ TGI Test
 - Stack
 - Interleaving
 - Pipelining
+  - Tasks with different durations
 - Amdahls Gesetz
