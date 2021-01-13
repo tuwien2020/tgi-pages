@@ -92,4 +92,5 @@ TGI Test
 - Interleaving
 - Pipelining
   - Tasks with different durations
+  - Branch prediction
 - Amdahls Gesetz
