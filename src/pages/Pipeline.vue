@@ -1,5 +1,29 @@
 <template>
-  <div>pipeline</div>
+  <div>
+    <table class="pipelineTable">
+      <thead>
+        <th>#</th>
+        
+        <th
+          v-for="(row, index) in pipelineStages"
+          :key="index"
+        >
+          {{ (row || {}).name.toUpperCase() }}
+        </th>
+      </thead>
+
+      <tr 
+        v-for="(row, index) in pipelineStates"
+        :key="index"
+        tabindex="0"
+      >
+        <td>{{ index+1 }}</td>
+        <td v-for="(item, itemIndex) in row" :key="itemIndex">
+          {{ (item || {}).name }}
+        </td>
+      </tr>
+    </table>
+  </div>
 </template>
 
 <script lang="ts">
@@ -84,11 +108,37 @@ function usePipelineSimulator(stages: PipelineStage[]) {
     return pipeline.slice().map((v) => (v == null ? "<noop>" : v.name));
   }
 
+  function isEmpty(){
+    return pipeline.filter(d => !!d).length === 0;
+  }
+
+  function getStages(){
+    console.log(stages);
+    return stages;
+  }
+
+  function run(){
+    // 2D-Array to return
+    let pipelineStates = [];
+
+    // run through Pipeline-states
+    step();
+    while(!isEmpty()){
+      pipelineStates.push(pipeline.slice());
+      step();
+    }
+
+    return pipelineStates;
+  }
+
   return {
     nextCommands,
     step,
     parseCommand,
     pipelineToString,
+    isEmpty,
+    getStages,
+    run,
   };
 }
 
@@ -115,14 +165,28 @@ export default defineComponent({
     );
 
     console.clear();
-    for (let i = 0; i < 15; i++) {
-      pipelineSimulator.step();
-      console.log(i + 1, pipelineSimulator.pipelineToString());
-    }
+    let pipelineStates = pipelineSimulator.run();
+    let pipelineStages = pipelineSimulator.getStages();
 
     return {
       count,
+      pipelineStates,
+      pipelineStages,
     };
   },
 });
 </script>
+
+<style scoped>
+.pipelineTable td:hover,
+.pipelineTable td:focus {
+  background-color: #f1f1f1;
+}
+
+.pipelineTable {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+  text-align: center;
+  overflow: hidden;
+}
+
+</style>
