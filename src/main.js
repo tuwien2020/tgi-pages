@@ -9,7 +9,6 @@ import TruthTable from "./pages/TruthTable.vue";
 import HammingDistance from "./pages/HammingDistance.vue";
 import BinaryCalculator from "./pages/BinaryCalculator.vue";
 import BinaryCoding from "./pages/BinaryCoding.vue";
-import KarnaughVeitchDiagram from "./pages/KarnaughVeitchDiagram.vue";
 import Pipeline from "./pages/Pipeline.vue";
 import InterleavingGraph from "./pages/InterleavingGraph.vue";
 import { name, version } from "./../package.json";
@@ -22,7 +21,6 @@ const routes = [
   { path: "/hamming-distance", component: HammingDistance },
   { path: "/binary-calculator", component: BinaryCalculator },
   { path: "/binary-coding", component: BinaryCoding },
-  { path: "/kv-diagram", component: KarnaughVeitchDiagram },
   { path: "/pipeline", component: Pipeline },
   { path: "/interleaving-graph", component: InterleavingGraph },
 ];
