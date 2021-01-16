@@ -1,14 +1,99 @@
 <template>
   <div>
+    <h4 style="margin: 2px 0px">General settings:</h4>
+
+    <p style="margin: 0px 15px">
+      - Read & Write: <input type="checkbox"/>
+    </p>
+  </div>
+  
+  <div style="margin: 50px 0px; float: left; width: 50%" >
+    <table class="inputTable">
+      <thead>
+        <th>Stage</th>
+        <th>Read</th>
+        <th>Write</th>
+        <th>Add</th>
+      </thead>
+
+      <tbody>
+        <tr 
+          v-for="(row, index) in stages"
+          :key="index"
+        >
+          <td>
+            <input type="text" placeholder="Name" v-model="row.name"/> 
+          </td>
+
+          <td>
+            <input type="checkbox" v-model="row.isRead"/> 
+          </td>
+
+          <td>
+            <input type="checkbox" v-model="row.isWrite"/>
+          </td>
+
+          <td>
+            <button @click="onAddStage({ name: null, isRead: false, isWrite: false }, index+1)">+</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <br />
+
+    <table class="inputTable">
+      <thead>
+        <th>Name</th>
+        <th>Register Read</th>
+        <th>Register Write</th>
+        <th>Add</th>
+      </thead>
+
+      <tbody>
+        <tr 
+          v-for="(row, index) in commands"
+          :key="index"
+        >
+          <td>
+            <input type="text" placeholder="Name" v-model="row.name"/> 
+          </td>
+
+          <td>
+            <input 
+              type="text" 
+              placeholder="R1, R2, ..."  
+              :value="row.readRegisters.map(d => 'R' + d)" 
+              @input="(event) => {row.readRegisters = event.target.value.replaceAll('R', '').split(',').map(d => +d)}"
+            /> 
+          </td>
+
+          <td>
+            <input type="text" 
+              placeholder="R1, R2, ..."  
+              :value="row.writeRegisters.map(d => 'R' + d)" 
+              @input="(event) => {row.writeRegisters = event.target.value.replaceAll('R', '').split(',').map(d => +d)}"
+            />
+          </td>
+
+          <td>
+            <button @click="onAddCommand({name: null, readRegisters: [], writeRegisters: [] }, index+1)">+</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div>
     <table class="pipelineTable">
       <thead>
         <th>#</th>
-        
+
         <th
-          v-for="(row, index) in pipelineStages"
+          v-for="(row, index) in stages"
           :key="index"
         >
-          {{ (row || {}).name.toUpperCase() }}
+          {{ ((row || {}).name||"").toUpperCase() }}
         </th>
       </thead>
 
@@ -112,11 +197,6 @@ function usePipelineSimulator(stages: PipelineStage[]) {
     return pipeline.filter(d => !!d).length === 0;
   }
 
-  function getStages(){
-    console.log(stages);
-    return stages;
-  }
-
   function run(){
     // 2D-Array to return
     let pipelineStates = [];
@@ -137,7 +217,6 @@ function usePipelineSimulator(stages: PipelineStage[]) {
     parseCommand,
     pipelineToString,
     isEmpty,
-    getStages,
     run,
   };
 }
@@ -147,34 +226,53 @@ export default defineComponent({
   setup() {
     const count = ref(0);
 
-    const pipelineSimulator = usePipelineSimulator([
+    // Pipeline-Stages
+    let stages = ref<PipelineStage[]>([
       { name: "fetch", isRead: false, isWrite: false },
       { name: "decode", isRead: true, isWrite: false },
       { name: "execute", isRead: false, isWrite: false },
       { name: "store", isRead: false, isWrite: true },
     ]);
 
-    pipelineSimulator.nextCommands.push(
+    let pipelineSimulator = usePipelineSimulator(stages.value);
+    watch(stages, (newStages) => pipelineSimulator = usePipelineSimulator(newStages), {deep: true});
+    
+    let onAddStage = (element:PipelineStage, index:number) => {
+      stages.value.splice(index, 0, element);
+    };
+
+    // Commands
+    let commands = ref<PipelineCommand[]>([
       pipelineSimulator.parseCommand("ADD", ["R1", "R2"], ["R1"]),
       pipelineSimulator.parseCommand("PUSH", ["R2"], []),
       pipelineSimulator.parseCommand("INC", ["R1"], ["R1"]),
       pipelineSimulator.parseCommand("DIV", ["R3", "R4"], ["R5"]),
       pipelineSimulator.parseCommand("SUB", ["R5", "R1"], ["R6"]),
       pipelineSimulator.parseCommand("MULT", ["R5", "R6"], ["R1"]),
-      pipelineSimulator.parseCommand("POP", [], ["R3"])
-    );
+      pipelineSimulator.parseCommand("POP", [], ["R3"]),
+    ]);
+    
+    pipelineSimulator.nextCommands.push(...commands.value);
+    watch(commands, (newCommands) => pipelineSimulator.nextCommands.push(...newCommands), {deep: true});
+    
+    let onAddCommand = (element:PipelineCommand, index:number) => {
+      commands.value.splice(index, 0, element);
+    };
 
-    console.clear();
+    // Run
     let pipelineStates = pipelineSimulator.run();
-    let pipelineStages = pipelineSimulator.getStages();
 
     return {
       count,
       pipelineStates,
-      pipelineStages,
+      stages,
+      onAddStage,
+      commands,
+      onAddCommand,
     };
   },
 });
+
 </script>
 
 <style scoped>
@@ -187,6 +285,15 @@ export default defineComponent({
   font-family: "Consolas", "Courier New", Courier, monospace;
   text-align: center;
   overflow: hidden;
+}
+
+.inputTable td{
+  padding: 4px;
+  text-align: center;
+}
+
+input[type="checkbox"]{
+  transform: scale(1.4);
 }
 
 </style>
