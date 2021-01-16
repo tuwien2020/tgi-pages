@@ -1,12 +1,25 @@
 <template>
-<h1>Interleaving</h1>
-<div id="mynetwork"></div>
+  <h1>Interleaving</h1>
+  <div id="mynetwork"></div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch, watchEffect, onMounted } from "vue";
-import { Network, Edge as VisEdge, Node as VisNode, Options } from "vis-network"
-import { DataSet } from "vis-data"
+import {
+  defineComponent,
+  computed,
+  ref,
+  watch,
+  watchEffect,
+  onMounted,
+} from "vue";
+import {
+  Network,
+  Edge as VisEdge,
+  Node as VisNode,
+  Options,
+} from "vis-network";
+import { DataSet } from "vis-data";
+
 export default {
   components: {},
   setup() {
@@ -37,13 +50,19 @@ export default {
       instructionPointer: 0,
     };
 
-    let resultNodes: Node[][] = new Array<Node[]>(thread1.instructions.length + 1)
+    let resultNodes: Node[][] = new Array<Node[]>(
+      thread1.instructions.length + 1
+    )
       .fill([])
       .map((a, i) =>
         new Array<Node>(thread2.instructions.length + 1)
           .fill({ states: [], edges: [], id: 0 })
           .map((b, j) => {
-            return { states: [], edges: [], id: (j*(thread1.instructions.length + 1) + i) };
+            return {
+              states: [],
+              edges: [],
+              id: j * (thread1.instructions.length + 1) + i,
+            };
           })
       );
 
@@ -55,8 +74,8 @@ export default {
     // removeDuplicatesInNetwork(resultNodes);
     // console.log(resultNodes);
 
-    let visNodes = [];
-    let visEdges = [];
+    let visNodes = [] as VisNode[];
+    let visEdges = [] as VisEdge[];
 
     let counter = 0;
 
@@ -65,32 +84,38 @@ export default {
         let node = resultNodes[i][j];
         visNodes.push({
           id: node.id,
-          label: node.states.map((state)=>`(${state.T}, ${state.U}, ${state.V}, ${state.W})`).join("\n")
-        })
+          label: node.states
+            .map((state) => `(${state.U}, ${state.T}, ${state.V}, ${state.W})`)
+            .join("\n"),
+          x: j * 10,
+          y: i * 10,
+        });
 
         node.edges.forEach((edge) => {
           visEdges.push({
             id: counter++,
-            from: node.id, to: edge.nextNode.id,
-            label: edge.instruction.label
+            from: node.id,
+            to: edge.nextNode.id,
+            label: edge.instruction.label,
           });
         });
-        
       }
     }
 
-
     let test1 = new DataSet<VisNode, "id">(visNodes);
     let test2 = new DataSet<VisEdge, "id">(visEdges);
-    
+
     console.log(visNodes);
     console.log(visEdges);
 
-    let data = { nodes: test1, edges: test2 }
+    let data = { nodes: test1, edges: test2 };
 
     onMounted(() => {
       let container = document.getElementById("mynetwork");
-      let options: Options = { nodes: {shape: "box" }, edges: { arrows: "to"} }
+      let options: Options = {
+        nodes: { shape: "box" },
+        edges: { arrows: "to" },
+      };
 
       let network = new Network(container, data, options);
     });
@@ -104,7 +129,8 @@ function generateGraphNetwork(
   threadB: Thread,
   resultNodes: Node[][]
 ) {
-  let currentNode = resultNodes[threadB.instructionPointer][threadA.instructionPointer];
+  let currentNode =
+    resultNodes[threadB.instructionPointer][threadA.instructionPointer];
 
   if (threadA.instructionPointer < threadA.instructions.length) {
     let instruction = threadA.instructions[threadA.instructionPointer];
@@ -113,7 +139,8 @@ function generateGraphNetwork(
 
     threadCopy.instructionPointer++;
 
-    let nextNode = resultNodes[threadB.instructionPointer][threadCopy.instructionPointer];
+    let nextNode =
+      resultNodes[threadB.instructionPointer][threadCopy.instructionPointer];
     // TODO: check if state already exists
 
     for (let state of newStates) {
@@ -123,6 +150,8 @@ function generateGraphNetwork(
     }
     
     let edge = {nextNode: nextNode, instruction: instruction}
+
+    let edge = { nextNode: nextNode, instruction: instruction };
 
     if (!edgeAlreadyExists(currentNode.edges, edge)) {
       currentNode.edges.push(edge);
@@ -138,7 +167,8 @@ function generateGraphNetwork(
     let threadCopy = { ...threadB };
     threadCopy.instructionPointer++;
 
-    let nextNode = resultNodes[threadCopy.instructionPointer][threadA.instructionPointer]
+    let nextNode =
+      resultNodes[threadCopy.instructionPointer][threadA.instructionPointer];
     // TODO: check if state already exists
 
     for (let state of newStates) {
@@ -173,7 +203,10 @@ function generateGraphNetwork(
 
 function edgeAlreadyExists(edges: Edge[], current: Edge) {
   for (let edge of edges) {
-    if (edge.nextNode === current.nextNode && edge.instruction === current.instruction) {
+    if (
+      edge.nextNode === current.nextNode &&
+      edge.instruction === current.instruction
+    ) {
       return true;
     }
   }
@@ -231,7 +264,7 @@ interface Instruction {
 }
 
 interface Node {
-  id: number;  
+  id: number;
   states: State[];
   edges: Edge[];
 }

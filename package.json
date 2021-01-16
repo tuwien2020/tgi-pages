@@ -10,6 +10,7 @@
     "@svgdotjs/svg.js": "^3.0.16",
     "bread-n-butter": "^0.6.0",
     "katex": "^0.12.0",
+    "monaco-editor": "^0.21.2",
     "uuid": "^8.3.2",
     "vis-data": "^7.1.2",
     "vis-network": "^9.0.0",
