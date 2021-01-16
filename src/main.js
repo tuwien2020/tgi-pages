@@ -11,7 +11,7 @@ import BinaryCalculator from "./pages/BinaryCalculator.vue";
 import BinaryCoding from "./pages/BinaryCoding.vue";
 import KarnaughVeitchDiagram from "./pages/KarnaughVeitchDiagram.vue";
 import Pipeline from "./pages/Pipeline.vue";
-import Interleaving from "./pages/InterleavingGraph.vue";
+import InterleavingGraph from "./pages/InterleavingGraph.vue";
 import { name, version } from "./../package.json";
 
 /** @type {import("vue-router").RouteRecordRaw[]} */
@@ -24,7 +24,7 @@ const routes = [
   { path: "/binary-coding", component: BinaryCoding },
   { path: "/kv-diagram", component: KarnaughVeitchDiagram },
   { path: "/pipeline", component: Pipeline },
-  { path: "/interleaving", component: Interleaving },
+  { path: "/interleaving-graph", component: InterleavingGraph },
 ];
 
 if (import.meta.env.PROD) {

@@ -1,6 +1,7 @@
 <template>
   <h1>Interleaving</h1>
   <div id="mynetwork"></div>
+  <div id="monaco-editor" style="width: 100%; height: 200px"></div>
 </template>
 
 <script lang="ts">
@@ -19,23 +20,64 @@ import {
   Options,
 } from "vis-network";
 import { DataSet } from "vis-data";
+import loader from "@monaco-editor/loader";
 
 export default {
   components: {},
   setup() {
+    onMounted(() => {
+      // TODO: Don't use the CDN version https://github.com/suren-atoyan/monaco-loader
+      loader.init().then((monaco) => {
+        monaco.editor.create(document.getElementById("monaco-editor"), {
+          value: "// some comment",
+          language: "javascript",
+        });
+      });
+    });
+
     // TODO: output variables order
     let initialState = { U: 0, T: 0, V: 0, W: 0 };
 
     let instructionsSet1 = [
-      { label: "1", operation: (state: State) => { state.U = 1; }},
-      { label: "2", operation: (state: State) => { state.V = state.T + state.W; }},
-      { label: "3", operation: (state: State) => { state.U = state.V - state.T; }}
+      {
+        label: "1",
+        operation: (state: State) => {
+          state.U = 1;
+        },
+      },
+      {
+        label: "2",
+        operation: (state: State) => {
+          state.V = state.T + state.W;
+        },
+      },
+      {
+        label: "3",
+        operation: (state: State) => {
+          state.U = state.V - state.T;
+        },
+      },
     ];
 
     let instructionsSet2 = [
-      { label: "4", operation: (state: State) => { state.T = 2; }},
-      { label: "5", operation: (state: State) => { state.W = state.U; }},
-      { label: "6", operation: (state: State) => { state.T = state.V; }}
+      {
+        label: "4",
+        operation: (state: State) => {
+          state.T = 2;
+        },
+      },
+      {
+        label: "5",
+        operation: (state: State) => {
+          state.W = state.U;
+        },
+      },
+      {
+        label: "6",
+        operation: (state: State) => {
+          state.T = state.V;
+        },
+      },
     ];
 
     let thread1: Thread = {
@@ -148,8 +190,6 @@ function generateGraphNetwork(
         nextNode.states.push(state);
       }
     }
-    
-    let edge = {nextNode: nextNode, instruction: instruction}
 
     let edge = { nextNode: nextNode, instruction: instruction };
 
@@ -173,12 +213,11 @@ function generateGraphNetwork(
 
     for (let state of newStates) {
       if (isStateUnique(state, nextNode.states)) {
-          nextNode.states.push(state);
+        nextNode.states.push(state);
       }
     }
 
-
-    let edge = { nextNode: nextNode, instruction: instruction }
+    let edge = { nextNode: nextNode, instruction: instruction };
 
     if (!edgeAlreadyExists(currentNode.edges, edge)) {
       currentNode.edges.push(edge);
@@ -234,14 +273,14 @@ interface State {
   W: number;
 }
 
-function isStateUnique(state: State, states: State[], index: number = -1)  {
+function isStateUnique(state: State, states: State[], index: number = -1) {
   for (let k = index + 1; k < states.length; k++) {
     if (areStatesEqual(state, states[k])) {
       return false;
     }
   }
   return true;
-};
+}
 
 function areStatesEqual(stateA: State, stateB: State): boolean {
   return (

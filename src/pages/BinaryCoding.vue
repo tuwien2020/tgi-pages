@@ -193,16 +193,19 @@ export default defineComponent({
     function binaryToDecimal(value: BinaryNumber): BigInt {
       value = unref(value);
       let result = BigInt(0);
+      const oneAsBigint = BigInt(1);
+      const twoAsBigint = BigInt(2);
+
       for (let i = 0; i < value.value.length; i++) {
         const bit = value.value[i];
-        result = result * 2n;
+        result = result * twoAsBigint;
         if (bit) {
-          result += 1n;
+          result += oneAsBigint;
         }
       }
 
       if (value.isNegative) {
-        result *= -1n;
+        result *= BigInt(-1);
       }
 
       if (value.decimalPoint > 0) {
