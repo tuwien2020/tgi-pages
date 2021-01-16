@@ -23,48 +23,19 @@ import { DataSet } from "vis-data";
 export default {
   components: {},
   setup() {
+    // TODO: output variables order
     let initialState = { U: 0, T: 0, V: 0, W: 0 };
 
     let instructionsSet1 = [
-      {
-        label: "1",
-        operation: (state: State) => {
-          state.U = 1;
-        },
-      },
-      {
-        label: "2",
-        operation: (state: State) => {
-          state.V = state.T + state.W;
-        },
-      },
-      {
-        label: "3",
-        operation: (state: State) => {
-          state.U = state.V - state.T;
-        },
-      },
+      { label: "1", operation: (state: State) => { state.U = 1; }},
+      { label: "2", operation: (state: State) => { state.V = state.T + state.W; }},
+      { label: "3", operation: (state: State) => { state.U = state.V - state.T; }}
     ];
 
     let instructionsSet2 = [
-      {
-        label: "4",
-        operation: (state: State) => {
-          state.T = 2;
-        },
-      },
-      {
-        label: "5",
-        operation: (state: State) => {
-          state.W = state.U;
-        },
-      },
-      {
-        label: "6",
-        operation: (state: State) => {
-          state.T = state.V;
-        },
-      },
+      { label: "4", operation: (state: State) => { state.T = 2; }},
+      { label: "5", operation: (state: State) => { state.W = state.U; }},
+      { label: "6", operation: (state: State) => { state.T = state.V; }}
     ];
 
     let thread1: Thread = {
@@ -100,7 +71,7 @@ export default {
     console.clear();
     generateGraphNetwork(thread1, thread2, resultNodes);
 
-    removeDuplicatesInNetwork(resultNodes);
+    // removeDuplicatesInNetwork(resultNodes);
     // console.log(resultNodes);
 
     let visNodes = [] as VisNode[];
@@ -171,7 +142,14 @@ function generateGraphNetwork(
     let nextNode =
       resultNodes[threadB.instructionPointer][threadCopy.instructionPointer];
     // TODO: check if state already exists
-    nextNode.states.push(...newStates);
+
+    for (let state of newStates) {
+      if (isStateUnique(state, nextNode.states)) {
+        nextNode.states.push(state);
+      }
+    }
+    
+    let edge = {nextNode: nextNode, instruction: instruction}
 
     let edge = { nextNode: nextNode, instruction: instruction };
 
@@ -192,9 +170,15 @@ function generateGraphNetwork(
     let nextNode =
       resultNodes[threadCopy.instructionPointer][threadA.instructionPointer];
     // TODO: check if state already exists
-    nextNode.states.push(...newStates);
 
-    let edge = { nextNode: nextNode, instruction: instruction };
+    for (let state of newStates) {
+      if (isStateUnique(state, nextNode.states)) {
+          nextNode.states.push(state);
+      }
+    }
+
+
+    let edge = { nextNode: nextNode, instruction: instruction }
 
     if (!edgeAlreadyExists(currentNode.edges, edge)) {
       currentNode.edges.push(edge);
@@ -235,17 +219,8 @@ function removeDuplicatesInNetwork(nodes: Node[][]) {
       let currentNode = nodes[i][j];
       let currentStates = currentNode.states;
 
-      const isUnique = (state: State, index: number) => {
-        for (let k = index + 1; k < currentStates.length; k++) {
-          if (areStatesEqual(state, currentStates[k])) {
-            return false;
-          }
-        }
-        return true;
-      };
-
       let filtered = currentStates.filter((state, index) => {
-        return isUnique(state, index);
+        return isStateUnique(state, currentStates, index);
       });
       currentNode.states = filtered;
     }
@@ -258,6 +233,15 @@ interface State {
   V: number;
   W: number;
 }
+
+function isStateUnique(state: State, states: State[], index: number = -1)  {
+  for (let k = index + 1; k < states.length; k++) {
+    if (areStatesEqual(state, states[k])) {
+      return false;
+    }
+  }
+  return true;
+};
 
 function areStatesEqual(stateA: State, stateB: State): boolean {
   return (
