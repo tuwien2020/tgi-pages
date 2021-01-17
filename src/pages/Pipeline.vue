@@ -1,118 +1,130 @@
 <template>
-  <div>
-    <h4 style="margin: 2px 0px">General settings:</h4>
+  <div class="flexbox">
+    <div class="item1">
+      <h4 style="margin: 25px 0px 2px 0px">General settings:</h4>
 
-    <p style="margin: 0px 15px">
-      - Read & Write: <input type="checkbox"/>
-    </p>
-  </div>
-  
-  <div style="margin: 50px 0px; float: left; width: 50%" >
-    <table class="inputTable">
-      <thead>
-        <th>Stage</th>
-        <th>Read</th>
-        <th>Write</th>
-        <th>Add</th>
-      </thead>
+      <ul style="margin: 0px 15px">
+        <li>Read & Write: <input type="checkbox" /></li>
+      </ul>
 
-      <tbody>
-        <tr 
-          v-for="(row, index) in stages"
-          :key="index"
-        >
+      <h4 style="margin: 25px 0px 2px 0px">Stages:</h4>
+
+      <table class="inputTable">
+        <thead>
+          <th>Name</th>
+
+          <th>Read</th>
+
+          <th>Write</th>
+
+          <th />
+        </thead>
+
+        <tbody>
+          <tr v-for="(row, index) in pipelineStages" :key="index">
+            <td>
+              <input type="text" placeholder="Name" v-model="row.name" />
+            </td>
+
+            <td>
+              <input type="checkbox" v-model="row.isRead" />
+            </td>
+
+            <td>
+              <input type="checkbox" v-model="row.isWrite" />
+            </td>
+
+            <td>
+              <button style="width: 100%" class="btnDelete">
+                <i class="fas fa-trash-alt" style="font-size: 20px" />
+              </button>
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="4">
+              <button style="width: 100%" class="btnAdd">
+                <i class="fas fa-plus-circle" style="font-size: 20px" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4 style="margin: 25px 0px 2px 0px">Commands:</h4>
+
+      <table class="inputTable">
+        <thead>
+          <th>Name</th>
+
+          <th>Read Register</th>
+
+          <th>Write Register</th>
+
+          <th />
+        </thead>
+
+        <tbody>
+          <tr v-for="(row, index) in pipelineCommands" :key="index">
+            <td>
+              <input type="text" placeholder="Name" />
+            </td>
+
+            <td>
+              <input type="text" placeholder="R1, R2, ..." />
+            </td>
+
+            <td>
+              <input type="text" placeholder="R1, R2, ..." />
+            </td>
+
+            <td>
+              <button style="width: 100%" class="btnDelete">
+                <i class="fas fa-trash-alt" style="font-size: 20px" />
+              </button>
+            </td>
+          </tr>
+
+          <tr>
+            <td colspan="4">
+              <button style="width: 100%" class="btnAdd">
+                <i class="fas fa-plus-circle" style="font-size: 20px" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button style="margin: 25px 0px 2px 0px; width: 100%; height: 25px">
+        Run
+      </button>
+    </div>
+
+    <div class="item2">
+      <table class="pipelineTable">
+        <thead>
+          <th>#</th>
+
+          <th v-for="(row, index) in pipelineStages" :key="index">
+            {{ (row || {}).name }}
+          </th>
+        </thead>
+
+        <tr v-for="(row, index) in pipelineStates" :key="index">
           <td>
-            <input type="text" placeholder="Name" v-model="row.name"/> 
+            {{ index + 1 }}
           </td>
 
-          <td>
-            <input type="checkbox" v-model="row.isRead"/> 
-          </td>
-
-          <td>
-            <input type="checkbox" v-model="row.isWrite"/>
-          </td>
-
-          <td>
-            <button @click="onAddStage({ name: null, isRead: false, isWrite: false }, index+1)">+</button>
+          <td v-for="(item, itemIndex) in row" :key="itemIndex">
+            {{ (item || {}).name }}
           </td>
         </tr>
-      </tbody>
-    </table>
-
-    <br />
-
-    <table class="inputTable">
-      <thead>
-        <th>Name</th>
-        <th>Register Read</th>
-        <th>Register Write</th>
-        <th>Add</th>
-      </thead>
-
-      <tbody>
-        <tr 
-          v-for="(row, index) in commands"
-          :key="index"
-        >
-          <td>
-            <input type="text" placeholder="Name" v-model="row.name"/> 
-          </td>
-
-          <td>
-            <input 
-              type="text" 
-              placeholder="R1, R2, ..."  
-              :value="row.readRegisters.map(d => 'R' + d)" 
-              @input="(event) => {row.readRegisters = event.target.value.replaceAll('R', '').split(',').map(d => +d)}"
-            /> 
-          </td>
-
-          <td>
-            <input type="text" 
-              placeholder="R1, R2, ..."  
-              :value="row.writeRegisters.map(d => 'R' + d)" 
-              @input="(event) => {row.writeRegisters = event.target.value.replaceAll('R', '').split(',').map(d => +d)}"
-            />
-          </td>
-
-          <td>
-            <button @click="onAddCommand({name: null, readRegisters: [], writeRegisters: [] }, index+1)">+</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div>
-    <table class="pipelineTable">
-      <thead>
-        <th>#</th>
-
-        <th
-          v-for="(row, index) in stages"
-          :key="index"
-        >
-          {{ ((row || {}).name||"").toUpperCase() }}
-        </th>
-      </thead>
-
-      <tr 
-        v-for="(row, index) in pipelineStates"
-        :key="index"
-        tabindex="0"
-      >
-        <td>{{ index+1 }}</td>
-        <td v-for="(item, itemIndex) in row" :key="itemIndex">
-          {{ (item || {}).name }}
-        </td>
-      </tr>
-    </table>
+      </table>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 
 interface PipelineStage {
@@ -193,17 +205,17 @@ function usePipelineSimulator(stages: PipelineStage[]) {
     return pipeline.slice().map((v) => (v == null ? "<noop>" : v.name));
   }
 
-  function isEmpty(){
-    return pipeline.filter(d => !!d).length === 0;
+  function isEmpty() {
+    return pipeline.filter((d) => !!d).length === 0;
   }
 
-  function run(){
+  function run() {
     // 2D-Array to return
     let pipelineStates = [];
 
     // run through Pipeline-states
     step();
-    while(!isEmpty()){
+    while (!isEmpty()) {
       pipelineStates.push(pipeline.slice());
       step();
     }
@@ -221,58 +233,46 @@ function usePipelineSimulator(stages: PipelineStage[]) {
   };
 }
 
+function setupPipeline() {
+  // Pipeline-Stages
+  let pipelineStages = ref<PipelineStage[]>([
+    { name: "FETCH", isRead: false, isWrite: false },
+    { name: "DECODE", isRead: true, isWrite: false },
+    { name: "EXECUTE", isRead: false, isWrite: false },
+    { name: "STORE", isRead: false, isWrite: true },
+  ]);
+
+  let pipelineSimulator = usePipelineSimulator(pipelineStages.value);
+
+  // Commands
+  let pipelineCommands = ref<PipelineCommand[]>([
+    pipelineSimulator.parseCommand("ADD", ["R1", "R2"], ["R1"]),
+    pipelineSimulator.parseCommand("PUSH", ["R2"], []),
+    pipelineSimulator.parseCommand("INC", ["R1"], ["R1"]),
+    pipelineSimulator.parseCommand("DIV", ["R3", "R4"], ["R5"]),
+    pipelineSimulator.parseCommand("SUB", ["R5", "R1"], ["R6"]),
+    pipelineSimulator.parseCommand("MULT", ["R5", "R6"], ["R1"]),
+    pipelineSimulator.parseCommand("POP", [], ["R3"]),
+  ]);
+
+  pipelineSimulator.nextCommands.push(...pipelineCommands.value);
+
+  // Run
+  let pipelineStates = pipelineSimulator.run();
+
+  return {
+    pipelineStages,
+    pipelineCommands,
+    pipelineStates,
+  };
+}
+
 export default defineComponent({
   components: {},
   setup() {
-    const count = ref(0);
-
-    // Pipeline-Stages
-    let stages = ref<PipelineStage[]>([
-      { name: "fetch", isRead: false, isWrite: false },
-      { name: "decode", isRead: true, isWrite: false },
-      { name: "execute", isRead: false, isWrite: false },
-      { name: "store", isRead: false, isWrite: true },
-    ]);
-
-    let pipelineSimulator = usePipelineSimulator(stages.value);
-    watch(stages, (newStages) => pipelineSimulator = usePipelineSimulator(newStages), {deep: true});
-    
-    let onAddStage = (element:PipelineStage, index:number) => {
-      stages.value.splice(index, 0, element);
-    };
-
-    // Commands
-    let commands = ref<PipelineCommand[]>([
-      pipelineSimulator.parseCommand("ADD", ["R1", "R2"], ["R1"]),
-      pipelineSimulator.parseCommand("PUSH", ["R2"], []),
-      pipelineSimulator.parseCommand("INC", ["R1"], ["R1"]),
-      pipelineSimulator.parseCommand("DIV", ["R3", "R4"], ["R5"]),
-      pipelineSimulator.parseCommand("SUB", ["R5", "R1"], ["R6"]),
-      pipelineSimulator.parseCommand("MULT", ["R5", "R6"], ["R1"]),
-      pipelineSimulator.parseCommand("POP", [], ["R3"]),
-    ]);
-    
-    pipelineSimulator.nextCommands.push(...commands.value);
-    watch(commands, (newCommands) => pipelineSimulator.nextCommands.push(...newCommands), {deep: true});
-    
-    let onAddCommand = (element:PipelineCommand, index:number) => {
-      commands.value.splice(index, 0, element);
-    };
-
-    // Run
-    let pipelineStates = pipelineSimulator.run();
-
-    return {
-      count,
-      pipelineStates,
-      stages,
-      onAddStage,
-      commands,
-      onAddCommand,
-    };
+    return { ...setupPipeline() };
   },
 });
-
 </script>
 
 <style scoped>
@@ -287,13 +287,52 @@ export default defineComponent({
   overflow: hidden;
 }
 
-.inputTable td{
+.inputTable td {
   padding: 4px;
   text-align: center;
 }
 
-input[type="checkbox"]{
+input[type="checkbox"] {
   transform: scale(1.4);
 }
 
+.flexbox {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+ul {
+  list-style-type: "- ";
+}
+
+.btnAdd {
+  background: white;
+  color: rgb(133, 133, 133);
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.btnAdd:hover {
+  color: #198754;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.btnDelete {
+  background: white;
+  color: rgb(133, 133, 133);
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.btnDelete:hover {
+  color: #dc3545;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
 </style>
