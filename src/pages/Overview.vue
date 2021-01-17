@@ -7,37 +7,6 @@
         <div class="card-content">
           <div class="media">
             <div class="media-content">
-              <p class="title is-4">Important cat pages</p>
-            </div>
-          </div>
-
-          <div class="content">
-            <ul>
-              <li>
-                <a
-                  href="https://stefnotch.github.io/shakespeares-cats/"
-                  target="_blank"
-                  >Shakespeare's Cats</a
-                >
-              </li>
-              <li>
-                <a
-                  href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                  target="_blank"
-                  >Updated Site</a
-                >
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="column is-one-third">
-      <div class="card">
-        <div class="card-content">
-          <div class="media">
-            <div class="media-content">
               <p class="title is-4">EAN 13 Barcode</p>
             </div>
           </div>
