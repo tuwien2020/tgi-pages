@@ -12,6 +12,7 @@ import BinaryCoding from "./pages/BinaryCoding.vue";
 import Pipeline from "./pages/Pipeline.vue";
 import InterleavingGraph from "./pages/InterleavingGraph.vue";
 import { name, version } from "./../package.json";
+import 'bulma/css/bulma.css';
 
 /** @type {import("vue-router").RouteRecordRaw[]} */
 const routes = [
