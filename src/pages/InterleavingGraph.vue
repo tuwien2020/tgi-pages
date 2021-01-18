@@ -1,7 +1,23 @@
 <template>
   <h1>Interleaving</h1>
-  <div id="mynetwork"></div>
-  <div id="monaco-editor" style="width: 100%; height: 200px"></div>
+  <div class="columns">
+    <div id="mynetwork" class="column"></div>
+    <div class="column" style="display: flex; flex-direction: column">
+      <h3>Variables</h3>
+      <div id="monaco-editor" style="height: 2em"></div>
+
+      <div class="columns" style="flex-grow: 1">
+        <div class="column" style="display: flex; flex-direction: column">
+          <h3>Thread 1</h3>
+          <div id="monaco-editor-1" style="flex-grow: 1"></div>
+        </div>
+        <div class="column" style="display: flex; flex-direction: column">
+          <h3>Thread 2</h3>
+          <div id="monaco-editor-2" style="flex-grow: 1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -22,16 +38,94 @@ import {
 import { DataSet } from "vis-data";
 import loader from "@monaco-editor/loader";
 
+console.log(import.meta.env.BASE_URL);
+
+loader.config({
+  paths: {
+    vs: import.meta.env.BASE_URL + "node_modules/monaco-editor/min/vs",
+  },
+});
+
 export default {
   components: {},
   setup() {
     onMounted(() => {
       // TODO: Don't use the CDN version https://github.com/suren-atoyan/monaco-loader
       loader.init().then((monaco) => {
-        monaco.editor.create(document.getElementById("monaco-editor"), {
-          value: "// some comment",
-          language: "javascript",
+        monaco.languages.typescript.javascriptDefaults.setWorkerOptions({
+          customWorkerPath: "/custom-worker.js",
         });
+        // https://github.com/microsoft/monaco-editor/issues/2147#issuecomment-696750840
+        /*monaco.languages.typescript.javascriptDefaults.addExtraLib(
+          "declare let testVar = 3, o = 3;",
+          "yourlibname.d.ts"
+        );*/
+
+        const editor = monaco.editor.create(
+          document.getElementById("monaco-editor"),
+          {
+            value: "let U = 0, T = 0, V = 0, A = 0;",
+            language: "javascript",
+            minimap: {
+              enabled: false,
+            },
+            lineNumbers: function (original) {
+              if (original == 1) return "Setup";
+              else return original - 1;
+            },
+          }
+        );
+        editor.onDidChangeModelContent((e) => console.log(editor.getValue()));
+
+        const editor1 = monaco.editor.create(
+          document.getElementById("monaco-editor-1"),
+          {
+            value: "\n\n\n\n",
+            language: "javascript",
+            minimap: {
+              enabled: false,
+            },
+            automaticLayout: true,
+          }
+        );
+
+        const editor2 = monaco.editor.create(
+          document.getElementById("monaco-editor-2"),
+          {
+            value: "\n\n\n\n",
+            language: "javascript",
+            minimap: {
+              enabled: false,
+            },
+          }
+        );
+
+        setTimeout(async () => {
+          const model = editor.getModel();
+          const worker = await monaco.languages.typescript.getJavaScriptWorker();
+          const thisWorker = await worker(model.uri);
+          const dts = await thisWorker.getVariables(model.uri.toString());
+          console.log(dts); // Needed for outputting in the correct order
+        }, 1000);
+
+        // Line number editing...
+        /*editor.onMouseDown((e) => {
+          if (
+            e.target?.type != monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS
+          )
+            return;
+          console.log(e.target);
+
+          const lineNumber = e.target.position?.lineNumber;
+          if (lineNumber === undefined) return;
+
+          // @ts-ignore
+          //e.target.element.contenteditable = true;
+          e.target.element?.addEventListener("mousedown", (ev) => {
+            ev.stopPropagation();
+            return false;
+          });
+        });*/
       });
     });
 
@@ -110,7 +204,6 @@ export default {
 
     resultNodes[0][0].states.push(initialState);
 
-    console.clear();
     generateGraphNetwork(thread1, thread2, resultNodes);
 
     // removeDuplicatesInNetwork(resultNodes);
@@ -316,8 +409,13 @@ interface Edge {
 
 <style scoped>
 #mynetwork {
-  width: 1000px;
   height: 800px;
   border: 1px solid lightgray;
+}
+</style>
+
+<style>
+.monaco-editor .line-numbers {
+  cursor: text !important;
 }
 </style>
