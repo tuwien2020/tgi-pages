@@ -80,7 +80,13 @@
             <input
               type="text"
               placeholder="1, 2, ..."
-              v-model="row.readRegisters"
+              :value="row.readRegisters.join(',')"
+              @blur="
+                (event) =>
+                  (row.readRegisters = event.target.value
+                    .split(',')
+                    .map((d) => +d))
+              "
             />
           </td>
 
@@ -88,7 +94,13 @@
             <input
               type="text"
               placeholder="1, 2, ..."
-              v-model="row.writeRegisters"
+              :value="row.writeRegisters.join(',')"
+              @blur="
+                (event) =>
+                  (row.writeRegisters = event.target.value
+                    .split(',')
+                    .map((d) => +d))
+              "
             />
           </td>
 
@@ -190,9 +202,11 @@ function usePipelineSimulator(
         const registersToRead = pipeline[i]?.readRegisters ?? [];
 
         for (let j = i + 1; j < pipeline.length; j++) {
+          console.log((canReadWhileWrite ? pipeline : oldPipeline)[j]);
           const registersToWrite =
             (canReadWhileWrite ? pipeline : oldPipeline)[j]?.writeRegisters ??
             [];
+
           const hasReadAfterWrite = registersToWrite.some((v) =>
             registersToRead.includes(v)
           );
