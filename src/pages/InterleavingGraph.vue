@@ -4,16 +4,16 @@
     <div id="mynetwork" class="column"></div>
     <div class="column" style="display: flex; flex-direction: column">
       <h3>Variables</h3>
-      <div id="monaco-editor-variables" style="height: 2em"></div>
+      <div ref="monaco-editor-variables" style="height: 2em"></div>
 
       <div class="columns" style="flex-grow: 1">
         <div class="column" style="display: flex; flex-direction: column">
           <h3>Thread 1</h3>
-          <div id="monaco-editor-thread-1" style="flex-grow: 1"></div>
+          <div ref="monaco-editor-thread-1" style="flex-grow: 1"></div>
         </div>
         <div class="column" style="display: flex; flex-direction: column">
           <h3>Thread 2</h3>
-          <div id="monaco-editor-thread-2" style="flex-grow: 1"></div>
+          <div ref="monaco-editor-thread-2" style="flex-grow: 1"></div>
         </div>
       </div>
     </div>
@@ -28,6 +28,7 @@ import {
   watch,
   watchEffect,
   onMounted,
+  Ref,
 } from "vue";
 import {
   Network,
@@ -36,7 +37,10 @@ import {
   Options,
 } from "vis-network";
 import { DataSet } from "vis-data";
-import loader from "@monaco-editor/loader";
+import loader, { Monaco } from "@monaco-editor/loader";
+import { editor } from "monaco-editor";
+import { useRoute, useRouter } from "vue-router";
+import { useUrlRef } from "../url-ref";
 
 loader.config({
   paths: {
@@ -45,101 +49,175 @@ loader.config({
   },
 });
 
-export default {
-  components: {},
-  setup() {
-    onMounted(() => {
-      loader.init().then((monaco) => {
-        monaco.languages.typescript.javascriptDefaults.setWorkerOptions({
-          customWorkerPath: "/custom-worker.js",
-        });
-        // https://github.com/microsoft/monaco-editor/issues/2147#issuecomment-696750840
-        /*monaco.languages.typescript.javascriptDefaults.addExtraLib(
+function useCodeEditors(
+  variablesCode: Ref<string>,
+  thread1Code: Ref<string>,
+  thread2Code: Ref<string>
+) {
+  const monacoEditorVariables = ref<HTMLElement>();
+  const monacoEditorThread1 = ref<HTMLElement>();
+  const monacoEditorThread2 = ref<HTMLElement>();
+
+  let variablesEditor: editor.IStandaloneCodeEditor | null = null;
+  let thread1Editor: editor.IStandaloneCodeEditor | null = null;
+  let thread2Editor: editor.IStandaloneCodeEditor | null = null;
+
+  let monaco: Monaco | null = null;
+
+  onMounted(async () => {
+    monaco = await loader.init().then((monaco) => {
+      monaco.languages.typescript.javascriptDefaults.setWorkerOptions({
+        customWorkerPath: "/custom-worker.js",
+      });
+
+      // https://github.com/microsoft/monaco-editor/issues/2147#issuecomment-696750840
+      /*monaco.languages.typescript.javascriptDefaults.addExtraLib(
           "declare let testVar = 3, o = 3;",
           "yourlibname.d.ts"
         );*/
+      watch(
+        monacoEditorVariables,
+        (value, oldValue) => {
+          if (oldValue) {
+            variablesEditor?.dispose();
+          }
 
-        const editor = monaco.editor.create(
-          document.getElementById("monaco-editor-variables"),
-          {
-            value: "let U = 0, T = 0, V = 0, A = 0;",
+          if (!value) return;
+
+          variablesEditor = monaco.editor.create(value, {
+            value: variablesCode.value,
             language: "javascript",
             minimap: {
               enabled: false,
             },
             lineNumbers: function (original) {
               if (original == 1) return "Setup";
-              else return original - 1;
+              else return `${original - 1}`;
             },
-          }
-        );
-
-        const editor1 = monaco.editor.create(
-          document.getElementById("monaco-editor-thread-1"),
-          {
-            value: "\n\n\n\n",
-            language: "javascript",
-            minimap: {
-              enabled: false,
-            },
-            automaticLayout: true,
-          }
-        );
-
-        const editor2 = monaco.editor.create(
-          document.getElementById("monaco-editor-thread-2"),
-          {
-            value: "\n\n\n\n",
-            language: "javascript",
-            minimap: {
-              enabled: false,
-            },
-          }
-        );
-
-        editor.onDidChangeModelContent((e) => console.log(editor.getValue()));
-
-        async function getVariableNames(): Promise<string[]> {
-          const model = editor.getModel();
-          if (!model) return [];
-          const worker = await monaco.languages.typescript.getJavaScriptWorker();
-          const thisWorker = await worker(model.uri);
-          // @ts-ignore
-          const variableNames = await thisWorker.getVariables(
-            model.uri.toString()
-          );
-
-          return variableNames;
-        }
-
-        getVariableNames().then((value) => console.log(value));
-
-        async function getThreadsInstructions() {
-          const variableNames = await getVariableNames();
-
-          const threadCodes = [editor1.getValue(), editor2.getValue()];
-
-          const threadsInstructions = threadCodes.map((v) => {
-            const lines = v.split("\n");
-            return lines.map((line) =>
-              Function.apply(null, [
-                `{ ${variableNames.join(",")} }`,
-                `${line}; return { ${variableNames.join(",")} };`,
-              ])
-            );
           });
 
-          const getInitialState = Function.apply(null, [
-            `${editor.getValue()}; return { ${variableNames.join(",")} };`,
-          ]);
+          variablesEditor.onDidChangeModelContent(
+            (e) => (variablesCode.value = variablesEditor?.getValue() ?? "")
+          );
+        },
+        { immediate: true }
+      );
 
-          return {
-            initialState: getInitialState(),
-            instructions: threadsInstructions,
-          };
-        }
-      });
+      watch(
+        monacoEditorThread1,
+        (value, oldValue) => {
+          if (oldValue) {
+            thread1Editor?.dispose();
+          }
+          if (!value) return;
+
+          thread1Editor = monaco.editor.create(value, {
+            value: thread1Code.value,
+            language: "javascript",
+            minimap: {
+              enabled: false,
+            },
+          });
+
+          thread1Editor.onDidChangeModelContent(
+            (e) => (thread1Code.value = thread1Editor?.getValue() ?? "")
+          );
+        },
+        { immediate: true }
+      );
+
+      watch(
+        monacoEditorThread2,
+        (value, oldValue) => {
+          if (oldValue) {
+            thread2Editor?.dispose();
+          }
+          if (!value) return;
+
+          thread2Editor = monaco.editor.create(value, {
+            value: thread2Code.value,
+            language: "javascript",
+            minimap: {
+              enabled: false,
+            },
+          });
+
+          thread2Editor.onDidChangeModelContent(
+            (e) => (thread2Code.value = thread2Editor?.getValue() ?? "")
+          );
+        },
+        { immediate: true }
+      );
+
+      return monaco;
     });
+  });
+
+  async function getVariableNames(): Promise<string[]> {
+    const model = variablesEditor?.getModel();
+    if (!model || !monaco) return [];
+    const worker = await monaco.languages.typescript.getJavaScriptWorker();
+    const thisWorker = await worker(model.uri);
+    // @ts-ignore
+    const variableNames = await thisWorker.getVariables(model.uri.toString());
+
+    return variableNames;
+  }
+
+  async function getThreadsInstructions() {
+    const variableNames = await getVariableNames();
+
+    const threadCodes = [
+      thread1Editor?.getValue() ?? "",
+      thread2Editor?.getValue() ?? "",
+    ];
+
+    const threadsInstructions = threadCodes.map((v) => {
+      const lines = v.split("\n");
+      return lines.map((line) =>
+        Function.apply(null, [
+          `{ ${variableNames.join(",")} }`,
+          `${line}; return { ${variableNames.join(",")} };`,
+        ])
+      );
+    });
+
+    const getInitialState = Function.apply(null, [
+      `${variablesEditor?.getValue() ?? ""}; return { ${variableNames.join(
+        ","
+      )} };`,
+    ]);
+
+    return {
+      initialState: getInitialState(),
+      instructions: threadsInstructions,
+    };
+  }
+
+  return {
+    monacoEditorVariables,
+    monacoEditorThread1,
+    monacoEditorThread2,
+
+    getVariableNames,
+    getThreadsInstructions,
+  };
+}
+
+export default {
+  components: {},
+  setup() {
+    const router = useRouter();
+    const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
+
+    const variablesCode = urlRef(
+      "variablesCode",
+      "let U = 0, T = 0, V = 0, W = 0"
+    );
+    const thread1Code = urlRef("thread1Code", "\n\n\n\n\n");
+    const thread2Code = urlRef("thread2Code", "\n\n\n\n\n");
+    let codeEditors = useCodeEditors(variablesCode, thread1Code, thread2Code);
 
     // TODO: output variables order
     let initialState = { U: 0, T: 0, V: 0, W: 0 };
@@ -257,7 +335,11 @@ export default {
       let network = new Network(container, data, options);
     });
 
-    return {};
+    return {
+      "monaco-editor-variables": codeEditors.monacoEditorVariables,
+      "monaco-editor-thread-1": codeEditors.monacoEditorThread1,
+      "monaco-editor-thread-2": codeEditors.monacoEditorThread2,
+    };
   },
 };
 
