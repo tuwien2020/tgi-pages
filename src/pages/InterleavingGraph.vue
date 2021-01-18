@@ -239,8 +239,8 @@ export default {
       "variablesCode",
       "let U = 0, T = 0, V = 0, W = 0"
     );
-    const thread1Code = urlRef("thread1Code", "\n\n\n\n\n");
-    const thread2Code = urlRef("thread2Code", "\n\n\n\n\n");
+    const thread1Code = urlRef("thread1Code", "\n\n\n");
+    const thread2Code = urlRef("thread2Code", "\n\n\n");
     let codeEditors = useCodeEditors(variablesCode, thread1Code, thread2Code);
 
     watch(
@@ -252,14 +252,14 @@ export default {
 
         let instructionsSet1 = value.instructions[0].map((v, i) => {
           return {
-            label: "" + i,
+            label: "" + (i + 1),
             operation: v,
           } as Instruction;
         });
 
         let instructionsSet2 = value.instructions[1].map((v, i) => {
           return {
-            label: "" + i,
+            label: "" + (i + 1),
             operation: v,
           } as Instruction;
         });
