@@ -1,126 +1,146 @@
 <template>
-  <div class="flexbox">
-    <div class="item1">
-      <h4 style="margin: 25px 0px 2px 0px">General settings:</h4>
+  <div class="item1">
+    <h4 style="margin: 25px 0px 2px 0px">General settings:</h4>
 
-      <ul style="margin: 0px 15px">
-        <li>Read & Write: <input type="checkbox" /></li>
-      </ul>
+    <ul style="margin: 0px 15px">
+      <li>
+        Read While Write:
+        <input type="checkbox" v-model="readWhileWrite" />
+      </li>
+    </ul>
 
-      <h4 style="margin: 25px 0px 2px 0px">Stages:</h4>
+    <h4 style="margin: 25px 0px 2px 0px">Stages:</h4>
 
-      <table class="inputTable">
-        <thead>
-          <th>Name</th>
+    <table class="inputTable">
+      <thead>
+        <th>Name</th>
 
-          <th>Read</th>
+        <th>Read</th>
 
-          <th>Write</th>
+        <th>Write</th>
 
-          <th />
-        </thead>
+        <th />
+      </thead>
 
-        <tbody>
-          <tr v-for="(row, index) in pipelineStages" :key="index">
-            <td>
-              <input type="text" placeholder="Name" v-model="row.name" />
-            </td>
-
-            <td>
-              <input type="checkbox" v-model="row.isRead" />
-            </td>
-
-            <td>
-              <input type="checkbox" v-model="row.isWrite" />
-            </td>
-
-            <td>
-              <button style="width: 100%" class="btnDelete">
-                <i class="fas fa-trash-alt" style="font-size: 20px" />
-              </button>
-            </td>
-          </tr>
-
-          <tr>
-            <td colspan="4">
-              <button style="width: 100%" class="btnAdd">
-                <i class="fas fa-plus-circle" style="font-size: 20px" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h4 style="margin: 25px 0px 2px 0px">Commands:</h4>
-
-      <table class="inputTable">
-        <thead>
-          <th>Name</th>
-
-          <th>Read Register</th>
-
-          <th>Write Register</th>
-
-          <th />
-        </thead>
-
-        <tbody>
-          <tr v-for="(row, index) in pipelineCommands" :key="index">
-            <td>
-              <input type="text" placeholder="Name" />
-            </td>
-
-            <td>
-              <input type="text" placeholder="R1, R2, ..." />
-            </td>
-
-            <td>
-              <input type="text" placeholder="R1, R2, ..." />
-            </td>
-
-            <td>
-              <button style="width: 100%" class="btnDelete">
-                <i class="fas fa-trash-alt" style="font-size: 20px" />
-              </button>
-            </td>
-          </tr>
-
-          <tr>
-            <td colspan="4">
-              <button style="width: 100%" class="btnAdd">
-                <i class="fas fa-plus-circle" style="font-size: 20px" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <button style="margin: 25px 0px 2px 0px; width: 100%; height: 25px">
-        Run
-      </button>
-    </div>
-
-    <div class="item2">
-      <table class="pipelineTable">
-        <thead>
-          <th>#</th>
-
-          <th v-for="(row, index) in pipelineStages" :key="index">
-            {{ (row || {}).name }}
-          </th>
-        </thead>
-
-        <tr v-for="(row, index) in pipelineStates" :key="index">
+      <tbody>
+        <tr v-for="(row, index) in pipelineStages" :key="index">
           <td>
-            {{ index + 1 }}
+            <input type="text" placeholder="Name" v-model="row.name" />
           </td>
 
-          <td v-for="(item, itemIndex) in row" :key="itemIndex">
-            {{ (item || {}).name }}
+          <td>
+            <input type="checkbox" v-model="row.isRead" />
+          </td>
+
+          <td>
+            <input type="checkbox" v-model="row.isWrite" />
+          </td>
+
+          <td>
+            <button
+              style="width: 100%"
+              class="btnDelete"
+              @click="onDeleteStage(index)"
+            >
+              <i class="fas fa-trash-alt" style="font-size: 20px" />
+            </button>
           </td>
         </tr>
-      </table>
-    </div>
+
+        <tr>
+          <td colspan="4">
+            <button style="width: 100%" class="btnAdd" @click="onAddStage">
+              <i class="fas fa-plus-circle" style="font-size: 20px" />
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4 style="margin: 25px 0px 2px 0px">Commands:</h4>
+
+    <table class="inputTable">
+      <thead>
+        <th>Name</th>
+
+        <th>Read Register</th>
+
+        <th>Write Register</th>
+
+        <th />
+      </thead>
+
+      <tbody>
+        <tr v-for="(row, index) in pipelineCommands" :key="index">
+          <td>
+            <input type="text" placeholder="Name" v-model="row.name" />
+          </td>
+
+          <td>
+            <input
+              type="text"
+              placeholder="1, 2, ..."
+              v-model="row.readRegisters"
+            />
+          </td>
+
+          <td>
+            <input
+              type="text"
+              placeholder="1, 2, ..."
+              v-model="row.writeRegisters"
+            />
+          </td>
+
+          <td>
+            <button
+              style="width: 100%"
+              class="btnDelete"
+              @click="onDeleteCommand(index)"
+            >
+              <i class="fas fa-trash-alt" style="font-size: 20px" />
+            </button>
+          </td>
+        </tr>
+
+        <tr>
+          <td colspan="4">
+            <button style="width: 100%" class="btnAdd" @click="onAddCommand">
+              <i class="fas fa-plus-circle" style="font-size: 20px" />
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button
+      style="margin: 25px 0px 2px 0px; width: 100%; height: 25px"
+      @click="run"
+    >
+      Run
+    </button>
+  </div>
+
+  <div class="item2">
+    <table class="pipelineTable" v-if="!dirty">
+      <thead>
+        <th>#</th>
+
+        <th v-for="(row, index) in pipelineStages" :key="index">
+          {{ (row || {}).name }}
+        </th>
+      </thead>
+
+      <tr v-for="(row, index) in pipelineStates" :key="index">
+        <td>
+          {{ index + 1 }}
+        </td>
+
+        <td v-for="(item, itemIndex) in row" :key="itemIndex">
+          {{ (item || {}).name }}
+        </td>
+      </tr>
+    </table>
   </div>
 </template>
 
@@ -139,10 +159,25 @@ interface PipelineCommand {
   readonly writeRegisters: readonly number[];
 }
 
-function usePipelineSimulator(stages: PipelineStage[]) {
-  const nextCommands = [] as PipelineCommand[];
+function parseCommand(
+  name: string,
+  readRegisters: string[],
+  writeRegisters: string[]
+): PipelineCommand {
+  return {
+    name: name,
+    readRegisters: readRegisters.map((v) => +v.replace(/r|R/, "")),
+    writeRegisters: writeRegisters.map((v) => +v.replace(/r|R/, "")),
+  };
+}
+
+function usePipelineSimulator(
+  stages: PipelineStage[],
+  commands: PipelineCommand[],
+  canReadWhileWrite: boolean
+) {
+  const nextCommands = commands.slice();
   const pipeline = new Array<PipelineCommand | null>(stages.length).fill(null);
-  const canReadWhileWrite = false;
 
   function step() {
     const oldPipeline = pipeline.slice();
@@ -189,18 +224,6 @@ function usePipelineSimulator(stages: PipelineStage[]) {
     }
   }
 
-  function parseCommand(
-    name: string,
-    readRegisters: string[],
-    writeRegisters: string[]
-  ): PipelineCommand {
-    return {
-      name: name,
-      readRegisters: readRegisters.map((v) => +v.replace(/r|R/, "")),
-      writeRegisters: writeRegisters.map((v) => +v.replace(/r|R/, "")),
-    };
-  }
-
   function pipelineToString() {
     return pipeline.slice().map((v) => (v == null ? "<noop>" : v.name));
   }
@@ -234,6 +257,9 @@ function usePipelineSimulator(stages: PipelineStage[]) {
 }
 
 function setupPipeline() {
+  let dirty = ref<boolean>(false);
+  let readWhileWrite = ref<boolean>(false);
+
   // Pipeline-Stages
   let pipelineStages = ref<PipelineStage[]>([
     { name: "FETCH", isRead: false, isWrite: false },
@@ -242,28 +268,66 @@ function setupPipeline() {
     { name: "STORE", isRead: false, isWrite: true },
   ]);
 
-  let pipelineSimulator = usePipelineSimulator(pipelineStages.value);
+  let onDeleteStage = (index: number) => {
+    pipelineStages.value.splice(index, 1);
+  };
+
+  let onAddStage = () => {
+    pipelineStages.value.push({ name: "", isRead: false, isWrite: false });
+  };
 
   // Commands
   let pipelineCommands = ref<PipelineCommand[]>([
-    pipelineSimulator.parseCommand("ADD", ["R1", "R2"], ["R1"]),
-    pipelineSimulator.parseCommand("PUSH", ["R2"], []),
-    pipelineSimulator.parseCommand("INC", ["R1"], ["R1"]),
-    pipelineSimulator.parseCommand("DIV", ["R3", "R4"], ["R5"]),
-    pipelineSimulator.parseCommand("SUB", ["R5", "R1"], ["R6"]),
-    pipelineSimulator.parseCommand("MULT", ["R5", "R6"], ["R1"]),
-    pipelineSimulator.parseCommand("POP", [], ["R3"]),
+    parseCommand("ADD", ["R1", "R2"], ["R1"]),
+    parseCommand("PUSH", ["R2"], []),
+    parseCommand("INC", ["R1"], ["R1"]),
+    parseCommand("DIV", ["R3", "R4"], ["R5"]),
+    parseCommand("SUB", ["R5", "R1"], ["R6"]),
+    parseCommand("MULT", ["R5", "R6"], ["R1"]),
+    parseCommand("POP", [], ["R3"]),
   ]);
 
-  pipelineSimulator.nextCommands.push(...pipelineCommands.value);
+  let onDeleteCommand = (index: number) => {
+    pipelineCommands.value.splice(index, 1);
+  };
+
+  let onAddCommand = () => {
+    pipelineCommands.value.push(parseCommand("", [], []));
+  };
 
   // Run
-  let pipelineStates = pipelineSimulator.run();
+  let pipelineStates = ref<(PipelineCommand | null)[][]>();
+  let run = () => {
+    let pipelineSimulator = usePipelineSimulator(
+      pipelineStages.value,
+      pipelineCommands.value,
+      readWhileWrite.value
+    );
+    pipelineStates.value = pipelineSimulator.run();
+    dirty.value = false;
+  };
+  run();
+
+  // watch for dirty
+  watch(
+    [pipelineStages, pipelineCommands, readWhileWrite],
+    () => (dirty.value = true),
+    {
+      deep: true,
+    }
+  );
 
   return {
     pipelineStages,
     pipelineCommands,
     pipelineStates,
+    dirty,
+    readWhileWrite,
+    onDeleteStage,
+    onAddStage,
+    onDeleteCommand,
+    onAddCommand,
+    run,
   };
 }
 
@@ -294,12 +358,6 @@ export default defineComponent({
 
 input[type="checkbox"] {
   transform: scale(1.4);
-}
-
-.flexbox {
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
 }
 
 ul {
@@ -334,5 +392,14 @@ ul {
   border: none;
   cursor: pointer;
   outline: none;
+}
+
+.item1,
+.item2 {
+  position: absolute;
+}
+
+.item2 {
+  left: 50%;
 }
 </style>
