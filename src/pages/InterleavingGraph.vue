@@ -1,7 +1,23 @@
 <template>
   <h1>Interleaving</h1>
-  <div id="mynetwork"></div>
-  <div id="monaco-editor" style="width: 100%; height: 200px"></div>
+  <div class="columns">
+    <div id="mynetwork" class="column"></div>
+    <div class="column" style="display: flex; flex-direction: column">
+      <h3>Variables</h3>
+      <div ref="monaco-editor-variables" style="height: 2em"></div>
+
+      <div class="columns" style="flex-grow: 1">
+        <div class="column" style="display: flex; flex-direction: column">
+          <h3>Thread 1</h3>
+          <div ref="monaco-editor-thread-1" style="flex-grow: 1"></div>
+        </div>
+        <div class="column" style="display: flex; flex-direction: column">
+          <h3>Thread 2</h3>
+          <div ref="monaco-editor-thread-2" style="flex-grow: 1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -12,6 +28,8 @@ import {
   watch,
   watchEffect,
   onMounted,
+  Ref,
+  shallowRef,
 } from "vue";
 import {
   Network,
@@ -20,151 +38,314 @@ import {
   Options,
 } from "vis-network";
 import { DataSet } from "vis-data";
-import loader from "@monaco-editor/loader";
+import loader, { Monaco } from "@monaco-editor/loader";
+import { editor } from "monaco-editor";
+import { useRoute, useRouter } from "vue-router";
+import { useUrlRef } from "../url-ref";
+
+loader.config({
+  paths: {
+    // @ts-ignore
+    vs: import.meta.env.BASE_URL + "node_modules/monaco-editor/min/vs",
+  },
+});
+
+function useCodeEditors(
+  variablesCode: Ref<string>,
+  thread1Code: Ref<string>,
+  thread2Code: Ref<string>
+) {
+  const monacoEditorVariables = ref<HTMLElement>();
+  const monacoEditorThread1 = ref<HTMLElement>();
+  const monacoEditorThread2 = ref<HTMLElement>();
+
+  let variablesEditor: editor.IStandaloneCodeEditor | null = null;
+  let thread1Editor: editor.IStandaloneCodeEditor | null = null;
+  let thread2Editor: editor.IStandaloneCodeEditor | null = null;
+
+  const threadsInstructions = shallowRef<{
+    variableNames: string[];
+    initialState: object;
+    instructions: Function[][];
+  }>();
+  let timerId = 0;
+  function updateThreadsInstructions() {
+    clearTimeout(timerId);
+
+    timerId = setTimeout(async () => {
+      timerId = 0;
+      threadsInstructions.value = await getThreadsInstructions();
+    }, 500);
+  }
+
+  const monacoPromise = new Promise<Monaco>((resolve, reject) => {
+    onMounted(async () => {
+      await loader.init().then((monaco) => {
+        monaco.languages.typescript.javascriptDefaults.setWorkerOptions({
+          customWorkerPath: "/custom-worker.js",
+        });
+
+        // https://github.com/microsoft/monaco-editor/issues/2147#issuecomment-696750840
+        /*monaco.languages.typescript.javascriptDefaults.addExtraLib(
+          "declare let testVar = 3, o = 3;",
+          "yourlibname.d.ts"
+        );*/
+        watch(
+          monacoEditorVariables,
+          (value, oldValue) => {
+            if (oldValue) {
+              variablesEditor?.dispose();
+            }
+
+            if (!value) return;
+
+            variablesEditor = monaco.editor.create(value, {
+              value: variablesCode.value,
+              language: "javascript",
+              minimap: {
+                enabled: false,
+              },
+              lineNumbers: function (original) {
+                if (original == 1) return "Setup";
+                else return `${original - 1}`;
+              },
+            });
+
+            variablesEditor.onDidChangeModelContent((e) => {
+              variablesCode.value = variablesEditor?.getValue() ?? "";
+              updateThreadsInstructions();
+            });
+          },
+          { immediate: true }
+        );
+
+        watch(
+          monacoEditorThread1,
+          (value, oldValue) => {
+            if (oldValue) {
+              thread1Editor?.dispose();
+            }
+            if (!value) return;
+
+            thread1Editor = monaco.editor.create(value, {
+              value: thread1Code.value,
+              language: "javascript",
+              minimap: {
+                enabled: false,
+              },
+            });
+
+            thread1Editor.onDidChangeModelContent((e) => {
+              thread1Code.value = thread1Editor?.getValue() ?? "";
+              updateThreadsInstructions();
+            });
+          },
+          { immediate: true }
+        );
+
+        watch(
+          monacoEditorThread2,
+          (value, oldValue) => {
+            if (oldValue) {
+              thread2Editor?.dispose();
+            }
+            if (!value) return;
+
+            thread2Editor = monaco.editor.create(value, {
+              value: thread2Code.value,
+              language: "javascript",
+              minimap: {
+                enabled: false,
+              },
+            });
+
+            thread2Editor.onDidChangeModelContent((e) => {
+              thread2Code.value = thread2Editor?.getValue() ?? "";
+              updateThreadsInstructions();
+            });
+          },
+          { immediate: true }
+        );
+
+        resolve(monaco);
+      });
+    });
+  });
+
+  async function getVariableNames(): Promise<string[]> {
+    const monaco = await monacoPromise;
+
+    const model = variablesEditor?.getModel();
+    if (!model) return [];
+    const worker = await monaco.languages.typescript.getJavaScriptWorker();
+    const thisWorker = await worker(model.uri);
+    // @ts-ignore
+    const variableNames = await thisWorker.getVariables(model.uri.toString());
+
+    return variableNames;
+  }
+
+  async function getThreadsInstructions() {
+    const monaco = await monacoPromise;
+
+    const variableNames = await getVariableNames();
+
+    const threadCodes = [
+      thread1Editor?.getValue() ?? "",
+      thread2Editor?.getValue() ?? "",
+    ];
+
+    const threadsInstructions = threadCodes.map((v) => {
+      const lines = v.split("\n");
+      return lines.map((line) =>
+        Function.apply(null, [
+          `{ ${variableNames.join(",")} }`,
+          `try { ${line}; } catch(e) { console.warn(e); } return { ${variableNames.join(
+            ","
+          )} };`,
+        ])
+      );
+    });
+
+    const getInitialState = Function.apply(null, [
+      `${variablesEditor?.getValue() ?? ""}; return { ${variableNames.join(
+        ","
+      )} };`,
+    ]);
+
+    return {
+      variableNames: variableNames,
+      initialState: getInitialState(),
+      instructions: threadsInstructions,
+    };
+  }
+
+  return {
+    monacoEditorVariables,
+    monacoEditorThread1,
+    monacoEditorThread2,
+    threadsInstructions,
+  };
+}
 
 export default {
   components: {},
   setup() {
-    onMounted(() => {
-      // TODO: Don't use the CDN version https://github.com/suren-atoyan/monaco-loader
-      loader.init().then((monaco) => {
-        monaco.editor.create(document.getElementById("monaco-editor"), {
-          value: "// some comment",
-          language: "javascript",
+    const router = useRouter();
+    const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
+
+    const variablesCode = urlRef(
+      "variablesCode",
+      "let U = 0, T = 0, V = 0, W = 0"
+    );
+    const thread1Code = urlRef("thread1Code", "\n\n\n");
+    const thread2Code = urlRef("thread2Code", "\n\n\n");
+    let codeEditors = useCodeEditors(variablesCode, thread1Code, thread2Code);
+
+    watch(
+      codeEditors.threadsInstructions,
+      (value) => {
+        if (!value) return;
+
+        // TODO: output variables order
+
+        let instructionsSet1 = value.instructions[0].map((v, i) => {
+          return {
+            label: "" + (i + 1),
+            operation: v,
+          } as Instruction;
         });
-      });
-    });
 
-    // TODO: output variables order
-    let initialState = { U: 0, T: 0, V: 0, W: 0 };
+        let instructionsSet2 = value.instructions[1].map((v, i) => {
+          return {
+            label: "" + (i + 1),
+            operation: v,
+          } as Instruction;
+        });
 
-    let instructionsSet1 = [
-      {
-        label: "1",
-        operation: (state: State) => {
-          state.U = 1;
-        },
-      },
-      {
-        label: "2",
-        operation: (state: State) => {
-          state.V = state.T + state.W;
-        },
-      },
-      {
-        label: "3",
-        operation: (state: State) => {
-          state.U = state.V - state.T;
-        },
-      },
-    ];
+        let thread1: Thread = {
+          label: "ThreadA",
+          instructions: instructionsSet1,
+          instructionPointer: 0,
+        };
 
-    let instructionsSet2 = [
-      {
-        label: "4",
-        operation: (state: State) => {
-          state.T = 2;
-        },
-      },
-      {
-        label: "5",
-        operation: (state: State) => {
-          state.W = state.U;
-        },
-      },
-      {
-        label: "6",
-        operation: (state: State) => {
-          state.T = state.V;
-        },
-      },
-    ];
+        let thread2: Thread = {
+          label: "ThreadB",
+          instructions: instructionsSet2,
+          instructionPointer: 0,
+        };
 
-    let thread1: Thread = {
-      label: "ThreadA",
-      instructions: instructionsSet1,
-      instructionPointer: 0,
+        let resultNodes = Array.from(
+          { length: thread2.instructions.length + 1 },
+          (v1, i) =>
+            Array.from({ length: thread1.instructions.length + 1 }, (v2, j) => {
+              return {
+                states: [],
+                edges: [],
+                id: j * (thread2.instructions.length + 1) + i,
+              } as Node;
+            })
+        );
+
+        resultNodes[0][0].states.push(value.initialState as any);
+
+        generateGraphNetwork(thread1, thread2, resultNodes);
+        showGraphNetwork(resultNodes, value.variableNames);
+      },
+      { immediate: true }
+    );
+    return {
+      "monaco-editor-variables": codeEditors.monacoEditorVariables,
+      "monaco-editor-thread-1": codeEditors.monacoEditorThread1,
+      "monaco-editor-thread-2": codeEditors.monacoEditorThread2,
     };
-
-    let thread2: Thread = {
-      label: "ThreadB",
-      instructions: instructionsSet2,
-      instructionPointer: 0,
-    };
-
-    let resultNodes: Node[][] = new Array<Node[]>(
-      thread1.instructions.length + 1
-    )
-      .fill([])
-      .map((a, i) =>
-        new Array<Node>(thread2.instructions.length + 1)
-          .fill({ states: [], edges: [], id: 0 })
-          .map((b, j) => {
-            return {
-              states: [],
-              edges: [],
-              id: j * (thread1.instructions.length + 1) + i,
-            };
-          })
-      );
-
-    resultNodes[0][0].states.push(initialState);
-
-    console.clear();
-    generateGraphNetwork(thread1, thread2, resultNodes);
-
-    // removeDuplicatesInNetwork(resultNodes);
-    // console.log(resultNodes);
-
-    let visNodes = [] as VisNode[];
-    let visEdges = [] as VisEdge[];
-
-    let counter = 0;
-
-    for (let i = 0; i < resultNodes.length; i++) {
-      for (let j = 0; j < resultNodes[i].length; j++) {
-        let node = resultNodes[i][j];
-        visNodes.push({
-          id: node.id,
-          label: node.states
-            .map((state) => `(${state.U}, ${state.T}, ${state.V}, ${state.W})`)
-            .join("\n"),
-          x: j * 10,
-          y: i * 10,
-        });
-
-        node.edges.forEach((edge) => {
-          visEdges.push({
-            id: counter++,
-            from: node.id,
-            to: edge.nextNode.id,
-            label: edge.instruction.label,
-          });
-        });
-      }
-    }
-
-    let test1 = new DataSet<VisNode, "id">(visNodes);
-    let test2 = new DataSet<VisEdge, "id">(visEdges);
-
-    console.log(visNodes);
-    console.log(visEdges);
-
-    let data = { nodes: test1, edges: test2 };
-
-    onMounted(() => {
-      let container = document.getElementById("mynetwork");
-      let options: Options = {
-        nodes: { shape: "box" },
-        edges: { arrows: "to" },
-      };
-
-      let network = new Network(container, data, options);
-    });
-
-    return {};
   },
 };
+
+function showGraphNetwork(resultNodes: Node[][], variableNames: string[]) {
+  let visNodes = [] as VisNode[];
+  let visEdges = [] as VisEdge[];
+
+  let counter = 0;
+
+  for (let i = 0; i < resultNodes.length; i++) {
+    for (let j = 0; j < resultNodes[i].length; j++) {
+      let node = resultNodes[i][j];
+      visNodes.push({
+        id: node.id,
+        label: node.states
+          .map((state) => `(${variableNames.map((v) => state[v]).join(",")})`)
+          .join("\n"),
+        x: j * 10,
+        y: i * 10,
+      });
+
+      node.edges.forEach((edge) => {
+        visEdges.push({
+          id: counter++,
+          from: node.id,
+          to: edge.nextNode.id,
+          label: edge.instruction.label,
+        });
+      });
+    }
+  }
+
+  let data = {
+    nodes: new DataSet<VisNode, "id">(visNodes),
+    edges: new DataSet<VisEdge, "id">(visEdges),
+  };
+
+  let container = document.getElementById("mynetwork");
+  if (!container) return;
+  let options: Options = {
+    nodes: { shape: "box" },
+    edges: { arrows: "to" },
+  };
+
+  let network = new Network(container, data, options); // TODO: HTML Ref
+}
 
 function generateGraphNetwork(
   threadA: Thread,
@@ -233,8 +414,7 @@ function generateGraphNetwork(
     let resultStates: State[] = [];
     for (let state of currentNode.states) {
       let stateCopy = { ...state };
-      instruction.operation(stateCopy);
-      resultStates.push(stateCopy);
+      resultStates.push(instruction.operation(stateCopy) as any);
     }
     return resultStates;
   }
@@ -252,25 +432,8 @@ function edgeAlreadyExists(edges: Edge[], current: Edge) {
   return false;
 }
 
-function removeDuplicatesInNetwork(nodes: Node[][]) {
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = 0; j < nodes[i].length; j++) {
-      let currentNode = nodes[i][j];
-      let currentStates = currentNode.states;
-
-      let filtered = currentStates.filter((state, index) => {
-        return isStateUnique(state, currentStates, index);
-      });
-      currentNode.states = filtered;
-    }
-  }
-}
-
 interface State {
-  U: number;
-  T: number;
-  V: number;
-  W: number;
+  [key: string]: number;
 }
 
 function isStateUnique(state: State, states: State[], index: number = -1) {
@@ -283,12 +446,20 @@ function isStateUnique(state: State, states: State[], index: number = -1) {
 }
 
 function areStatesEqual(stateA: State, stateB: State): boolean {
-  return (
-    stateA.U === stateB.U &&
-    stateA.T === stateB.T &&
-    stateA.V === stateB.V &&
-    stateA.W === stateB.W
-  );
+  const keys1 = Object.keys(stateA);
+  const keys2 = Object.keys(stateB);
+
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+
+  for (let key of keys1) {
+    if (stateA[key] !== stateB[key]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 interface Thread {
@@ -316,8 +487,13 @@ interface Edge {
 
 <style scoped>
 #mynetwork {
-  width: 1000px;
   height: 800px;
   border: 1px solid lightgray;
+}
+</style>
+
+<style>
+.monaco-editor .line-numbers {
+  cursor: text !important;
 }
 </style>
