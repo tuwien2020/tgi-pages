@@ -1,11 +1,12 @@
 <template>
-  <div class="header">
-    <div>
+  <nav class="navbar header" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
       <router-link to="/" class="home-link"
         >TGI Pages - {{ version }}
       </router-link>
     </div>
-  </div>
+  </nav>
+
   <div class="content">
     <router-view></router-view>
   </div>
@@ -31,6 +32,7 @@ export default defineComponent({
   padding: 12px 24px;
   background: #f5f5f5;
   box-shadow: 0 1px 5px -1px rgba(0, 0, 0, 0.2);
+  min-height: none;
 }
 .home-link {
   text-decoration: none;

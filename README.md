@@ -88,8 +88,11 @@ TGI Test
 
 - Code ausführen
   - Automatically identify dependencies
+  - Out of order execution
+  - Multithreading (locks)
+  - Interleaving
+  
 - Stack
-- Interleaving
 - Pipelining
   - Tasks with different durations
   - Branch prediction
