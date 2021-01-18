@@ -1,158 +1,179 @@
 <template>
-  <div class="item1">
-    <h4 style="margin: 25px 0px 2px 0px">General settings:</h4>
+  <div class="columns">
+    <div class="column">
+      <b>General settings:</b>
 
-    <ul style="margin: 0px 15px">
-      <li>
-        Read While Write:
-        <input type="checkbox" v-model="readWhileWrite" />
-      </li>
-    </ul>
+      <ul>
+        <li>
+          <label class="checkbox">
+            <input type="checkbox" />
+            <span style="margin-left: 10px">Read and write</span>
+          </label>
+        </li>
+      </ul>
 
-    <h4 style="margin: 25px 0px 2px 0px">Stages:</h4>
+      <br />
 
-    <table class="inputTable">
-      <thead>
-        <th>Name</th>
+      <b>Stages:</b>
 
-        <th>Read</th>
+      <table class="table is-striped is-bordered">
+        <thead>
+          <th>Name</th>
 
-        <th>Write</th>
+          <th>Read</th>
 
-        <th />
-      </thead>
+          <th>Write</th>
 
-      <tbody>
-        <tr v-for="(row, index) in pipelineStages" :key="index">
-          <td>
-            <input type="text" placeholder="Name" v-model="row.name" />
-          </td>
+          <th />
+        </thead>
 
-          <td>
-            <input type="checkbox" v-model="row.isRead" />
-          </td>
+        <tbody>
+          <tr v-for="(row, index) in pipelineStages" :key="index">
+            <td>
+              <input
+                class="input"
+                type="text"
+                placeholder="Name"
+                v-model="row.name"
+              />
+            </td>
 
-          <td>
-            <input type="checkbox" v-model="row.isWrite" />
-          </td>
+            <td>
+              <input class="checkbox" type="checkbox" v-model="row.isRead" />
+            </td>
 
-          <td>
-            <button
-              style="width: 100%"
-              class="btnDelete"
-              @click="onDeleteStage(index)"
-            >
-              <i class="fas fa-trash-alt" style="font-size: 20px" />
-            </button>
-          </td>
-        </tr>
+            <td>
+              <input class="checkbox" type="checkbox" v-model="row.isWrite" />
+            </td>
 
-        <tr>
-          <td colspan="4">
-            <button style="width: 100%" class="btnAdd" @click="onAddStage">
-              <i class="fas fa-plus-circle" style="font-size: 20px" />
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <td>
+              <button
+                class="button is-danger is-light is-small"
+                @click="onDeleteStage(index)"
+              >
+                <i class="fas fa-trash-alt" />
+              </button>
+            </td>
+          </tr>
 
-    <h4 style="margin: 25px 0px 2px 0px">Commands:</h4>
+          <tr>
+            <td colspan="4" style="text-align: center">
+              <button
+                @click="onAddStage"
+                class="button is-success is-light is-small"
+              >
+                <i class="fas fa-plus-circle" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <table class="inputTable">
-      <thead>
-        <th>Name</th>
+      <span>Commands:</span>
 
-        <th>Read Register</th>
+      <table class="table is-striped is-bordered">
+        <thead>
+          <th>Name</th>
 
-        <th>Write Register</th>
+          <th>Read Register</th>
 
-        <th />
-      </thead>
+          <th>Write Register</th>
 
-      <tbody>
-        <tr v-for="(row, index) in pipelineCommands" :key="index">
-          <td>
-            <input type="text" placeholder="Name" v-model="row.name" />
-          </td>
+          <th />
+        </thead>
 
-          <td>
-            <input
-              type="text"
-              placeholder="1, 2, ..."
-              :value="row.readRegisters.join(',')"
-              @blur="
-                (event) =>
-                  (row.readRegisters = event.target.value
-                    .split(',')
-                    .map((d) => +d))
-              "
-            />
-          </td>
+        <tbody>
+          <tr v-for="(row, index) in pipelineCommands" :key="index">
+            <td>
+              <input
+                class="input"
+                type="text"
+                placeholder="Name"
+                v-model="row.name"
+              />
+            </td>
 
-          <td>
-            <input
-              type="text"
-              placeholder="1, 2, ..."
-              :value="row.writeRegisters.join(',')"
-              @blur="
-                (event) =>
-                  (row.writeRegisters = event.target.value
-                    .split(',')
-                    .map((d) => +d))
-              "
-            />
-          </td>
+            <td>
+              <input
+                class="input"
+                type="text"
+                placeholder="1, 2, ..."
+                :value="row.readRegisters.join(',')"
+                @blur="
+                  (event) =>
+                    (row.readRegisters = event.target.value
+                      .split(',')
+                      .map((d) => +d))
+                "
+              />
+            </td>
 
-          <td>
-            <button
-              style="width: 100%"
-              class="btnDelete"
-              @click="onDeleteCommand(index)"
-            >
-              <i class="fas fa-trash-alt" style="font-size: 20px" />
-            </button>
-          </td>
-        </tr>
+            <td>
+              <input
+                class="input"
+                type="text"
+                placeholder="1, 2, ..."
+                :value="row.writeRegisters.join(',')"
+                @blur="
+                  (event) =>
+                    (row.writeRegisters = event.target.value
+                      .split(',')
+                      .map((d) => +d))
+                "
+              />
+            </td>
 
-        <tr>
-          <td colspan="4">
-            <button style="width: 100%" class="btnAdd" @click="onAddCommand">
-              <i class="fas fa-plus-circle" style="font-size: 20px" />
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <td>
+              <button
+                class="button is-danger is-light is-small"
+                @click="onDeleteCommand(index)"
+              >
+                <i class="fas fa-trash-alt" />
+              </button>
+            </td>
+          </tr>
 
-    <button
-      style="margin: 25px 0px 2px 0px; width: 100%; height: 25px"
-      @click="run"
-    >
-      Run
-    </button>
-  </div>
+          <tr>
+            <td colspan="4" style="text-align: center">
+              <button
+                class="button is-success is-light is-small"
+                @click="onAddCommand"
+              >
+                <i class="fas fa-plus-circle" />
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-  <div class="item2">
-    <table class="pipelineTable" v-if="!dirty">
-      <thead>
-        <th>#</th>
+      <button style="width: 100%" class="button is-info" @click="run">
+        Run
+      </button>
+    </div>
 
-        <th v-for="(row, index) in pipelineStages" :key="index">
-          {{ (row || {}).name }}
-        </th>
-      </thead>
+    <div class="column">
+      <table class="table is-striped is-bordered" v-if="!dirty">
+        <thead>
+          <th style="width: 50px">#</th>
 
-      <tr v-for="(row, index) in pipelineStates" :key="index">
-        <td>
-          {{ index + 1 }}
-        </td>
+          <th v-for="(row, index) in pipelineStages" :key="index">
+            {{ (row || {}).name }}
+          </th>
+        </thead>
 
-        <td v-for="(item, itemIndex) in row" :key="itemIndex">
-          {{ (item || {}).name }}
-        </td>
-      </tr>
-    </table>
+        <tbody>
+          <tr v-for="(row, index) in pipelineStates" :key="index">
+            <td>
+              {{ index + 1 }}
+            </td>
+
+            <td v-for="(item, itemIndex) in row" :key="itemIndex">
+              {{ (item || {}).name }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -202,7 +223,6 @@ function usePipelineSimulator(
         const registersToRead = pipeline[i]?.readRegisters ?? [];
 
         for (let j = i + 1; j < pipeline.length; j++) {
-          console.log((canReadWhileWrite ? pipeline : oldPipeline)[j]);
           const registersToWrite =
             (canReadWhileWrite ? pipeline : oldPipeline)[j]?.writeRegisters ??
             [];
@@ -296,7 +316,11 @@ function setupPipeline() {
     parseCommand("PUSH", ["R2"], []),
     parseCommand("INC", ["R1"], ["R1"]),
     parseCommand("DIV", ["R3", "R4"], ["R5"]),
-    parseCommand("SUB", ["R5", "R1"], ["R6"]),
+    parseCommand(
+      "SUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUB",
+      ["R5", "R1"],
+      ["R6"]
+    ),
     parseCommand("MULT", ["R5", "R6"], ["R1"]),
     parseCommand("POP", [], ["R3"]),
   ]);
@@ -354,66 +378,34 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.pipelineTable td:hover,
-.pipelineTable td:focus {
-  background-color: #f1f1f1;
+tr,
+td,
+th,
+input[type="text"],
+button {
+  height: 25px !important;
 }
 
-.pipelineTable {
-  font-family: "Consolas", "Courier New", Courier, monospace;
-  text-align: center;
-  overflow: hidden;
+button {
+  width: 25px;
 }
 
-.inputTable td {
-  padding: 4px;
-  text-align: center;
+tr,
+td,
+th {
+  text-align: center !important;
 }
 
 input[type="checkbox"] {
-  transform: scale(1.4);
+  transform: scale(1.5);
 }
 
 ul {
-  list-style-type: "- ";
+  list-style: none !important;
+  margin: 0px 0px 0px 25px !important;
 }
 
-.btnAdd {
-  background: white;
-  color: rgb(133, 133, 133);
-  border: none;
-  cursor: pointer;
-  outline: none;
-}
-
-.btnAdd:hover {
-  color: #198754;
-  border: none;
-  cursor: pointer;
-  outline: none;
-}
-
-.btnDelete {
-  background: white;
-  color: rgb(133, 133, 133);
-  border: none;
-  cursor: pointer;
-  outline: none;
-}
-
-.btnDelete:hover {
-  color: #dc3545;
-  border: none;
-  cursor: pointer;
-  outline: none;
-}
-
-.item1,
-.item2 {
-  position: absolute;
-}
-
-.item2 {
-  left: 50%;
+table {
+  word-break: break-all;
 }
 </style>
