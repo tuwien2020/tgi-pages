@@ -4,16 +4,16 @@
     <div id="mynetwork" class="column"></div>
     <div class="column" style="display: flex; flex-direction: column">
       <h3>Variables</h3>
-      <div id="monaco-editor" style="height: 2em"></div>
+      <div id="monaco-editor-variables" style="height: 2em"></div>
 
       <div class="columns" style="flex-grow: 1">
         <div class="column" style="display: flex; flex-direction: column">
           <h3>Thread 1</h3>
-          <div id="monaco-editor-1" style="flex-grow: 1"></div>
+          <div id="monaco-editor-thread-1" style="flex-grow: 1"></div>
         </div>
         <div class="column" style="display: flex; flex-direction: column">
           <h3>Thread 2</h3>
-          <div id="monaco-editor-2" style="flex-grow: 1"></div>
+          <div id="monaco-editor-thread-2" style="flex-grow: 1"></div>
         </div>
       </div>
     </div>
@@ -38,10 +38,9 @@ import {
 import { DataSet } from "vis-data";
 import loader from "@monaco-editor/loader";
 
-console.log(import.meta.env.BASE_URL);
-
 loader.config({
   paths: {
+    // @ts-ignore
     vs: import.meta.env.BASE_URL + "node_modules/monaco-editor/min/vs",
   },
 });
@@ -50,7 +49,6 @@ export default {
   components: {},
   setup() {
     onMounted(() => {
-      // TODO: Don't use the CDN version https://github.com/suren-atoyan/monaco-loader
       loader.init().then((monaco) => {
         monaco.languages.typescript.javascriptDefaults.setWorkerOptions({
           customWorkerPath: "/custom-worker.js",
@@ -62,7 +60,7 @@ export default {
         );*/
 
         const editor = monaco.editor.create(
-          document.getElementById("monaco-editor"),
+          document.getElementById("monaco-editor-variables"),
           {
             value: "let U = 0, T = 0, V = 0, A = 0;",
             language: "javascript",
@@ -75,10 +73,9 @@ export default {
             },
           }
         );
-        editor.onDidChangeModelContent((e) => console.log(editor.getValue()));
 
         const editor1 = monaco.editor.create(
-          document.getElementById("monaco-editor-1"),
+          document.getElementById("monaco-editor-thread-1"),
           {
             value: "\n\n\n\n",
             language: "javascript",
@@ -90,7 +87,7 @@ export default {
         );
 
         const editor2 = monaco.editor.create(
-          document.getElementById("monaco-editor-2"),
+          document.getElementById("monaco-editor-thread-2"),
           {
             value: "\n\n\n\n",
             language: "javascript",
@@ -100,32 +97,47 @@ export default {
           }
         );
 
-        setTimeout(async () => {
+        editor.onDidChangeModelContent((e) => console.log(editor.getValue()));
+
+        async function getVariableNames(): Promise<string[]> {
           const model = editor.getModel();
+          if (!model) return [];
           const worker = await monaco.languages.typescript.getJavaScriptWorker();
           const thisWorker = await worker(model.uri);
-          const dts = await thisWorker.getVariables(model.uri.toString());
-          console.log(dts); // Needed for outputting in the correct order
-        }, 1000);
-
-        // Line number editing...
-        /*editor.onMouseDown((e) => {
-          if (
-            e.target?.type != monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS
-          )
-            return;
-          console.log(e.target);
-
-          const lineNumber = e.target.position?.lineNumber;
-          if (lineNumber === undefined) return;
-
           // @ts-ignore
-          //e.target.element.contenteditable = true;
-          e.target.element?.addEventListener("mousedown", (ev) => {
-            ev.stopPropagation();
-            return false;
+          const variableNames = await thisWorker.getVariables(
+            model.uri.toString()
+          );
+
+          return variableNames;
+        }
+
+        getVariableNames().then((value) => console.log(value));
+
+        async function getThreadsInstructions() {
+          const variableNames = await getVariableNames();
+
+          const threadCodes = [editor1.getValue(), editor2.getValue()];
+
+          const threadsInstructions = threadCodes.map((v) => {
+            const lines = v.split("\n");
+            return lines.map((line) =>
+              Function.apply(null, [
+                `{ ${variableNames.join(",")} }`,
+                `${line}; return { ${variableNames.join(",")} };`,
+              ])
+            );
           });
-        });*/
+
+          const getInitialState = Function.apply(null, [
+            `${editor.getValue()}; return { ${variableNames.join(",")} };`,
+          ]);
+
+          return {
+            initialState: getInitialState(),
+            instructions: threadsInstructions,
+          };
+        }
       });
     });
 
@@ -186,28 +198,21 @@ export default {
       instructionPointer: 0,
     };
 
-    let resultNodes: Node[][] = new Array<Node[]>(
-      thread1.instructions.length + 1
-    )
-      .fill([])
-      .map((a, i) =>
-        new Array<Node>(thread2.instructions.length + 1)
-          .fill({ states: [], edges: [], id: 0 })
-          .map((b, j) => {
-            return {
-              states: [],
-              edges: [],
-              id: j * (thread1.instructions.length + 1) + i,
-            };
-          })
-      );
+    let resultNodes = Array.from(
+      { length: thread1.instructions.length + 1 },
+      (v1, i) =>
+        Array.from({ length: thread2.instructions.length + 1 }, (v2, j) => {
+          return {
+            states: [],
+            edges: [],
+            id: j * (thread1.instructions.length + 1) + i,
+          } as Node;
+        })
+    );
 
     resultNodes[0][0].states.push(initialState);
 
     generateGraphNetwork(thread1, thread2, resultNodes);
-
-    // removeDuplicatesInNetwork(resultNodes);
-    // console.log(resultNodes);
 
     let visNodes = [] as VisNode[];
     let visEdges = [] as VisEdge[];
@@ -237,13 +242,10 @@ export default {
       }
     }
 
-    let test1 = new DataSet<VisNode, "id">(visNodes);
-    let test2 = new DataSet<VisEdge, "id">(visEdges);
-
-    console.log(visNodes);
-    console.log(visEdges);
-
-    let data = { nodes: test1, edges: test2 };
+    let data = {
+      nodes: new DataSet<VisNode, "id">(visNodes),
+      edges: new DataSet<VisEdge, "id">(visEdges),
+    };
 
     onMounted(() => {
       let container = document.getElementById("mynetwork");
@@ -343,20 +345,6 @@ function edgeAlreadyExists(edges: Edge[], current: Edge) {
     }
   }
   return false;
-}
-
-function removeDuplicatesInNetwork(nodes: Node[][]) {
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = 0; j < nodes[i].length; j++) {
-      let currentNode = nodes[i][j];
-      let currentStates = currentNode.states;
-
-      let filtered = currentStates.filter((state, index) => {
-        return isStateUnique(state, currentStates, index);
-      });
-      currentNode.states = filtered;
-    }
-  }
 }
 
 interface State {
