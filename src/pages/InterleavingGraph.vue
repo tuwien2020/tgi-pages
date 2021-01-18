@@ -29,6 +29,7 @@ import {
   watchEffect,
   onMounted,
   Ref,
+  shallowRef,
 } from "vue";
 import {
   Network,
@@ -61,6 +62,21 @@ function useCodeEditors(
   let variablesEditor: editor.IStandaloneCodeEditor | null = null;
   let thread1Editor: editor.IStandaloneCodeEditor | null = null;
   let thread2Editor: editor.IStandaloneCodeEditor | null = null;
+
+  const threadsInstructions = shallowRef<{
+    variableNames: string[];
+    initialState: object;
+    instructions: Function[][];
+  }>();
+  let timerId = 0;
+  function updateThreadsInstructions() {
+    clearTimeout(timerId);
+
+    timerId = setTimeout(async () => {
+      timerId = 0;
+      threadsInstructions.value = await getThreadsInstructions();
+    }, 500);
+  }
 
   const monacoPromise = new Promise<Monaco>((resolve, reject) => {
     onMounted(async () => {
@@ -95,9 +111,10 @@ function useCodeEditors(
               },
             });
 
-            variablesEditor.onDidChangeModelContent(
-              (e) => (variablesCode.value = variablesEditor?.getValue() ?? "")
-            );
+            variablesEditor.onDidChangeModelContent((e) => {
+              variablesCode.value = variablesEditor?.getValue() ?? "";
+              updateThreadsInstructions();
+            });
           },
           { immediate: true }
         );
@@ -118,9 +135,10 @@ function useCodeEditors(
               },
             });
 
-            thread1Editor.onDidChangeModelContent(
-              (e) => (thread1Code.value = thread1Editor?.getValue() ?? "")
-            );
+            thread1Editor.onDidChangeModelContent((e) => {
+              thread1Code.value = thread1Editor?.getValue() ?? "";
+              updateThreadsInstructions();
+            });
           },
           { immediate: true }
         );
@@ -141,9 +159,10 @@ function useCodeEditors(
               },
             });
 
-            thread2Editor.onDidChangeModelContent(
-              (e) => (thread2Code.value = thread2Editor?.getValue() ?? "")
-            );
+            thread2Editor.onDidChangeModelContent((e) => {
+              thread2Code.value = thread2Editor?.getValue() ?? "";
+              updateThreadsInstructions();
+            });
           },
           { immediate: true }
         );
@@ -181,7 +200,9 @@ function useCodeEditors(
       return lines.map((line) =>
         Function.apply(null, [
           `{ ${variableNames.join(",")} }`,
-          `${line}; return { ${variableNames.join(",")} };`,
+          `try { ${line}; } catch(e) { console.warn(e); } return { ${variableNames.join(
+            ","
+          )} };`,
         ])
       );
     });
@@ -193,6 +214,7 @@ function useCodeEditors(
     ]);
 
     return {
+      variableNames: variableNames,
       initialState: getInitialState(),
       instructions: threadsInstructions,
     };
@@ -202,9 +224,7 @@ function useCodeEditors(
     monacoEditorVariables,
     monacoEditorThread1,
     monacoEditorThread2,
-
-    getVariableNames,
-    getThreadsInstructions,
+    threadsInstructions,
   };
 }
 
@@ -223,122 +243,58 @@ export default {
     const thread2Code = urlRef("thread2Code", "\n\n\n\n\n");
     let codeEditors = useCodeEditors(variablesCode, thread1Code, thread2Code);
 
-    // TODO: output variables order
-    let initialState = { U: 0, T: 0, V: 0, W: 0 };
+    watch(
+      codeEditors.threadsInstructions,
+      (value) => {
+        if (!value) return;
 
-    let instructionsSet1 = [
-      {
-        label: "1",
-        operation: (state: State) => {
-          state.U = 1;
-        },
-      },
-      {
-        label: "2",
-        operation: (state: State) => {
-          state.V = state.T + state.W;
-        },
-      },
-      {
-        label: "3",
-        operation: (state: State) => {
-          state.U = state.V - state.T;
-        },
-      },
-    ];
+        // TODO: output variables order
 
-    let instructionsSet2 = [
-      {
-        label: "4",
-        operation: (state: State) => {
-          state.T = 2;
-        },
-      },
-      {
-        label: "5",
-        operation: (state: State) => {
-          state.W = state.U;
-        },
-      },
-      {
-        label: "6",
-        operation: (state: State) => {
-          state.T = state.V;
-        },
-      },
-    ];
-
-    let thread1: Thread = {
-      label: "ThreadA",
-      instructions: instructionsSet1,
-      instructionPointer: 0,
-    };
-
-    let thread2: Thread = {
-      label: "ThreadB",
-      instructions: instructionsSet2,
-      instructionPointer: 0,
-    };
-
-    let resultNodes = Array.from(
-      { length: thread1.instructions.length + 1 },
-      (v1, i) =>
-        Array.from({ length: thread2.instructions.length + 1 }, (v2, j) => {
+        let instructionsSet1 = value.instructions[0].map((v, i) => {
           return {
-            states: [],
-            edges: [],
-            id: j * (thread1.instructions.length + 1) + i,
-          } as Node;
-        })
+            label: "" + i,
+            operation: v,
+          } as Instruction;
+        });
+
+        let instructionsSet2 = value.instructions[1].map((v, i) => {
+          return {
+            label: "" + i,
+            operation: v,
+          } as Instruction;
+        });
+
+        let thread1: Thread = {
+          label: "ThreadA",
+          instructions: instructionsSet1,
+          instructionPointer: 0,
+        };
+
+        let thread2: Thread = {
+          label: "ThreadB",
+          instructions: instructionsSet2,
+          instructionPointer: 0,
+        };
+
+        let resultNodes = Array.from(
+          { length: thread2.instructions.length + 1 },
+          (v1, i) =>
+            Array.from({ length: thread1.instructions.length + 1 }, (v2, j) => {
+              return {
+                states: [],
+                edges: [],
+                id: j * (thread2.instructions.length + 1) + i,
+              } as Node;
+            })
+        );
+
+        resultNodes[0][0].states.push(value.initialState as any);
+
+        generateGraphNetwork(thread1, thread2, resultNodes);
+        showGraphNetwork(resultNodes, value.variableNames);
+      },
+      { immediate: true }
     );
-
-    resultNodes[0][0].states.push(initialState);
-
-    generateGraphNetwork(thread1, thread2, resultNodes);
-
-    let visNodes = [] as VisNode[];
-    let visEdges = [] as VisEdge[];
-
-    let counter = 0;
-
-    for (let i = 0; i < resultNodes.length; i++) {
-      for (let j = 0; j < resultNodes[i].length; j++) {
-        let node = resultNodes[i][j];
-        visNodes.push({
-          id: node.id,
-          label: node.states
-            .map((state) => `(${state.U}, ${state.T}, ${state.V}, ${state.W})`)
-            .join("\n"),
-          x: j * 10,
-          y: i * 10,
-        });
-
-        node.edges.forEach((edge) => {
-          visEdges.push({
-            id: counter++,
-            from: node.id,
-            to: edge.nextNode.id,
-            label: edge.instruction.label,
-          });
-        });
-      }
-    }
-
-    let data = {
-      nodes: new DataSet<VisNode, "id">(visNodes),
-      edges: new DataSet<VisEdge, "id">(visEdges),
-    };
-
-    onMounted(() => {
-      let container = document.getElementById("mynetwork");
-      let options: Options = {
-        nodes: { shape: "box" },
-        edges: { arrows: "to" },
-      };
-
-      let network = new Network(container, data, options);
-    });
-
     return {
       "monaco-editor-variables": codeEditors.monacoEditorVariables,
       "monaco-editor-thread-1": codeEditors.monacoEditorThread1,
@@ -346,6 +302,50 @@ export default {
     };
   },
 };
+
+function showGraphNetwork(resultNodes: Node[][], variableNames: string[]) {
+  let visNodes = [] as VisNode[];
+  let visEdges = [] as VisEdge[];
+
+  let counter = 0;
+
+  for (let i = 0; i < resultNodes.length; i++) {
+    for (let j = 0; j < resultNodes[i].length; j++) {
+      let node = resultNodes[i][j];
+      visNodes.push({
+        id: node.id,
+        label: node.states
+          .map((state) => `(${variableNames.map((v) => state[v]).join(",")})`)
+          .join("\n"),
+        x: j * 10,
+        y: i * 10,
+      });
+
+      node.edges.forEach((edge) => {
+        visEdges.push({
+          id: counter++,
+          from: node.id,
+          to: edge.nextNode.id,
+          label: edge.instruction.label,
+        });
+      });
+    }
+  }
+
+  let data = {
+    nodes: new DataSet<VisNode, "id">(visNodes),
+    edges: new DataSet<VisEdge, "id">(visEdges),
+  };
+
+  let container = document.getElementById("mynetwork");
+  if (!container) return;
+  let options: Options = {
+    nodes: { shape: "box" },
+    edges: { arrows: "to" },
+  };
+
+  let network = new Network(container, data, options); // TODO: HTML Ref
+}
 
 function generateGraphNetwork(
   threadA: Thread,
@@ -414,8 +414,7 @@ function generateGraphNetwork(
     let resultStates: State[] = [];
     for (let state of currentNode.states) {
       let stateCopy = { ...state };
-      instruction.operation(stateCopy);
-      resultStates.push(stateCopy);
+      resultStates.push(instruction.operation(stateCopy) as any);
     }
     return resultStates;
   }
@@ -434,10 +433,7 @@ function edgeAlreadyExists(edges: Edge[], current: Edge) {
 }
 
 interface State {
-  U: number;
-  T: number;
-  V: number;
-  W: number;
+  [key: string]: number;
 }
 
 function isStateUnique(state: State, states: State[], index: number = -1) {
@@ -450,12 +446,20 @@ function isStateUnique(state: State, states: State[], index: number = -1) {
 }
 
 function areStatesEqual(stateA: State, stateB: State): boolean {
-  return (
-    stateA.U === stateB.U &&
-    stateA.T === stateB.T &&
-    stateA.V === stateB.V &&
-    stateA.W === stateB.W
-  );
+  const keys1 = Object.keys(stateA);
+  const keys2 = Object.keys(stateB);
+
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+
+  for (let key of keys1) {
+    if (stateA[key] !== stateB[key]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 interface Thread {
