@@ -38,18 +38,22 @@ import {
   Options,
 } from "vis-network";
 import { DataSet } from "vis-data";
-import loader, { Monaco } from "@monaco-editor/loader";
-import { editor } from "monaco-editor";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
 import { useMonaco } from "../monaco/use-monaco";
 
-loader.config({
-  paths: {
-    // @ts-ignore
-    vs: import.meta.env.BASE_URL + "node_modules/monaco-editor/min/vs",
-  },
-});
+function lineNumberToLetters(lineNumber: number) {
+  let output = "";
+  let aCharCode = "A".charCodeAt(0);
+
+  while (lineNumber > 0) {
+    let lastPart = (lineNumber - 1) % 26;
+    output = String.fromCharCode(aCharCode + lastPart) + output;
+    lineNumber = Math.floor((lineNumber - lastPart) / 26);
+  }
+
+  return output;
+}
 
 export default {
   components: {},
@@ -85,8 +89,7 @@ export default {
             enabled: false,
           },
           lineNumbers: function (original) {
-            if (original == 1) return "Setup";
-            else return `${original - 1}`;
+            return `Setup`;
           },
         }
       );
@@ -106,6 +109,9 @@ export default {
         language: "javascript",
         minimap: {
           enabled: false,
+        },
+        lineNumbers: function (original) {
+          return lineNumberToLetters(original);
         },
       });
       watchEffect(() => (thread2Code.value = thread2Monaco.code.value));
@@ -163,7 +169,7 @@ export default {
 
         let instructionsSet2 = value.instructions[1].map((v, i) => {
           return {
-            label: "" + (i + 1),
+            label: "" + lineNumberToLetters(i + 1),
             operation: v,
           } as Instruction;
         });
