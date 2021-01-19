@@ -112,7 +112,7 @@
         <div class="column">
           <span>Instruktionen:</span>
 
-          <textarea class="textarea"></textarea>
+          <textarea id="test" class="textarea"></textarea>
         </div>
       </div>
 
@@ -272,5 +272,9 @@ td button {
 
 .is-half {
   width: 50%;
+}
+
+#test {
+  height: 75vh;
 }
 </style>
