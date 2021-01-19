@@ -3,25 +3,36 @@
     <div class="column">
       <span>Initialer Speicher: </span>
 
-      <table class="table is-bordered is-striped is-narrow is-fullwidth">
-        <thead>
-          <th v-for="(item, index) in adresses" :key="index">{{ item }}</th>
-        </thead>
+      <div class="columns">
+        <div class="column">
+          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+              <th v-for="(item, index) in adresses" :key="index">{{ item }}</th>
+            </thead>
 
-        <tbody>
-          <tr>
-            <td v-for="(item, index) in adressValues" :key="index">
-              {{ item }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            <tbody>
+              <tr>
+                <td v-for="(item, index) in adressValues" :key="index">
+                  {{ item }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="column is-1 is-flex is-align-items-center">
+          <button class="button is-small is-success">
+            <i class="fas fa-plus-circle" />
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="columns">
     <div class="column">
       <span>Register:</span>
+
       <table class="table is-bordered is-striped is-narrow is-fullwidth">
         <thead>
           <th class="is-half">Register</th>
@@ -59,6 +70,20 @@
           </tr>
         </tbody>
       </table>
+
+      <div class="columns">
+        <div class="column is-1">SP:</div>
+        <div class="column">
+          <input
+            class="input"
+            type="text"
+            style="height: 25px"
+            placeholder="0xFFFF"
+            :value="(stackPointer || '').toString(16).toUpperCase()"
+            @blur="(event) => (stackPointer = event.target.value.toString(16))"
+          />
+        </div>
+      </div>
     </div>
 
     <div class="column">
@@ -115,7 +140,19 @@
     </div>
   </div>
 
-  <button class="button is-info is-fullwidth">Simulate</button>
+  <div class="columns">
+    <div class="column">
+      <button class="button is-info is-fullwidth">Run</button>
+    </div>
+
+    <div class="column">
+      <button class="button is-info is-fullwidth">Step</button>
+    </div>
+
+    <div class="column">
+      <button class="button is-danger is-fullwidth">Reset</button>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -163,7 +200,6 @@ let registerValues = ref([
   { name: "R1", value: 1 },
   { name: "R2", value: 0 },
   { name: "R3", value: 3 },
-  { name: "SP", value: 0xffff },
 ]);
 
 let stack = ref([
@@ -173,10 +209,12 @@ let stack = ref([
   { name: 0xffff, value: 7 },
 ]);
 
+let stackPointer = ref(0xffff);
+
 export default defineComponent({
   components: {},
   setup() {
-    return { adresses, adressValues, registerValues, stack };
+    return { adresses, adressValues, registerValues, stack, stackPointer };
   },
 });
 </script>
