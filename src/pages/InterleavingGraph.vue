@@ -82,14 +82,9 @@ function useCodeEditors(
     onMounted(async () => {
       await loader.init().then((monaco) => {
         monaco.languages.typescript.javascriptDefaults.setWorkerOptions({
-          customWorkerPath: "/custom-worker.js",
+          customWorkerPath: "/monaco-custom-worker.js",
         });
 
-        // https://github.com/microsoft/monaco-editor/issues/2147#issuecomment-696750840
-        /*monaco.languages.typescript.javascriptDefaults.addExtraLib(
-          "declare let testVar = 3, o = 3;",
-          "yourlibname.d.ts"
-        );*/
         watch(
           monacoEditorVariables,
           (value, oldValue) => {
