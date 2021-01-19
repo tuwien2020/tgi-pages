@@ -1,17 +1,19 @@
 <template>
   <div class="columns">
     <div class="column">
-      <span>Initialer Speicher: </span>
-
       <div class="columns">
         <div class="column">
+          <span>Initialer Speicher: </span>
+
           <table class="table is-bordered is-striped is-narrow is-fullwidth">
             <thead>
+              <th>Adresse:</th>
               <th v-for="(item, index) in adresses" :key="index">{{ item }}</th>
             </thead>
 
             <tbody>
               <tr>
+                <td>Wert:</td>
                 <td v-for="(item, index) in adressValues" :key="index">
                   {{ item }}
                 </td>
@@ -19,138 +21,82 @@
             </tbody>
           </table>
         </div>
-
-        <div class="column is-1 is-flex is-align-items-center">
-          <button class="button is-small is-success">
-            <i class="fas fa-plus-circle" />
-          </button>
-        </div>
       </div>
-    </div>
-  </div>
-
-  <div class="columns">
-    <div class="column">
-      <span>Register:</span>
-
-      <table class="table is-bordered is-striped is-narrow is-fullwidth">
-        <thead>
-          <th class="is-half">Register</th>
-          <th class="is-half">Wert</th>
-          <th></th>
-        </thead>
-
-        <tbody>
-          <tr v-for="(item, index) in registerValues" :key="index">
-            <td>
-              {{ item.name }}
-            </td>
-
-            <td>
-              {{
-                item.name == "SP"
-                  ? "0x" + item.value.toString(16).toUpperCase()
-                  : item.value
-              }}
-            </td>
-
-            <td>
-              <button class="button is-small is-danger">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </td>
-          </tr>
-
-          <tr>
-            <td colspan="3">
-              <button class="button is-small is-success">
-                <i class="fas fa-plus-circle" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
 
       <div class="columns">
-        <div class="column is-1">SP:</div>
         <div class="column">
-          <input
-            class="input"
-            type="text"
-            style="height: 25px"
-            placeholder="0xFFFF"
-            :value="(stackPointer || '').toString(16).toUpperCase()"
-            @blur="(event) => (stackPointer = event.target.value.toString(16))"
-          />
+          <span>Register:</span>
+
+          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+              <th class="is-half">Register</th>
+              <th class="is-half">Wert</th>
+            </thead>
+
+            <tbody>
+              <tr v-for="(item, index) in registerValues" :key="index">
+                <td>
+                  {{ item.name }}
+                </td>
+
+                <td>
+                  {{
+                    item.name == "SP"
+                      ? "0x" + item.value.toString(16).toUpperCase()
+                      : item.value
+                  }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="column">
+          <span>Speicherbereich des Stacks:</span>
+          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+            <thead>
+              <th class="is-half">Adresse</th>
+              <th class="is-half">Wert</th>
+            </thead>
+
+            <tbody>
+              <tr v-for="(item, index) in stack" :key="index">
+                <td>
+                  {{ "0x" + item.name.toString(16).toUpperCase() }}
+                </td>
+
+                <td>
+                  {{ item.value }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
 
     <div class="column">
-      <span>Speicherbereich des Stacks:</span>
-      <table class="table is-bordered is-striped is-narrow is-fullwidth">
-        <thead>
-          <th class="is-half">Adresse</th>
-          <th class="is-half">Wert</th>
-          <th></th>
-        </thead>
+      <div class="columns">
+        <div class="column">
+          <span>Instruktionen:</span>
 
-        <tbody>
-          <tr v-for="(item, index) in stack" :key="index">
-            <td>
-              {{ "0x" + item.name.toString(16).toUpperCase() }}
-            </td>
-
-            <td>
-              {{ item.value }}
-            </td>
-
-            <td>
-              <button class="button is-small is-danger">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </td>
-          </tr>
-
-          <tr>
-            <td colspan="3">
-              <button class="button is-small is-success">
-                <i class="fas fa-plus-circle" />
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="columns">
-    <div class="column">
-      <span>Instruktionen:</span>
-
-      <br />
-
-      <div
-        style="background: rgb(240, 240, 240); padding: 10px; margin: 5px 0px"
-      >
-        Beispiele:
+          <textarea class="textarea"></textarea>
+        </div>
       </div>
 
-      <textarea class="textarea"></textarea>
-    </div>
-  </div>
+      <div class="columns">
+        <div class="column">
+          <button class="button is-info is-fullwidth">Run</button>
+        </div>
 
-  <div class="columns">
-    <div class="column">
-      <button class="button is-info is-fullwidth">Run</button>
-    </div>
+        <div class="column">
+          <button class="button is-info is-fullwidth">Step</button>
+        </div>
 
-    <div class="column">
-      <button class="button is-info is-fullwidth">Step</button>
-    </div>
-
-    <div class="column">
-      <button class="button is-danger is-fullwidth">Reset</button>
+        <div class="column">
+          <button class="button is-danger is-fullwidth">Reset</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -200,6 +146,7 @@ let registerValues = ref([
   { name: "R1", value: 1 },
   { name: "R2", value: 0 },
   { name: "R3", value: 3 },
+  { name: "SP", value: 0xffff },
 ]);
 
 let stack = ref([
@@ -222,15 +169,11 @@ export default defineComponent({
 <style scoped>
 table {
   text-align: center;
-}
-
-tr,
-td,
-td button {
-  height: 25px !important;
+  vertical-align: middle;
 }
 
 td button {
+  height: 25px;
   width: 25px;
 }
 
