@@ -48,7 +48,7 @@
 
             <td>
               <button
-                class="button is-danger is-light is-small"
+                class="button is-danger is-small"
                 @click="onDeleteStage(index)"
               >
                 <i class="fas fa-trash-alt" />
@@ -58,10 +58,7 @@
 
           <tr>
             <td colspan="4" style="text-align: center">
-              <button
-                @click="onAddStage"
-                class="button is-success is-light is-small"
-              >
+              <button @click="onAddStage" class="button is-success is-small">
                 <i class="fas fa-plus-circle" />
               </button>
             </td>
@@ -125,7 +122,7 @@
 
             <td>
               <button
-                class="button is-danger is-light is-small"
+                class="button is-danger is-small"
                 @click="onDeleteCommand(index)"
               >
                 <i class="fas fa-trash-alt" />
@@ -135,10 +132,7 @@
 
           <tr>
             <td colspan="4" style="text-align: center">
-              <button
-                class="button is-success is-light is-small"
-                @click="onAddCommand"
-              >
+              <button class="button is-success is-small" @click="onAddCommand">
                 <i class="fas fa-plus-circle" />
               </button>
             </td>
