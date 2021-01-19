@@ -21,7 +21,8 @@ export async function useMonaco() {
 
     monaco = await loader.init().then((value) => {
       value.languages.typescript.javascriptDefaults.setWorkerOptions({
-        customWorkerPath: "/monaco-custom-worker.js",
+        // @ts-ignore
+        customWorkerPath: import.meta.env.BASE_URL + "/monaco-custom-worker.js",
       });
       return value;
     });
