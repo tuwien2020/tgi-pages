@@ -1,6 +1,6 @@
 import loader, { Monaco } from "@monaco-editor/loader";
 import { editor } from "monaco-editor";
-import { ref, Ref, watch } from "vue";
+import { ref, Ref, shallowRef, watch } from "vue";
 
 let monaco: Monaco | null = null;
 
@@ -28,27 +28,27 @@ export async function useMonaco() {
   }
 
   function createEditor(
-    element: Ref<HTMLElement>,
+    element: Ref<HTMLElement | undefined>,
     options: editor.IStandaloneEditorConstructionOptions
   ) {
-    let editor: editor.IStandaloneCodeEditor | null;
-    let code = ref("");
+    const editor = shallowRef<editor.IStandaloneCodeEditor>();
+    const code = ref("");
 
     watch(
       element,
       (value, oldValue) => {
         if (oldValue) {
-          editor?.dispose();
-          editor = null;
+          editor.value?.dispose();
+          editor.value = undefined;
         }
 
         if (!value || !monaco) return;
 
-        editor = monaco.editor.create(value, options);
+        editor.value = monaco.editor.create(value, options);
         code.value = options.value ?? "";
 
-        editor.onDidChangeModelContent((e) => {
-          code.value = editor?.getValue() ?? "";
+        editor.value.onDidChangeModelContent((e) => {
+          code.value = editor.value?.getValue() ?? "";
         });
       },
       { immediate: true }
@@ -56,7 +56,7 @@ export async function useMonaco() {
 
     async function getVariableNames(): Promise<string[]> {
       // TODO: Wait until editor is initialized
-      const model = editor?.getModel();
+      const model = editor.value?.getModel();
       if (!model || !monaco) return [];
       const worker = await monaco.languages.typescript.getJavaScriptWorker();
       const thisWorker = await worker(model.uri);
