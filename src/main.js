@@ -12,6 +12,7 @@ import BinaryCoding from "./pages/BinaryCoding.vue";
 import Pipeline from "./pages/Pipeline.vue";
 import InterleavingGraph from "./pages/InterleavingGraph.vue";
 import CacheCalc from "./pages/CacheCalc.vue";
+import Stack from "./pages/Stack.vue";
 import { name, version } from "./../package.json";
 import 'bulma/css/bulma.css';
 
@@ -26,6 +27,7 @@ const routes = [
   { path: "/pipeline", component: Pipeline },
   { path: "/interleaving-graph", component: InterleavingGraph },
   { path: "/cache-calc", component: CacheCalc },
+  { path: "/stack", component: Stack }
 ];
 
 if (import.meta.env.PROD) {
