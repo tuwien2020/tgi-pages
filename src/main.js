@@ -13,6 +13,7 @@ import Pipeline from "./pages/Pipeline.vue";
 import InterleavingGraph from "./pages/InterleavingGraph.vue";
 import CacheCalc from "./pages/CacheCalc.vue";
 import Stack from "./pages/Stack.vue";
+import Micro16Decompiler from './pages/Micro16Decompiler.vue';
 import { name, version } from "./../package.json";
 import 'bulma/css/bulma.css';
 
@@ -27,7 +28,8 @@ const routes = [
   { path: "/pipeline", component: Pipeline },
   { path: "/interleaving-graph", component: InterleavingGraph },
   { path: "/cache-calc", component: CacheCalc },
-  { path: "/stack", component: Stack }
+  { path: "/stack", component: Stack },
+  { path: "/micro-decompile", component: Micro16Decompiler }
 ];
 
 if (import.meta.env.PROD) {
