@@ -109,6 +109,7 @@
         </div>
       </div>
     </div>
+
     <div class="column codingSection">
       <div class="is-full columns">
         <div class="column">
@@ -373,6 +374,8 @@ declare const mem: number[];`);
 
       const exposedVariables = getExposedVariables();
 
+      runSetup(exposedVariables);
+
       /*
       watch(simulator.value.memory, (value) => {}, {
         onTrigger: (e) => {
@@ -381,7 +384,7 @@ declare const mem: number[];`);
         deep: true,
       });
 
-      runSetup(exposedVariables);
+      
 
       watch(simulator.value.register, (value) => {}, {
         onTrack: (e) => {
@@ -434,15 +437,15 @@ td button {
   height: 75vh;
 }
 
-.is-full-height{
+.is-full-height {
   height: 100%;
 }
 
-.grows{
+.grows {
   flex: 1 1 auto;
 }
 
-.codingSection{
+.codingSection {
   display: flex;
   flex-direction: column;
 }
