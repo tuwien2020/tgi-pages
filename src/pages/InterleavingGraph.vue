@@ -145,14 +145,18 @@ export default {
       }
 
       let timerId = 0;
-      watch([code, thread1Monaco.code, thread2Monaco.code], (value) => {
-        clearTimeout(timerId);
+      watch(
+        [code, thread1Monaco.code, thread2Monaco.code],
+        (value) => {
+          clearTimeout(timerId);
 
-        timerId = setTimeout(async () => {
-          timerId = 0;
-          threadsInstructions.value = await getThreadsInstructions();
-        }, 500);
-      });
+          timerId = setTimeout(async () => {
+            timerId = 0;
+            threadsInstructions.value = await getThreadsInstructions();
+          }, 500);
+        },
+        { immediate: true }
+      );
     });
 
     watch(

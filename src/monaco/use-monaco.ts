@@ -22,7 +22,7 @@ export async function useMonaco() {
     monaco = await loader.init().then((value) => {
       value.languages.typescript.javascriptDefaults.setWorkerOptions({
         // @ts-ignore
-        customWorkerPath: import.meta.env.BASE_URL + "/monaco-custom-worker.js",
+        customWorkerPath: import.meta.env.BASE_URL + "monaco-custom-worker.js",
       });
       return value;
     });
