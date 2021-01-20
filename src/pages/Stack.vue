@@ -5,17 +5,32 @@
         <div class="column">
           <span>Initialer Speicher: </span>
 
-          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+          <table
+            class="table is-bordered is-striped is-narrow is-fullwidth"
+            v-for="(section, idxMemory) in memorySections"
+            :key="idxMemory"
+          >
             <thead>
               <th>Adresse:</th>
-              <th v-for="(item, index) in adresses" :key="index">{{ item }}</th>
+              <th
+                v-for="address in section.to - section.from + 1"
+                :key="address"
+              >
+                {{ toHex(address - 1 + section.from) }}
+              </th>
             </thead>
 
             <tbody>
               <tr>
                 <td>Wert:</td>
-                <td v-for="(item, index) in adressValues" :key="index">
-                  {{ item }}
+                <td
+                  v-for="(item, index) in memory.slice(
+                    section.from,
+                    section.to + 1
+                  )"
+                  :key="index"
+                >
+                  {{ toHex(item) }}
                 </td>
               </tr>
             </tbody>
@@ -27,24 +42,30 @@
         <div class="column">
           <span>Register:</span>
 
-          <table class="table is-bordered is-striped is-narrow is-fullwidth">
+          <table
+            class="table is-bordered is-striped is-narrow is-fullwidth"
+            v-for="(section, idxRegister) in registerSections"
+            :key="idxRegister"
+          >
             <thead>
               <th class="is-half">Register</th>
               <th class="is-half">Wert</th>
             </thead>
 
             <tbody>
-              <tr v-for="(item, index) in registerValues" :key="index">
+              <tr
+                v-for="(item, index) in register.slice(
+                  section.from,
+                  section.to + 1
+                )"
+                :key="index"
+              >
                 <td>
-                  {{ item.name }}
+                  {{ "R" + (index + section.from) }}
                 </td>
 
                 <td>
-                  {{
-                    item.name == "SP"
-                      ? "0x" + item.value.toString(16).toUpperCase()
-                      : item.value
-                  }}
+                  {{ toHex(item) }}
                 </td>
               </tr>
             </tbody>
@@ -60,13 +81,24 @@
             </thead>
 
             <tbody>
-              <tr v-for="(item, index) in stack" :key="index">
+              <tr
+                v-for="(item, index) in !!stackSizeDisplay
+                  ? stack.slice(stackSizeDisplay.from, stackSizeDisplay.to + 1)
+                  : stack.slice(stackpointer)"
+                :key="index"
+              >
                 <td>
-                  {{ "0x" + item.name.toString(16).toUpperCase() }}
+                  {{
+                    toHex(
+                      (!!stackSizeDisplay
+                        ? stackSizeDisplay.from
+                        : stackpointer) + index
+                    )
+                  }}
                 </td>
 
                 <td>
-                  {{ item.value }}
+                  {{ item }}
                 </td>
               </tr>
             </tbody>
@@ -80,7 +112,7 @@
         <div class="column">
           <span>Instruktionen:</span>
 
-          <textarea class="textarea"></textarea>
+          <textarea id="test" class="textarea"></textarea>
         </div>
       </div>
 
@@ -104,64 +136,125 @@
 <script lang="ts">
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 
-let adresses = ref([
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-]);
+let programStack;
 
-let adressValues = ref([
-  "0",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "A",
-  "B",
-  "C",
-  "D",
-  "E",
-  "F",
-]);
+interface Section {
+  from: number;
+  to: number;
+}
 
-let registerValues = ref([
-  { name: "R1", value: 1 },
-  { name: "R2", value: 0 },
-  { name: "R3", value: 3 },
-  { name: "SP", value: 0xffff },
-]);
+let register: number[] = [];
+let stackpointer: number = 0;
+let memory: number[] = [];
+let stack: number[] = [];
+let memorySections: Section[] = [];
+let registerSections: Section[] = [];
+let stackSizeDisplay: Section | null = null;
+let r = register;
 
-let stack = ref([
-  { name: 0xffff, value: 5 },
-  { name: 0xfffd, value: 2 },
-  { name: 0xfffe, value: 4 },
-  { name: 0xffff, value: 7 },
-]);
+function push(reg: number) {
+  stack[stackpointer] = register[reg];
+  stackpointer--;
+}
 
-let stackPointer = ref(0xffff);
+function pop(reg: number) {
+  stackpointer++;
+  register[reg] = stack[stackpointer];
+}
+
+function fillArray(memeories: string, offset: number = 0, array: number[]) {
+  let elements = memeories.split(/\s+|,|;/).map((d) => parseInt(d, 16));
+  elements = elements.filter((d) => !isNaN(d));
+
+  for (let i = 0; i < elements.length; i++) {
+    array[i + offset] = elements[i];
+  }
+
+  return elements.length;
+}
+
+function fillStack(memeories: string, offset: number = 0) {
+  let l = fillArray(memeories, offset, stack);
+}
+
+function fillMemory(memeories: string, offset: number = 0) {
+  let l = fillArray(memeories, offset, memory);
+  memorySections.push({ from: offset, to: offset + l - 1 });
+}
+
+function fillRegister(memeories: string, offset: number = 0) {
+  let l = fillArray(memeories, offset, register);
+  registerSections.push({ from: offset, to: offset + l - 1 });
+}
+
+function setStackPointer(address: number) {
+  stackpointer = address;
+}
+
+function setStackView(from: number, to: number) {
+  stackSizeDisplay = { from, to };
+}
+
+fillMemory("5 1 B 5 5 C A F F C B 3 4 7 E 1", 0);
+fillRegister("1 0 3", 1);
+fillStack("5 2 4 7", 0xfffc);
+setStackPointer(0xfffe);
+setStackView(0xfffc, 0xffff);
+
+// R3 <- 17
+r[3] = 17;
+
+// pop(R3)
+pop(3);
+
+// R1 <- memory[R1]
+r[1] = memory[r[1]];
+
+// R2 <- memory[memory[B]]
+r[2] = memory[memory[0xb]];
+
+// push(R1)
+push(1);
+
+// push(R2)
+push(2);
+
+// push(R3)
+push(3);
+
+// push(R3)
+push(3);
+
+// memory[-(R1)] <- memory[F]
+memory[--r[1]] = memory[0xf];
+
+// pop(R3)
+pop(3);
+
+// memory[(R2)+] <- memory[E]
+memory[r[2]++] = memory[0xe];
+
+function toHex(number: number) {
+  return number.toString(16).toUpperCase();
+}
 
 export default defineComponent({
   components: {},
   setup() {
-    return { adresses, adressValues, registerValues, stack, stackPointer };
+    return {
+      register,
+      memory,
+      stack,
+      fillStack,
+      fillMemory,
+      fillRegister,
+      setStackPointer,
+      memorySections,
+      registerSections,
+      toHex,
+      stackSizeDisplay,
+      stackpointer,
+    };
   },
 });
 </script>
@@ -179,5 +272,9 @@ td button {
 
 .is-half {
   width: 50%;
+}
+
+#test {
+  height: 75vh;
 }
 </style>
