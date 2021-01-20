@@ -200,7 +200,6 @@ function createSimulator() {
   watch(
     stackpointer,
     (value) => {
-      console.log(value);
       stackSizeDisplay.value = {
         from: Math.min(stackSizeDisplay.value.from, value),
         to: Math.max(stackSizeDisplay.value.to, value),
@@ -288,46 +287,6 @@ function createSimulator() {
     },
   });
 
-  /*
-fillMemory("5 1 B 5 5 C A F F C B 3 4 7 E 1", 0);
-fillRegister("1 0 3", 1);
-fillStack("5 2 4 7", 0xfffc);
-setStackPointer(0xfffe);*/
-
-  /*
-  // R3 <- 17
-  r[3] = 17;
-
-  // pop(R3)
-  pop(3);
-
-  // R1 <- memory[R1]
-  r[1] = memory[r[1]];
-
-  // R2 <- memory[memory[B]]
-  r[2] = memory[memory[0xb]];
-
-  // push(R1)
-  push(1);
-
-  // push(R2)
-  push(2);
-
-  // push(R3)
-  push(3);
-
-  // push(R3)
-  push(3);
-
-  // memory[-(R1)] <- memory[F]
-  memory[--r[1]] = memory[0xf];
-
-  // pop(R3)
-  pop(3);
-
-  // memory[(R2)+] <- memory[E]
-  memory[r[2]++] = memory[0xe];*/
-
   return {
     register,
     stackpointer,
@@ -364,13 +323,38 @@ export default defineComponent({
 
     const setupCode = urlRef(
       "setupCode",
-      `fillMemory("0 0 0 0", 0x0);
-fillRegister("0 0", 0x0);
-fillStack("", 0xffff);
+      `fillMemory("5 1 B 5 5 C A F F C B 3 4 7 E 1", 0);
+fillRegister("1 0 3", 1);
+fillStack("5 2 4 7", 0xfffc);
 setStackPointer(0xffff);`
     );
 
-    const instructionCode = urlRef("instructionCode", "");
+    const instructionCode = urlRef(
+      "instructionCode",
+      `// R3 <- 17
+r[3] = 17;
+
+// R1 <- memory[R1]
+r[1] = memory[r[1]];
+
+// R2 <- memory[memory[B]]
+r[2] = memory[memory[0xb]];
+
+// push(R1)
+push(1);
+
+// push(R2)
+push(2);
+
+// memory[-(R1)] <- memory[F]
+memory[--r[1]] = memory[0xf];
+
+// pop(R3)
+pop(3);
+
+// memory[(R2)+] <- memory[E]
+memory[r[2]++] = memory[0xe];`
+    );
 
     useMonaco().then((monaco) => {
       monaco.addExtraLib(`declare function push(reg: number): void;
