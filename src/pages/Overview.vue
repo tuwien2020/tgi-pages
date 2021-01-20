@@ -347,6 +347,26 @@
         <div class="card-content">
           <div class="media">
             <div class="media-content">
+              <p class="title is-4">Pipeline</p>
+            </div>
+          </div>
+
+          <div class="content">
+            <ul>
+              <li>
+                <router-link to="/pipeline">Pipeline-Simulator</router-link>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="column is-one-third">
+      <div class="card">
+        <div class="card-content">
+          <div class="media">
+            <div class="media-content">
               <p class="title is-4">Stack</p>
             </div>
           </div>
