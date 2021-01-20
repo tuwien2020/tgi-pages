@@ -1,5 +1,5 @@
 <template>
-  <div class="columns">
+  <div class="columns is-full-height">
     <div class="column">
       <div class="columns">
         <div class="column">
@@ -110,8 +110,8 @@
       </div>
     </div>
 
-    <div class="column">
-      <div class="columns">
+    <div class="column codingSection">
+      <div class="columns grows">
         <div class="column">
           <span>Setup:</span>
           <div ref="monaco-editor-setup" style="height: 10em"></div>
@@ -395,5 +395,18 @@ td button {
 
 #test {
   height: 75vh;
+}
+
+.is-full-height{
+  height: 100%;
+}
+
+.grows{
+  flex: 1 1 auto;
+}
+
+.codingSection{
+  display: flex;
+  flex-direction: column;
 }
 </style>

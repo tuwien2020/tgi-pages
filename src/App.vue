@@ -1,14 +1,16 @@
 <template>
-  <nav class="navbar header" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-      <router-link to="/" class="home-link"
-        >TGI Pages - {{ version }}
-      </router-link>
-    </div>
-  </nav>
+  <div class="wrapper">
+    <nav class="navbar header" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <router-link to="/" class="home-link"
+          >TGI Pages - {{ version }}
+        </router-link>
+      </div>
+    </nav>
 
-  <div class="content">
-    <router-view></router-view>
+    <div class="content">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -34,6 +36,12 @@ export default defineComponent({
   box-shadow: 0 1px 5px -1px rgba(0, 0, 0, 0.2);
   min-height: none;
 }
+.wrapper{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+}
 .home-link {
   text-decoration: none;
   text-transform: uppercase;
@@ -41,5 +49,6 @@ export default defineComponent({
 }
 .content {
   margin: 24px;
+  flex: 1 1 auto;
 }
 </style>
