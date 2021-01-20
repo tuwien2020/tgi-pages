@@ -3,7 +3,7 @@
     <div class="column">
       <div class="columns">
         <div class="column">
-          <span>Initialer Speicher: </span>
+          <span>Memory: </span>
 
           <table
             class="table is-bordered is-striped is-narrow is-fullwidth"
@@ -110,9 +110,10 @@
     <div class="column">
       <div class="columns">
         <div class="column">
-          <span>Instruktionen:</span>
-
-          <textarea id="test" class="textarea"></textarea>
+          <span>Setup:</span>
+          <div ref="monaco-editor-setup" style="height: 10em"></div>
+          <span>Instructions:</span>
+          <div ref="monaco-editor-instructions" style="height: 35em"></div>
         </div>
       </div>
 
@@ -134,7 +135,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch, watchEffect } from "vue";
+import {
+  defineComponent,
+  computed,
+  ref,
+  watch,
+  watchEffect,
+  onMounted,
+  Ref,
+  shallowRef,
+} from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useUrlRef } from "../url-ref";
+import { useMonaco } from "../monaco/use-monaco";
 
 let programStack;
 
@@ -241,7 +254,63 @@ function toHex(number: number) {
 export default defineComponent({
   components: {},
   setup() {
+    const router = useRouter();
+    const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
+
+    const monacoEditorSetup = ref<HTMLElement>();
+    const monacoEditorInstructions = ref<HTMLElement>();
+
+    const setupCode = urlRef("setupCode", 
+`fillMemory("", 0);
+fillRegister("", 0);
+fillStack("", 0xffff);
+setStackPointer(0xffff);
+setStackView(0xfffc, 0xffff); `);
+
+    const instructionCode = urlRef("instructionCode", "")
+
+    useMonaco().then((monaco) => {
+      const setupEditor = monaco.createEditor(
+        monacoEditorSetup,
+        {
+          value: setupCode.value,
+          language: "javascript",
+          minimap: {
+            enabled: false,
+          },
+          scrollBeyondLastLine: false
+        }
+      );
+
+      watchEffect(() => {
+        setupCode.value = setupEditor.code.value;
+      });
+
+      const instructionsEditor = monaco.createEditor(
+        monacoEditorInstructions,
+        {
+          value: instructionCode.value,
+          language: "javascript",
+          minimap: {
+            enabled: false,
+          },
+          scrollBeyondLastLine: false
+        }
+      );
+      
+      watchEffect(() => {
+        instructionCode.value = instructionsEditor.code.value;
+      });
+    });
+
+   
+
     return {
+      "monaco-editor-setup": monacoEditorSetup,
+      "monaco-editor-instructions": monacoEditorInstructions,
+      setupCode,
+      instructionCode,
       register,
       memory,
       stack,
