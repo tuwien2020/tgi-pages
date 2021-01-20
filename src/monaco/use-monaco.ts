@@ -44,6 +44,7 @@ export async function useMonaco() {
   ) {
     const editor = shallowRef<editor.IStandaloneCodeEditor>();
     const code = ref("");
+    let decorations = [] as string[];
 
     watch(
       element,
@@ -77,9 +78,27 @@ export async function useMonaco() {
       return variableNames;
     }
 
+    function setLinePointer(lineNumber: number) {
+      if (!editor.value || !monaco) return;
+
+      if (lineNumber <= 0) {
+        decorations = editor.value?.deltaDecorations(decorations, []);
+      } else {
+        decorations = editor.value?.deltaDecorations(decorations, [
+          {
+            range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+            options: {
+              marginClassName: "linePointer",
+            },
+          },
+        ]);
+      }
+    }
+
     return {
       code,
       getVariableNames,
+      setLinePointer,
     };
   }
   return {

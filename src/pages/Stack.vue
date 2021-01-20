@@ -49,7 +49,7 @@
           >
             <thead>
               <th class="is-half">Register</th>
-              <th class="is-half">Wert</th>
+              <th class="is-half">Wert (Hex)</th>
             </thead>
 
             <tbody>
@@ -147,11 +147,15 @@
         </div>
 
         <div class="column">
-          <button class="button is-info is-fullwidth">Step</button>
+          <button class="button is-info is-fullwidth" @click="step">
+            {{ steppingLineNumber == 0 ? "Debug" : "Step" }}
+          </button>
         </div>
 
         <div class="column">
-          <button class="button is-danger is-fullwidth">Reset</button>
+          <button class="button is-danger is-fullwidth" @click="reset">
+            Reset
+          </button>
         </div>
       </div>
     </div>
@@ -191,7 +195,7 @@ function createSimulator() {
   const register = ref<number[]>([]);
   const stackpointer = ref(0);
   const memory = ref<number[]>([]);
-  const stack = ref<number[]>([]);
+  const stack = ref<number[]>([]); // TODO: memory and stack are one
   const memorySections = ref<Section[]>([]);
   const registerSections = ref<Section[]>([]);
   const stackSizeDisplay = ref<Section>({ from: 0, to: 0 });
@@ -287,6 +291,26 @@ function createSimulator() {
     },
   });
 
+  function getExposedVariables() {
+    return {
+      push: push,
+      pop: pop,
+      fillStack: fillStack,
+      fillMemory: fillMemory,
+      fillRegister: fillRegister,
+      setStackPointer: setStackPointer,
+      print: print,
+
+      register: register.value,
+      reg: register.value,
+      r: register.value,
+      memory: memory.value,
+      mem: memory.value,
+
+      console: consoleProxy,
+    };
+  }
+
   return {
     register,
     stackpointer,
@@ -304,6 +328,7 @@ function createSimulator() {
     print,
     outputLog,
     consoleProxy,
+    getExposedVariables,
   };
 }
 
@@ -320,6 +345,9 @@ export default defineComponent({
     const simulator = shallowRef<ReturnType<typeof createSimulator>>(
       createSimulator()
     );
+
+    const steppingLineNumber = ref(0);
+    let steppingGenerator: null | Generator;
 
     const setupCode = urlRef(
       "setupCode",
@@ -401,31 +429,15 @@ declare const mem: number[];`);
       });
 
       watchEffect(() => {
+        instructionsEditor.setLinePointer(steppingLineNumber.value);
+      });
+
+      watchEffect(() => {
         instructionCode.value = instructionsEditor.code.value;
       });
 
       runCode();
     });
-
-    function getExposedVariables() {
-      return {
-        push: simulator.value.push,
-        pop: simulator.value.pop,
-        fillStack: simulator.value.fillStack,
-        fillMemory: simulator.value.fillMemory,
-        fillRegister: simulator.value.fillRegister,
-        setStackPointer: simulator.value.setStackPointer,
-        print: simulator.value.print,
-
-        register: simulator.value.register.value,
-        reg: simulator.value.register.value,
-        r: simulator.value.register.value,
-        memory: simulator.value.memory.value,
-        mem: simulator.value.memory.value,
-
-        console: simulator.value.consoleProxy,
-      };
-    }
 
     function runSetup(exposedVariables: object) {
       const setupFunction = Function.apply(null, [
@@ -437,10 +449,11 @@ declare const mem: number[];`);
     }
 
     function runCode() {
+      steppingLineNumber.value = 0;
+      steppingGenerator = null;
+
       simulator.value = createSimulator();
-
-      const exposedVariables = getExposedVariables();
-
+      const exposedVariables = simulator.value.getExposedVariables();
       runSetup(exposedVariables);
 
       /*
@@ -474,6 +487,43 @@ declare const mem: number[];`);
       instructionsFunction(exposedVariables);
     }
 
+    function reset() {
+      steppingLineNumber.value = 0;
+      steppingGenerator = null;
+
+      simulator.value = createSimulator();
+      const exposedVariables = simulator.value.getExposedVariables();
+      runSetup(exposedVariables);
+    }
+
+    function step() {
+      if (steppingLineNumber.value == 0) {
+        steppingLineNumber.value = 1;
+        simulator.value = createSimulator();
+        const exposedVariables = simulator.value.getExposedVariables();
+        runSetup(exposedVariables);
+
+        const GeneratorFunction = Object.getPrototypeOf(function* () {})
+          .constructor;
+
+        steppingGenerator = GeneratorFunction.apply(null, [
+          `{ ${Object.keys(exposedVariables).join(",")} }`,
+          `try { ${instructionCode.value
+            .split("\n")
+            .map((v) => v + "; yield 0;")
+            .join("\n")}; } catch(e) { console.warn(e); }`,
+        ])(exposedVariables);
+      } else {
+        if (steppingGenerator == null) {
+          console.warn("The code-executing generator object is null");
+        }
+        steppingGenerator?.next();
+        steppingLineNumber.value++;
+      }
+    }
+
+    function* test() {}
+
     return {
       "monaco-editor-setup": monacoEditorSetup,
       "monaco-editor-instructions": monacoEditorInstructions,
@@ -481,7 +531,10 @@ declare const mem: number[];`);
       instructionCode,
       toHex,
       runCode,
+      reset,
+      step,
       simulator,
+      steppingLineNumber,
     };
   },
 });
