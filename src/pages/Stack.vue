@@ -110,8 +110,22 @@
       </div>
     </div>
 
-    <div class="column codingSection">
-      <div class="is-full columns">
+    <div class="column">
+      <span>Setup</span>
+      <div ref="monaco-editor-setup" style="height: 25%" class="shadow"></div>
+
+      <br />
+
+      <span>Instructions</span>
+      <div
+        ref="monaco-editor-instructions"
+        style="height: 50%"
+        class="shadow"
+      ></div>
+
+      <br />
+
+      <div class="columns is-full">
         <div class="column">
           <button class="button is-info is-fullwidth" @click="runCode">
             Run
@@ -124,15 +138,6 @@
 
         <div class="column">
           <button class="button is-danger is-fullwidth">Reset</button>
-        </div>
-      </div>
-
-      <div class="columns grows">
-        <div class="column">
-          <h3>Setup</h3>
-          <div ref="monaco-editor-setup" style="height: 8em"></div>
-          <h3>Instructions</h3>
-          <div ref="monaco-editor-instructions" style="height: 35em"></div>
         </div>
       </div>
     </div>
@@ -320,6 +325,10 @@ declare const mem: number[];`);
           enabled: false,
         },
         scrollBeyondLastLine: false,
+        scrollbar: {
+          vertical: "visible",
+          horizontal: "visible",
+        },
       });
 
       watchEffect(() => {
@@ -333,6 +342,10 @@ declare const mem: number[];`);
           enabled: false,
         },
         scrollBeyondLastLine: false,
+        scrollbar: {
+          vertical: "visible",
+          horizontal: "visible",
+        },
       });
 
       watchEffect(() => {
@@ -433,20 +446,15 @@ td button {
   width: 50%;
 }
 
-#test {
-  height: 75vh;
-}
-
 .is-full-height {
   height: 100%;
 }
 
-.grows {
-  flex: 1 1 auto;
-}
-
-.codingSection {
-  display: flex;
-  flex-direction: column;
+.shadow {
+  /* border: 1px solid black; */
+  overflow: hidden;
+  -webkit-box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.25);
+  -moz-box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.25);
+  box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.25);
 }
 </style>
