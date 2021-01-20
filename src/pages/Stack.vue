@@ -109,18 +109,8 @@
         </div>
       </div>
     </div>
-
     <div class="column codingSection">
-      <div class="columns grows">
-        <div class="column">
-          <span>Setup:</span>
-          <div ref="monaco-editor-setup" style="height: 10em"></div>
-          <span>Instructions:</span>
-          <div ref="monaco-editor-instructions" style="height: 35em"></div>
-        </div>
-      </div>
-
-      <div class="columns">
+      <div class="is-full columns">
         <div class="column">
           <button class="button is-info is-fullwidth" @click="runCode">
             Run
@@ -133,6 +123,15 @@
 
         <div class="column">
           <button class="button is-danger is-fullwidth">Reset</button>
+        </div>
+      </div>
+
+      <div class="columns grows">
+        <div class="column">
+          <h3>Setup</h3>
+          <div ref="monaco-editor-setup" style="height: 8em"></div>
+          <h3>Instructions</h3>
+          <div ref="monaco-editor-instructions" style="height: 35em"></div>
         </div>
       </div>
     </div>
@@ -222,7 +221,6 @@ fillStack("5 2 4 7", 0xfffc);
 setStackPointer(0xfffe);
 setStackView(0xfffc, 0xffff);*/
 
-  // TODO: Proxy object for registers, memory (and stack)
   /*
   // R3 <- 17
   r[3] = 17;
@@ -291,8 +289,8 @@ export default defineComponent({
 
     const setupCode = urlRef(
       "setupCode",
-      `fillMemory("", 0);
-fillRegister("", 0);
+      `fillMemory("0 0 0 0", 0x0);
+fillRegister("0 0", 0x0);
 fillStack("", 0xffff);
 setStackPointer(0xffff);
 setStackView(0xfffc, 0xffff);`
@@ -307,7 +305,12 @@ declare function fillStack(memeories: string, offset: number = 0): void;
 declare function fillMemory(memeories: string, offset: number = 0): void;
 declare function fillRegister(memeories: string, offset: number = 0): void;
 declare function setStackPointer(address: number): void;
-declare function setStackView(from: number, to: number): void;`);
+declare function setStackView(from: number, to: number): void;
+declare const register: number[];
+declare const reg: number[];
+declare const r: number[];
+declare const memory: number[];
+declare const mem: number[];`);
 
       const setupEditor = monaco.createEditor(monacoEditorSetup, {
         value: setupCode.value,
@@ -338,10 +341,8 @@ declare function setStackView(from: number, to: number): void;`);
       runCode();
     });
 
-    function runCode() {
-      simulator.value = createSimulator();
-
-      const exposedVariables = {
+    function getExposedVariables() {
+      return {
         push: simulator.value.push,
         pop: simulator.value.pop,
         fillStack: simulator.value.fillStack,
@@ -356,13 +357,49 @@ declare function setStackView(from: number, to: number): void;`);
         memory: simulator.value.memory.value,
         mem: simulator.value.memory.value,
       };
+    }
 
+    function runSetup(exposedVariables: object) {
       const setupFunction = Function.apply(null, [
         `{ ${Object.keys(exposedVariables).join(",")} }`,
         `try { ${setupCode.value}; } catch(e) { console.warn(e); }`,
       ]);
 
       setupFunction(exposedVariables);
+    }
+
+    function runCode() {
+      simulator.value = createSimulator();
+
+      const exposedVariables = getExposedVariables();
+
+      /*
+      watch(simulator.value.memory, (value) => {}, {
+        onTrigger: (e) => {
+          //debugger;
+        },
+        deep: true,
+      });
+
+      runSetup(exposedVariables);
+
+      watch(simulator.value.register, (value) => {}, {
+        onTrack: (e) => {
+          console.log("track", e);
+        },
+        onTrigger: (e) => {
+          console.log(e);
+          //debugger;
+        },
+        deep: true,
+      });*/
+
+      const instructionsFunction = Function.apply(null, [
+        `{ ${Object.keys(exposedVariables).join(",")} }`,
+        `try { ${instructionCode.value}; } catch(e) { console.warn(e); }`,
+      ]);
+
+      instructionsFunction(exposedVariables);
     }
 
     return {

@@ -270,6 +270,7 @@ export default defineComponent({
   font-family: "Consolas", "Courier New", Courier, monospace;
   text-align: center;
   overflow: hidden;
+  width: auto;
 }
 .truth-table td {
   padding: 2px;
