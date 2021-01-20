@@ -91,6 +91,7 @@ export default {
           lineNumbers: function (original) {
             return `Setup`;
           },
+          scrollBeyondLastLine: false,
         }
       );
       watchEffect(() => (variablesCode.value = code.value));
@@ -101,6 +102,7 @@ export default {
         minimap: {
           enabled: false,
         },
+        scrollBeyondLastLine: false,
       });
       watchEffect(() => (thread1Code.value = thread1Monaco.code.value));
 
@@ -113,6 +115,7 @@ export default {
         lineNumbers: function (original) {
           return lineNumberToLetters(original);
         },
+        scrollBeyondLastLine: false,
       });
       watchEffect(() => (thread2Code.value = thread2Monaco.code.value));
 

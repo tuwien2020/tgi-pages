@@ -5,12 +5,6 @@ import { ref, Ref, shallowRef, watch } from "vue";
 let monaco: Monaco | null = null;
 
 export async function useMonaco() {
-  // https://github.com/microsoft/monaco-editor/issues/2147#issuecomment-696750840
-  /*monaco.languages.typescript.javascriptDefaults.addExtraLib(
-          "declare let testVar = 3, o = 3;",
-          "yourlibname.d.ts"
-        );*/
-
   if (monaco == null) {
     loader.config({
       paths: {
@@ -26,6 +20,16 @@ export async function useMonaco() {
       });
       return value;
     });
+  }
+
+  function addExtraLib(code: string) {
+    if (!monaco) return;
+
+    // https://github.com/microsoft/monaco-editor/issues/2147#issuecomment-696750840
+    monaco.languages.typescript.javascriptDefaults.addExtraLib(
+      code, // Stuff like "declare let testVar = 3, o = 3;"
+      "meow-own-lib.d.ts"
+    );
   }
 
   function createEditor(
@@ -73,6 +77,7 @@ export async function useMonaco() {
     };
   }
   return {
+    addExtraLib,
     createEditor,
   };
 }
