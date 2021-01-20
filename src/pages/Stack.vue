@@ -3,7 +3,7 @@
     <div class="column">
       <div class="columns">
         <div class="column">
-          <span>Memory: </span>
+          <h4 class="no-margin">Memory</h4>
 
           <table
             class="table is-bordered is-striped is-narrow is-fullwidth"
@@ -40,7 +40,7 @@
 
       <div class="columns">
         <div class="column">
-          <span>Register:</span>
+          <h4 class="no-margin">Register</h4>
 
           <table
             class="table is-bordered is-striped is-narrow is-fullwidth"
@@ -73,7 +73,7 @@
         </div>
 
         <div class="column">
-          <span>Speicherbereich des Stacks:</span>
+          <h4 class="no-margin">Speicherbereich des Stacks:</h4>
           <table class="table is-bordered is-striped is-narrow is-fullwidth">
             <thead>
               <th class="is-half">Adresse</th>
@@ -82,22 +82,20 @@
 
             <tbody>
               <tr
-                v-for="(item, index) in !!simulator.stackSizeDisplay.value
-                  ? simulator.stack.value.slice(
-                      simulator.stackSizeDisplay.value.from,
-                      simulator.stackSizeDisplay.value.to + 1
-                    )
-                  : simulator.stack.value.slice(simulator.stackpointer.value)"
+                v-for="(item, index) in simulator.stack.value.slice(
+                  simulator.stackSizeDisplay.value.from,
+                  simulator.stackSizeDisplay.value.to + 1
+                )"
                 :key="index"
               >
-                <td>
-                  {{
-                    toHex(
-                      (!!simulator.stackSizeDisplay.value
-                        ? simulator.stackSizeDisplay.value.from
-                        : simulator.stackpointer.value) + index
-                    )
-                  }}
+                <td
+                  :class="{
+                    stackpointer:
+                      simulator.stackSizeDisplay.value.from + index ==
+                      simulator.stackpointer.value,
+                  }"
+                >
+                  {{ toHex(simulator.stackSizeDisplay.value.from + index) }}
                 </td>
 
                 <td>
@@ -108,15 +106,31 @@
           </table>
         </div>
       </div>
+
+      <div class="columns">
+        <div>
+          <h4 class="no-margin">Debug log</h4>
+          <div v-for="(item, index) in simulator.outputLog.value" :key="index">
+            <span
+              :class="{
+                warning: item.type == 'warning',
+                error: item.type == 'error',
+              }"
+            >
+              {{ item.message }}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="column">
-      <span>Setup</span>
+      <h4 class="no-margin">Setup</h4>
       <div ref="monaco-editor-setup" style="height: 25%" class="shadow"></div>
 
       <br />
 
-      <span>Instructions</span>
+      <h4 class="no-margin">Instructions</h4>
       <div
         ref="monaco-editor-instructions"
         style="height: 50%"
@@ -164,6 +178,11 @@ interface Section {
   readonly to: number;
 }
 
+interface LogMessage {
+  readonly type: "info" | "warning" | "error";
+  readonly message: string;
+}
+
 function toHex(number: number) {
   return number.toString(16).toUpperCase();
 }
@@ -175,7 +194,23 @@ function createSimulator() {
   const stack = ref<number[]>([]);
   const memorySections = ref<Section[]>([]);
   const registerSections = ref<Section[]>([]);
-  const stackSizeDisplay = ref<Section | null>(null);
+  const stackSizeDisplay = ref<Section>({ from: 0, to: 0 });
+  const outputLog = ref<LogMessage[]>([]);
+
+  watch(
+    stackpointer,
+    (value) => {
+      console.log(value);
+      stackSizeDisplay.value = {
+        from: Math.min(stackSizeDisplay.value.from, value),
+        to: Math.max(stackSizeDisplay.value.to, value),
+      };
+    },
+    {
+      immediate: true,
+      flush: "sync",
+    }
+  );
 
   function push(reg: number) {
     stack.value[stackpointer.value] = register.value[reg];
@@ -214,18 +249,50 @@ function createSimulator() {
 
   function setStackPointer(address: number) {
     stackpointer.value = address;
+    stackSizeDisplay.value = { from: address, to: address };
   }
 
-  function setStackView(from: number, to: number) {
-    stackSizeDisplay.value = { from, to };
+  function print(message: any) {
+    outputLog.value.push({
+      type: "info",
+      message: "" + message,
+    });
   }
+
+  const consoleProxy = new Proxy(console, {
+    get(target, propKey, receiver) {
+      const originalMethod = (target as any)[propKey];
+
+      if (propKey == "log" || propKey == "info") {
+        return function (...args: any[]) {
+          outputLog.value.push({
+            type: "info",
+            message: "" + args,
+          });
+        };
+      } else if (propKey == "warn") {
+        return function (...args: any[]) {
+          outputLog.value.push({
+            type: "warning",
+            message: "" + args,
+          });
+        };
+      } else if (propKey == "error" || propKey == "exception") {
+        return function (...args: any[]) {
+          outputLog.value.push({
+            type: "error",
+            message: "" + args,
+          });
+        };
+      }
+    },
+  });
 
   /*
 fillMemory("5 1 B 5 5 C A F F C B 3 4 7 E 1", 0);
 fillRegister("1 0 3", 1);
 fillStack("5 2 4 7", 0xfffc);
-setStackPointer(0xfffe);
-setStackView(0xfffc, 0xffff);*/
+setStackPointer(0xfffe);*/
 
   /*
   // R3 <- 17
@@ -275,7 +342,9 @@ setStackView(0xfffc, 0xffff);*/
     fillMemory,
     fillRegister,
     setStackPointer,
-    setStackView,
+    print,
+    outputLog,
+    consoleProxy,
   };
 }
 
@@ -298,8 +367,7 @@ export default defineComponent({
       `fillMemory("0 0 0 0", 0x0);
 fillRegister("0 0", 0x0);
 fillStack("", 0xffff);
-setStackPointer(0xffff);
-setStackView(0xfffc, 0xffff);`
+setStackPointer(0xffff);`
     );
 
     const instructionCode = urlRef("instructionCode", "");
@@ -311,7 +379,7 @@ declare function fillStack(memeories: string, offset: number = 0): void;
 declare function fillMemory(memeories: string, offset: number = 0): void;
 declare function fillRegister(memeories: string, offset: number = 0): void;
 declare function setStackPointer(address: number): void;
-declare function setStackView(from: number, to: number): void;
+declare function print(message: any): void;
 declare const register: number[];
 declare const reg: number[];
 declare const r: number[];
@@ -363,13 +431,15 @@ declare const mem: number[];`);
         fillMemory: simulator.value.fillMemory,
         fillRegister: simulator.value.fillRegister,
         setStackPointer: simulator.value.setStackPointer,
-        setStackView: simulator.value.setStackView,
+        print: simulator.value.print,
 
         register: simulator.value.register.value,
         reg: simulator.value.register.value,
         r: simulator.value.register.value,
         memory: simulator.value.memory.value,
         mem: simulator.value.memory.value,
+
+        console: simulator.value.consoleProxy,
       };
     }
 
@@ -395,6 +465,7 @@ declare const mem: number[];`);
           //debugger;
         },
         deep: true,
+        flush: "sync"
       });
 
       
@@ -408,6 +479,7 @@ declare const mem: number[];`);
           //debugger;
         },
         deep: true,
+        flush: "sync"
       });*/
 
       const instructionsFunction = Function.apply(null, [
@@ -456,5 +528,25 @@ td button {
   -webkit-box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.25);
   -moz-box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.25);
   box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.25);
+}
+
+.warning {
+  background-color: #fffbd6;
+  border: 1px solid #f4e89a;
+}
+.error {
+  background-color: #fdf2f5;
+  border: 1px solid #f8d5db;
+}
+
+.no-margin {
+  margin: 0px;
+}
+
+.stackpointer::before {
+  position: absolute;
+  content: ">";
+  margin-left: -30px;
+  font-weight: bolder;
 }
 </style>
