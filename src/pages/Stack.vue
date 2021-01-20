@@ -7,7 +7,7 @@
 
           <table
             class="table is-bordered is-striped is-narrow is-fullwidth"
-            v-for="(section, idxMemory) in memorySections"
+            v-for="(section, idxMemory) in simulator.memorySections.value"
             :key="idxMemory"
           >
             <thead>
@@ -24,7 +24,7 @@
               <tr>
                 <td>Wert:</td>
                 <td
-                  v-for="(item, index) in memory.slice(
+                  v-for="(item, index) in simulator.memory.value.slice(
                     section.from,
                     section.to + 1
                   )"
@@ -44,7 +44,7 @@
 
           <table
             class="table is-bordered is-striped is-narrow is-fullwidth"
-            v-for="(section, idxRegister) in registerSections"
+            v-for="(section, idxRegister) in simulator.registerSections.value"
             :key="idxRegister"
           >
             <thead>
@@ -54,7 +54,7 @@
 
             <tbody>
               <tr
-                v-for="(item, index) in register.slice(
+                v-for="(item, index) in simulator.register.value.slice(
                   section.from,
                   section.to + 1
                 )"
@@ -82,17 +82,20 @@
 
             <tbody>
               <tr
-                v-for="(item, index) in !!stackSizeDisplay
-                  ? stack.slice(stackSizeDisplay.from, stackSizeDisplay.to + 1)
-                  : stack.slice(stackpointer)"
+                v-for="(item, index) in !!simulator.stackSizeDisplay.value
+                  ? simulator.stack.value.slice(
+                      simulator.stackSizeDisplay.value.from,
+                      simulator.stackSizeDisplay.value.to + 1
+                    )
+                  : simulator.stack.value.slice(simulator.stackpointer.value)"
                 :key="index"
               >
                 <td>
                   {{
                     toHex(
-                      (!!stackSizeDisplay
-                        ? stackSizeDisplay.from
-                        : stackpointer) + index
+                      (!!simulator.stackSizeDisplay.value
+                        ? simulator.stackSizeDisplay.value.from
+                        : simulator.stackpointer.value) + index
                     )
                   }}
                 </td>
@@ -119,7 +122,9 @@
 
       <div class="columns">
         <div class="column">
-          <button class="button is-info is-fullwidth">Run</button>
+          <button class="button is-info is-fullwidth" @click="runCode">
+            Run
+          </button>
         </div>
 
         <div class="column">
@@ -149,106 +154,125 @@ import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
 import { useMonaco } from "../monaco/use-monaco";
 
-let programStack;
-
 interface Section {
-  from: number;
-  to: number;
+  readonly from: number;
+  readonly to: number;
 }
 
-let register: number[] = [];
-let stackpointer: number = 0;
-let memory: number[] = [];
-let stack: number[] = [];
-let memorySections: Section[] = [];
-let registerSections: Section[] = [];
-let stackSizeDisplay: Section | null = null;
-let r = register;
-
-function push(reg: number) {
-  stack[stackpointer] = register[reg];
-  stackpointer--;
+function toHex(number: number) {
+  return number.toString(16).toUpperCase();
 }
 
-function pop(reg: number) {
-  stackpointer++;
-  register[reg] = stack[stackpointer];
-}
+function createSimulator() {
+  const register = ref<number[]>([]);
+  const stackpointer = ref(0);
+  const memory = ref<number[]>([]);
+  const stack = ref<number[]>([]);
+  const memorySections = ref<Section[]>([]);
+  const registerSections = ref<Section[]>([]);
+  const stackSizeDisplay = ref<Section | null>(null);
 
-function fillArray(memeories: string, offset: number = 0, array: number[]) {
-  let elements = memeories.split(/\s+|,|;/).map((d) => parseInt(d, 16));
-  elements = elements.filter((d) => !isNaN(d));
-
-  for (let i = 0; i < elements.length; i++) {
-    array[i + offset] = elements[i];
+  function push(reg: number) {
+    stack.value[stackpointer.value] = register.value[reg];
+    stackpointer.value--;
   }
 
-  return elements.length;
-}
+  function pop(reg: number) {
+    stackpointer.value++;
+    register.value[reg] = stack.value[stackpointer.value];
+  }
 
-function fillStack(memeories: string, offset: number = 0) {
-  let l = fillArray(memeories, offset, stack);
-}
+  function fillArray(memeories: string, offset: number = 0, array: number[]) {
+    let elements = memeories.split(/\s+|,|;/).map((d) => parseInt(d, 16));
+    elements = elements.filter((d) => !isNaN(d));
 
-function fillMemory(memeories: string, offset: number = 0) {
-  let l = fillArray(memeories, offset, memory);
-  memorySections.push({ from: offset, to: offset + l - 1 });
-}
+    for (let i = 0; i < elements.length; i++) {
+      array[i + offset] = elements[i];
+    }
 
-function fillRegister(memeories: string, offset: number = 0) {
-  let l = fillArray(memeories, offset, register);
-  registerSections.push({ from: offset, to: offset + l - 1 });
-}
+    return elements.length;
+  }
 
-function setStackPointer(address: number) {
-  stackpointer = address;
-}
+  function fillStack(memeories: string, offset: number = 0) {
+    let l = fillArray(memeories, offset, stack.value);
+  }
 
-function setStackView(from: number, to: number) {
-  stackSizeDisplay = { from, to };
-}
+  function fillMemory(memeories: string, offset: number = 0) {
+    let l = fillArray(memeories, offset, memory.value);
+    memorySections.value.push({ from: offset, to: offset + l - 1 });
+  }
 
+  function fillRegister(memeories: string, offset: number = 0) {
+    let l = fillArray(memeories, offset, register.value);
+    registerSections.value.push({ from: offset, to: offset + l - 1 });
+  }
+
+  function setStackPointer(address: number) {
+    stackpointer.value = address;
+  }
+
+  function setStackView(from: number, to: number) {
+    stackSizeDisplay.value = { from, to };
+  }
+
+  /*
 fillMemory("5 1 B 5 5 C A F F C B 3 4 7 E 1", 0);
 fillRegister("1 0 3", 1);
 fillStack("5 2 4 7", 0xfffc);
 setStackPointer(0xfffe);
-setStackView(0xfffc, 0xffff);
+setStackView(0xfffc, 0xffff);*/
 
-// R3 <- 17
-r[3] = 17;
+  // TODO: Proxy object for registers, memory (and stack)
+  /*
+  // R3 <- 17
+  r[3] = 17;
 
-// pop(R3)
-pop(3);
+  // pop(R3)
+  pop(3);
 
-// R1 <- memory[R1]
-r[1] = memory[r[1]];
+  // R1 <- memory[R1]
+  r[1] = memory[r[1]];
 
-// R2 <- memory[memory[B]]
-r[2] = memory[memory[0xb]];
+  // R2 <- memory[memory[B]]
+  r[2] = memory[memory[0xb]];
 
-// push(R1)
-push(1);
+  // push(R1)
+  push(1);
 
-// push(R2)
-push(2);
+  // push(R2)
+  push(2);
 
-// push(R3)
-push(3);
+  // push(R3)
+  push(3);
 
-// push(R3)
-push(3);
+  // push(R3)
+  push(3);
 
-// memory[-(R1)] <- memory[F]
-memory[--r[1]] = memory[0xf];
+  // memory[-(R1)] <- memory[F]
+  memory[--r[1]] = memory[0xf];
 
-// pop(R3)
-pop(3);
+  // pop(R3)
+  pop(3);
 
-// memory[(R2)+] <- memory[E]
-memory[r[2]++] = memory[0xe];
+  // memory[(R2)+] <- memory[E]
+  memory[r[2]++] = memory[0xe];*/
 
-function toHex(number: number) {
-  return number.toString(16).toUpperCase();
+  return {
+    register,
+    stackpointer,
+    memory,
+    stack,
+    memorySections,
+    registerSections,
+    stackSizeDisplay,
+    push,
+    pop,
+    fillStack,
+    fillMemory,
+    fillRegister,
+    setStackPointer,
+    setStackView,
+  };
 }
 
 export default defineComponent({
@@ -261,68 +285,94 @@ export default defineComponent({
     const monacoEditorSetup = ref<HTMLElement>();
     const monacoEditorInstructions = ref<HTMLElement>();
 
-    const setupCode = urlRef("setupCode", 
-`fillMemory("", 0);
+    const simulator = shallowRef<ReturnType<typeof createSimulator>>(
+      createSimulator()
+    );
+
+    const setupCode = urlRef(
+      "setupCode",
+      `fillMemory("", 0);
 fillRegister("", 0);
 fillStack("", 0xffff);
 setStackPointer(0xffff);
-setStackView(0xfffc, 0xffff); `);
+setStackView(0xfffc, 0xffff);`
+    );
 
-    const instructionCode = urlRef("instructionCode", "")
+    const instructionCode = urlRef("instructionCode", "");
 
     useMonaco().then((monaco) => {
-      const setupEditor = monaco.createEditor(
-        monacoEditorSetup,
-        {
-          value: setupCode.value,
-          language: "javascript",
-          minimap: {
-            enabled: false,
-          },
-          scrollBeyondLastLine: false
-        }
-      );
+      monaco.addExtraLib(`declare function push(reg: number): void;
+declare function pop(reg: number): void;
+declare function fillStack(memeories: string, offset: number = 0): void;
+declare function fillMemory(memeories: string, offset: number = 0): void;
+declare function fillRegister(memeories: string, offset: number = 0): void;
+declare function setStackPointer(address: number): void;
+declare function setStackView(from: number, to: number): void;`);
+
+      const setupEditor = monaco.createEditor(monacoEditorSetup, {
+        value: setupCode.value,
+        language: "javascript",
+        minimap: {
+          enabled: false,
+        },
+        scrollBeyondLastLine: false,
+      });
 
       watchEffect(() => {
         setupCode.value = setupEditor.code.value;
       });
 
-      const instructionsEditor = monaco.createEditor(
-        monacoEditorInstructions,
-        {
-          value: instructionCode.value,
-          language: "javascript",
-          minimap: {
-            enabled: false,
-          },
-          scrollBeyondLastLine: false
-        }
-      );
-      
+      const instructionsEditor = monaco.createEditor(monacoEditorInstructions, {
+        value: instructionCode.value,
+        language: "javascript",
+        minimap: {
+          enabled: false,
+        },
+        scrollBeyondLastLine: false,
+      });
+
       watchEffect(() => {
         instructionCode.value = instructionsEditor.code.value;
       });
+
+      runCode();
     });
 
-   
+    function runCode() {
+      simulator.value = createSimulator();
+
+      const exposedVariables = {
+        push: simulator.value.push,
+        pop: simulator.value.pop,
+        fillStack: simulator.value.fillStack,
+        fillMemory: simulator.value.fillMemory,
+        fillRegister: simulator.value.fillRegister,
+        setStackPointer: simulator.value.setStackPointer,
+        setStackView: simulator.value.setStackView,
+
+        register: simulator.value.register.value,
+        reg: simulator.value.register.value,
+        r: simulator.value.register.value,
+        memory: simulator.value.memory.value,
+        mem: simulator.value.memory.value,
+      };
+
+      const setupFunction = Function.apply(null, [
+        `{ ${Object.keys(exposedVariables).join(",")} }`,
+        `try { ${setupCode.value}; } catch(e) { console.warn(e); }`,
+      ]);
+
+      setupFunction(exposedVariables);
+    }
 
     return {
       "monaco-editor-setup": monacoEditorSetup,
       "monaco-editor-instructions": monacoEditorInstructions,
       setupCode,
       instructionCode,
-      register,
-      memory,
-      stack,
-      fillStack,
-      fillMemory,
-      fillRegister,
-      setStackPointer,
-      memorySections,
-      registerSections,
       toHex,
-      stackSizeDisplay,
-      stackpointer,
+      runCode,
+      simulator,
     };
   },
 });

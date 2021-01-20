@@ -11,7 +11,7 @@
     "bread-n-butter": "^0.6.0",
     "bulma": "^0.9.1",
     "katex": "^0.12.0",
-    "monaco-editor": "^0.21.2",
+    "monaco-editor": "^0.21.3",
     "uuid": "^8.3.2",
     "vis-data": "^7.1.2",
     "vis-network": "^9.0.0",
@@ -20,10 +20,10 @@
   },
   "devDependencies": {
     "@types/katex": "^0.11.0",
-    "@vitejs/plugin-vue": "^1.0.6",
+    "@vitejs/plugin-vue": "^1.1.0",
     "@vue/compiler-sfc": "^3.0.5",
     "gh-pages": "^3.1.0",
     "rollup-plugin-copy-assets": "^2.0.3",
-    "vite": "^2.0.0-beta.30"
+    "vite": "^2.0.0-beta.34"
   }
 }
