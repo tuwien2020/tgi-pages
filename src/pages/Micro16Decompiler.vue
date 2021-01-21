@@ -5,8 +5,7 @@
   <textarea 
     rows="4" 
     cols="50" 
-    
-    @input="change"
+    v-model="bytecode"
     ></textarea>
 
     <pre>{{instruction}}</pre>
@@ -28,25 +27,17 @@ export default defineComponent({
     const bytecode = urlRef("bytecode", "");
     const instruction = ref("instruction");
 
-    const change = (event) => {
-      bytecode.value = event.target.value;
+    watch(bytecode, (value) => {
       let s = "";
-      console.log(bytecode.value.split('\n'));
-      
-      console.log();
       for (const line of bytecode.value.split('\n')) {
-      
-        
         s += interpret(line) + "\n";
-      } 
+      }
       instruction.value = s;
-      event.stopPropagation();
-    };
+    });
 
     return {
       bytecode,
       instruction,
-      change
     };
   },
 });

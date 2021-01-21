@@ -6,7 +6,7 @@
       <ul>
         <li>
           <label class="checkbox">
-            <input type="checkbox" />
+            <input type="checkbox" v-model="readWhileWrite"/>
             <span style="margin-left: 10px">Read while write</span>
           </label>
         </li>
@@ -139,10 +139,6 @@
           </tr>
         </tbody>
       </table>
-
-      <button style="width: 100%" class="button is-info" @click="run">
-        Run
-      </button>
     </div>
 
     <div class="column">
@@ -351,7 +347,7 @@ function setupPipeline() {
     if (value) {
       timeoutId = setTimeout(() => {
         run();
-      }, 500);
+      }, 250);
     }
   });
 
