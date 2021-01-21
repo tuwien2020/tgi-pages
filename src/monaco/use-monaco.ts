@@ -14,9 +14,18 @@ export async function useMonaco() {
     });
 
     monaco = await loader.init().then((value) => {
+      value.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+        noSemanticValidation: false,
+        noSuggestionDiagnostics: false,
+        noSyntaxValidation: false,
+      });
+
       value.languages.typescript.javascriptDefaults.setCompilerOptions({
         allowNonTsExtensions: true,
         lib: ["es2020"],
+        checkJs: true,
+        //alwaysStrict: true,
+        //strict: true,
       });
 
       value.languages.typescript.javascriptDefaults.setWorkerOptions({
