@@ -336,6 +336,14 @@
               </li>
             </ul>
           </div>
+
+          <div class="content">
+            <ul>
+              <li>
+                <router-link to="/micro-decompile">Mikro 16 decompiler</router-link>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

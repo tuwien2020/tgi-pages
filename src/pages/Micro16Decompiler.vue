@@ -5,20 +5,18 @@
   <textarea 
     rows="4" 
     cols="50" 
-    :value="bytecode"
-    @input="
-      (event) => 
-        (bytecode = event.target.value
-          .replace(/ /g, '')
-          .replace(/[^01\n]/g, ''))
-    "
+    
+    @input="change"
     ></textarea>
+
+    <pre>{{instruction}}</pre>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
+import { ParsedInstruction, parse, getRegistry, interpret} from './../assets/decompiler';
 
 export default defineComponent({
   components: {},
@@ -28,9 +26,27 @@ export default defineComponent({
     const { urlRef } = useUrlRef(router, route);
 
     const bytecode = urlRef("bytecode", "");
+    const instruction = ref("instruction");
+
+    const change = (event) => {
+      bytecode.value = event.target.value;
+      let s = "";
+      console.log(bytecode.value.split('\n'));
+      
+      console.log();
+      for (const line of bytecode.value.split('\n')) {
+      
+        
+        s += interpret(line) + "\n";
+      } 
+      instruction.value = s;
+      event.stopPropagation();
+    };
 
     return {
       bytecode,
+      instruction,
+      change
     };
   },
 });
