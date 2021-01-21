@@ -550,15 +550,17 @@ declare const mem: number[];`);
           `{ ${Object.keys(exposedVariables).join(",")} }`,
           `try { ${instructionCode.value
             .split("\n")
-            .map((v) => v + "; yield 0;")
+            .map((v, i) => v + `; yield ${i + 1};`)
             .join("\n")}; } catch(e) { console.warn(e); }`,
         ])(exposedVariables);
       } else {
         if (steppingGenerator == null) {
           console.warn("The code-executing generator object is null");
+          steppingLineNumber.value = 0;
+          return;
         }
-        steppingGenerator?.next();
-        steppingLineNumber.value++;
+        steppingLineNumber.value =
+          (steppingGenerator?.next()?.value as any) ?? 0;
       }
     }
 
