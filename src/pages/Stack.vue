@@ -131,18 +131,24 @@
     </div>
 
     <div class="column">
-      <h4 class="no-margin">Setup</h4>
-      <div ref="monaco-editor-setup" style="height: 25%" class="shadow"></div>
+      <div class="card" style="height: 25%">
+        <div class="card-content" style="height: 100%">
+          <h4 class="no-margin">Setup</h4>
+          <div ref="monaco-editor-setup" style="height: 100%"></div>
+        </div>
+      </div>
 
       <br />
+      <br />
 
-      <h4 class="no-margin">Instructions</h4>
-      <div
-        ref="monaco-editor-instructions"
-        style="height: 50%"
-        class="shadow"
-      ></div>
+      <div class="card" style="height: 50%">
+        <div class="card-content" style="height: 100%">
+          <h4 class="no-margin">Instructions</h4>
+          <div ref="monaco-editor-instructions" style="height: 100%"></div>
+        </div>
+      </div>
 
+      <br />
       <br />
 
       <div class="columns is-full">
@@ -446,6 +452,7 @@ declare const mem: number[];`);
         scrollbar: {
           vertical: "visible",
           horizontal: "visible",
+          useShadows: false,
         },
       });
 
@@ -463,6 +470,7 @@ declare const mem: number[];`);
         scrollbar: {
           vertical: "visible",
           horizontal: "visible",
+          useShadows: false,
         },
       });
 
