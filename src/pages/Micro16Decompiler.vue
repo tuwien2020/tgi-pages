@@ -34,9 +34,17 @@ export default defineComponent({
     const instruction = computed(() => {
       const lines = bytecode.value.trimEnd().split("\n");
       let s = "";
-      for (const line of lines) {
+      console.log(bytecode.value.split('\n'));
+      
+      console.log();
+      for (const line of bytecode.value.split('\n')) {
+      
+        
         s += interpret(line) + "\n";
-      }
+      } 
+      instruction.value = s;
+      event.stopPropagation();
+    };
 
       return s;
     });
