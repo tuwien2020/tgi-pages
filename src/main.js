@@ -13,9 +13,9 @@ import Pipeline from "./pages/Pipeline.vue";
 import InterleavingGraph from "./pages/InterleavingGraph.vue";
 import CacheCalc from "./pages/CacheCalc.vue";
 import Stack from "./pages/Stack.vue";
-import Micro16Decompiler from './pages/Micro16Decompiler.vue';
+import Micro16Decompiler from "./pages/Micro16Decompiler.vue";
 import { name, version } from "./../package.json";
-import 'bulma/css/bulma.css';
+import "bulma/css/bulma.css";
 
 /** @type {import("vue-router").RouteRecordRaw[]} */
 const routes = [
@@ -29,7 +29,7 @@ const routes = [
   { path: "/interleaving-graph", component: InterleavingGraph },
   { path: "/cache-calc", component: CacheCalc },
   { path: "/stack", component: Stack },
-  { path: "/micro-decompile", component: Micro16Decompiler }
+  { path: "/micro16-decompiler", component: Micro16Decompiler },
 ];
 
 if (import.meta.env.PROD) {
