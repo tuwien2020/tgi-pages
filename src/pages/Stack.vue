@@ -16,7 +16,8 @@
                 v-for="address in section.to - section.from + 1"
                 :key="address"
               >
-                {{ toHex(address - 1 + section.from) }}
+                <span class="hex-prefix">0x</span
+                >{{ toHex(address - 1 + section.from) }}
               </th>
             </thead>
 
@@ -30,7 +31,7 @@
                   )"
                   :key="index"
                 >
-                  {{ toHex(item) }}
+                  <span class="hex-prefix">0x</span>{{ toHex(item) }}
                 </td>
               </tr>
             </tbody>
@@ -49,7 +50,7 @@
           >
             <thead>
               <th class="is-half">Register</th>
-              <th class="is-half">Wert (Hex)</th>
+              <th class="is-half">Wert</th>
             </thead>
 
             <tbody>
@@ -64,9 +65,7 @@
                   {{ "R" + (index + section.from) }}
                 </td>
 
-                <td>
-                  {{ toHex(item) }}
-                </td>
+                <td><span class="hex-prefix">0x</span>{{ toHex(item) }}</td>
               </tr>
             </tbody>
           </table>
@@ -77,7 +76,7 @@
           <table class="table is-bordered is-striped is-narrow is-fullwidth">
             <thead>
               <th class="is-half">Adresse</th>
-              <th class="is-half">Wert (Hex)</th>
+              <th class="is-half">Wert</th>
             </thead>
 
             <tbody>
@@ -95,12 +94,11 @@
                       simulator.stackpointer.value,
                   }"
                 >
-                  {{ toHex(simulator.stackSizeDisplay.value.from + index) }}
+                  <span class="hex-prefix">0x</span
+                  >{{ toHex(simulator.stackSizeDisplay.value.from + index) }}
                 </td>
 
-                <td>
-                  {{ item }}
-                </td>
+                <td><span class="hex-prefix">0x</span>{{ toHex(item) }}</td>
               </tr>
             </tbody>
           </table>
@@ -624,5 +622,11 @@ td button {
   content: ">";
   margin-left: -30px;
   font-weight: bolder;
+}
+
+.hex-prefix {
+  font-size: 0.8em;
+  color: darkgrey;
+  user-select: none;
 }
 </style>

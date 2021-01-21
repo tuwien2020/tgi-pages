@@ -290,7 +290,7 @@
           <div class="content">
             <ul>
               <li>
-                <router-link to="/pipeline">Pipeline-Simulator</router-link>
+                <router-link to="/pipeline">(NICHT EMPFOHLEN) Pipeline-Simulator</router-link>
               </li>
             </ul>
           </div>
