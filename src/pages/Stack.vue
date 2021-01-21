@@ -77,7 +77,7 @@
           <table class="table is-bordered is-striped is-narrow is-fullwidth">
             <thead>
               <th class="is-half">Adresse</th>
-              <th class="is-half">Wert</th>
+              <th class="is-half">Wert (Hex)</th>
             </thead>
 
             <tbody>
@@ -207,11 +207,14 @@ function toHex(number: number) {
 
 function createSimulator() {
   const register = ref<number[]>([]);
-  const stackpointer = ref(0);
+  const stackpointer = ref(0xffff);
   const memory = ref<number[]>([]);
   const memorySections = ref<Section[]>([]);
   const registerSections = ref<Section[]>([]);
-  const stackSizeDisplay = ref<Section>({ from: 0, to: 0 });
+  const stackSizeDisplay = ref<Section>({
+    from: stackpointer.value,
+    to: stackpointer.value,
+  });
   const outputLog = ref<LogMessage[]>([]);
 
   watch(
@@ -395,7 +398,7 @@ export default defineComponent({
 
     const setupCode = urlRef(
       "setupCode",
-      `fillMemory("5 1 B 5 5 C A F F C B 3 4 7 E 1", 0);
+      `fillMemory("5 1 B 5 5 C A F F C B 3 4 7 E 1", 0x0);
 fillRegister("1 0 3", 1);
 fillStack("5 2 4 7", 0xfffc);
 setStackPointer(0xffff);`
@@ -502,23 +505,6 @@ declare const mem: number[];`);
       const exposedVariables = simulator.value.getExposedVariables();
       runSetup(exposedVariables);
 
-      /*
-      
-
-      
-
-      watch(simulator.value.register, (value) => {}, {
-        onTrack: (e) => {
-          console.log("track", e);
-        },
-        onTrigger: (e) => {
-          console.log(e);
-          //debugger;
-        },
-        deep: true,
-        flush: "sync"
-      });*/
-
       const instructionsFunction = Function.apply(null, [
         `{ ${Object.keys(exposedVariables).join(",")} }`,
         `try { ${instructionCode.value}; } catch(e) { console.warn(e); }`,
@@ -550,7 +536,13 @@ declare const mem: number[];`);
           `{ ${Object.keys(exposedVariables).join(",")} }`,
           `try { ${instructionCode.value
             .split("\n")
-            .map((v, i) => v + `; yield ${i + 1};`)
+            .map((v, i) => {
+              if (v == "") {
+                return v;
+              } else {
+                return v + `; yield ${i + 1};`;
+              }
+            })
             .join("\n")}; } catch(e) { console.warn(e); }`,
         ])(exposedVariables);
       } else {

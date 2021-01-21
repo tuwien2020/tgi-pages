@@ -98,9 +98,9 @@
                 :value="row.readRegisters.join(',')"
                 @blur="
                   (event) =>
-                    (row.readRegisters = event.target.value
-                      .split(',')
-                      .map((d) => +d))
+                    (row.readRegisters = !!event.target.value
+                      ? event.target.value.split(',').map((d) => +d)
+                      : [])
                 "
               />
             </td>
@@ -113,9 +113,9 @@
                 :value="row.writeRegisters.join(',')"
                 @blur="
                   (event) =>
-                    (row.writeRegisters = event.target.value
-                      .split(',')
-                      .map((d) => +d))
+                    (row.writeRegisters = !!event.target.value
+                      ? event.target.value.split(',').map((d) => +d)
+                      : [])
                 "
               />
             </td>
@@ -310,11 +310,7 @@ function setupPipeline() {
     parseCommand("PUSH", ["R2"], []),
     parseCommand("INC", ["R1"], ["R1"]),
     parseCommand("DIV", ["R3", "R4"], ["R5"]),
-    parseCommand(
-      "SUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUBSUB",
-      ["R5", "R1"],
-      ["R6"]
-    ),
+    parseCommand("SUB", ["R5", "R1"], ["R6"]),
     parseCommand("MULT", ["R5", "R6"], ["R1"]),
     parseCommand("POP", [], ["R3"]),
   ]);
@@ -348,6 +344,16 @@ function setupPipeline() {
       deep: true,
     }
   );
+
+  let timeoutId = 0;
+  watch(dirty, (value) => {
+    clearTimeout(timeoutId);
+    if (value) {
+      timeoutId = setTimeout(() => {
+        run();
+      }, 500);
+    }
+  });
 
   return {
     pipelineStages,

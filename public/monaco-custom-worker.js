@@ -5,6 +5,7 @@
 self.customTSWorkerFactory = (TypeScriptWorker) => {
   // TODO: Line numbers (before every line, insert a "lineNumber = X" statement), used for printing
   // TODO: Registers like R3 should just work
+  // TODO: Proper debugging (simply interleaving yield linenumber; doesn't really always work)
 
   return class MonacoTSWorker extends TypeScriptWorker {
     async getVariables(modelUri) {
