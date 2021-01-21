@@ -82,7 +82,7 @@
 
             <tbody>
               <tr
-                v-for="(item, index) in simulator.stack.value.slice(
+                v-for="(item, index) in simulator.memory.value.slice(
                   simulator.stackSizeDisplay.value.from,
                   simulator.stackSizeDisplay.value.to + 1
                 )"
@@ -194,6 +194,7 @@ interface LogMessage {
 }
 
 function toHex(number: number) {
+  if (number === null || number === undefined) return "";
   return number.toString(16).toUpperCase();
 }
 
@@ -201,7 +202,6 @@ function createSimulator() {
   const register = ref<number[]>([]);
   const stackpointer = ref(0);
   const memory = ref<number[]>([]);
-  const stack = ref<number[]>([]); // TODO: memory and stack are one
   const memorySections = ref<Section[]>([]);
   const registerSections = ref<Section[]>([]);
   const stackSizeDisplay = ref<Section>({ from: 0, to: 0 });
@@ -222,13 +222,13 @@ function createSimulator() {
   );
 
   function push(reg: number) {
-    stack.value[stackpointer.value] = register.value[reg];
+    memory.value[stackpointer.value] = register.value[reg];
     stackpointer.value--;
   }
 
   function pop(reg: number) {
     stackpointer.value++;
-    register.value[reg] = stack.value[stackpointer.value];
+    register.value[reg] = memory.value[stackpointer.value];
   }
 
   function fillArray(memeories: string, offset: number = 0, array: number[]) {
@@ -243,7 +243,7 @@ function createSimulator() {
   }
 
   function fillStack(memeories: string, offset: number = 0) {
-    let l = fillArray(memeories, offset, stack.value);
+    let l = fillArray(memeories, offset, memory.value);
   }
 
   function fillMemory(memeories: string, offset: number = 0) {
@@ -321,12 +321,9 @@ function createSimulator() {
     register,
     stackpointer,
     memory,
-    stack,
     memorySections,
     registerSections,
     stackSizeDisplay,
-    push,
-    pop,
     fillStack,
     fillMemory,
     fillRegister,
@@ -465,13 +462,7 @@ declare const mem: number[];`);
       runSetup(exposedVariables);
 
       /*
-      watch(simulator.value.memory, (value) => {}, {
-        onTrigger: (e) => {
-          //debugger;
-        },
-        deep: true,
-        flush: "sync"
-      });
+      
 
       
 
@@ -529,8 +520,6 @@ declare const mem: number[];`);
         steppingLineNumber.value++;
       }
     }
-
-    function* test() {}
 
     return {
       "monaco-editor-setup": monacoEditorSetup,

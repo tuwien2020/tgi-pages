@@ -256,7 +256,6 @@
       </div>
     </div>
 
-    
     <div class="column is-one-third">
       <div class="card">
         <div class="card-content">
@@ -331,9 +330,7 @@
           <div class="content">
             <ul>
               <li>
-                <a
-                  href="https://tgi.rwutscher.com/"
-                  target="_blank"
+                <a href="https://tgi.rwutscher.com/" target="_blank"
                   >Mikro 16 compiler</a
                 >
               </li>
@@ -400,6 +397,13 @@
                   href="https://trustconverter.com/en/data-storage-conversion/zettabits/zettabits-to-bits.html"
                   target="_blank"
                   >SI Bits Conversion (Kilobits, Gibibytes etc.)</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://www.unitjuggler.com/frequency-umwandeln-von-MHz-nach-ns(p).html"
+                  target="_blank"
+                  >MHz to nanoseconds</a
                 >
               </li>
             </ul>
