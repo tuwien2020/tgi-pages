@@ -220,16 +220,20 @@ function createSimulator() {
   watch(
     stackpointer,
     (value) => {
-      stackSizeDisplay.value = {
-        from: Math.min(stackSizeDisplay.value.from, value),
-        to: Math.max(stackSizeDisplay.value.to, value),
-      };
+      updateStackSizeDisplay(value, value);
     },
     {
       immediate: true,
       flush: "sync",
     }
   );
+
+  function updateStackSizeDisplay(from: number, to: number) {
+    stackSizeDisplay.value = {
+      from: Math.min(stackSizeDisplay.value.from, from),
+      to: Math.max(stackSizeDisplay.value.to, to),
+    };
+  }
 
   function push(reg: number) {
     memory.value[stackpointer.value] = register.value[reg];
@@ -254,6 +258,7 @@ function createSimulator() {
 
   function fillStack(memeories: string, offset: number = 0) {
     let l = fillArray(memeories, offset, memory.value);
+    stackSizeDisplay.value = { from: offset, to: offset + l };
   }
 
   function fillMemory(memeories: string, offset: number = 0) {
@@ -268,8 +273,10 @@ function createSimulator() {
 
   function setStackPointer(address: number) {
     stackpointer.value = address;
-    stackSizeDisplay.value = { from: address, to: address };
+    updateStackSizeDisplay(address, address);
   }
+
+  // TODO: lsh und rsh
 
   function print(message: any): any {
     outputLog.value.push({
