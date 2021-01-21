@@ -1,6 +1,6 @@
 <template>
   <h1>Interleaving</h1>
-  <div class="columns">
+  <div class="columns is-desktop">
     <div id="mynetwork" class="column"></div>
     <div class="column" style="display: flex; flex-direction: column">
       <h3>Variables</h3>

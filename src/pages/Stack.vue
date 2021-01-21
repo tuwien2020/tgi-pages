@@ -1,5 +1,5 @@
 <template>
-  <div class="columns is-full-height">
+  <div class="columns is-full-height is-desktop">
     <div class="column">
       <div class="columns">
         <div class="column">

@@ -7,7 +7,7 @@
         <li>
           <label class="checkbox">
             <input type="checkbox" />
-            <span style="margin-left: 10px">Read and write</span>
+            <span style="margin-left: 10px">Read while write</span>
           </label>
         </li>
       </ul>
