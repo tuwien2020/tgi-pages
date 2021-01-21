@@ -110,15 +110,21 @@
       <div class="columns">
         <div>
           <h4 class="no-margin">Debug log</h4>
-          <div v-for="(item, index) in simulator.outputLog.value" :key="index">
-            <span
-              :class="{
-                warning: item.type == 'warning',
-                error: item.type == 'error',
-              }"
+          <div class="is-family-monospace">
+            <div
+              v-for="(item, index) in simulator.outputLog.value"
+              :key="index"
+              class="is-family-monospace"
             >
-              {{ item.message }}
-            </span>
+              <span
+                :class="{
+                  warning: item.type == 'warning',
+                  error: item.type == 'error',
+                }"
+              >
+                {{ item.message }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -172,6 +178,7 @@ import {
   onMounted,
   Ref,
   shallowRef,
+  toRaw,
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
@@ -255,11 +262,12 @@ function createSimulator() {
     stackSizeDisplay.value = { from: address, to: address };
   }
 
-  function print(message: any) {
+  function print(message: any): any {
     outputLog.value.push({
       type: "info",
       message: "" + message,
     });
+    return message;
   }
 
   const consoleProxy = new Proxy(console, {
@@ -292,6 +300,37 @@ function createSimulator() {
   });
 
   function getExposedVariables() {
+    const internalMemory = toRaw(memory.value);
+
+    const memoryProxy = new Proxy(internalMemory, {
+      get(target, prop, receiver) {
+        if (typeof prop == "string") {
+          const index = +prop;
+          if (!isNaN(index)) {
+            print(`read(${toHex(index)})[${target[index]}]`);
+          } else {
+            print(`get memory ${String(prop)}`);
+          }
+        } else {
+          print(`get memory ${String(prop)}`);
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+      set(target, prop, val, receiver) {
+        if (typeof prop == "string") {
+          const index = +prop;
+          if (!isNaN(index)) {
+            print(`write(${toHex(index)})=${toHex(val)}`);
+          } else {
+            print(`set memory ${String(prop)} = ${val}`);
+          }
+        } else {
+          print(`set memory ${String(prop)} = ${val}`);
+        }
+        return Reflect.set(target, prop, val, receiver); // (2)
+      },
+    });
+
     return {
       push: push,
       pop: pop,
@@ -304,8 +343,10 @@ function createSimulator() {
       register: register.value,
       reg: register.value,
       r: register.value,
-      memory: memory.value,
-      mem: memory.value,
+      // memory: memory.value,
+      //  mem: memory.value,
+      memory: memoryProxy,
+      mem: memoryProxy,
 
       console: consoleProxy,
     };
@@ -388,7 +429,7 @@ declare function fillStack(memeories: string, offset: number = 0): void;
 declare function fillMemory(memeories: string, offset: number = 0): void;
 declare function fillRegister(memeories: string, offset: number = 0): void;
 declare function setStackPointer(address: number): void;
-declare function print(message: any): void;
+declare function print(message: any): any;
 declare const register: number[];
 declare const reg: number[];
 declare const r: number[];

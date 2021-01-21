@@ -3,6 +3,9 @@
  * @param {import('monaco-editor').languages.typescript.TypeScriptWorker} TypeScriptWorker
  */
 self.customTSWorkerFactory = (TypeScriptWorker) => {
+  // TODO: Line numbers (before every line, insert a "lineNumber = X" statement), used for printing
+  // TODO: Registers like R3 should just work
+
   return class MonacoTSWorker extends TypeScriptWorker {
     async getVariables(modelUri) {
       const purr = this._languageService.getProgram(modelUri);
