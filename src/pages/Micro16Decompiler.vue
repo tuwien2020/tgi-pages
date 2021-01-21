@@ -31,23 +31,13 @@ export default defineComponent({
     const { urlRef } = useUrlRef(router, route);
 
     const bytecode = urlRef("bytecode", "");
-    const instruction = computed(() => {
-      const lines = bytecode.value.trimEnd().split("\n");
-      let s = "";
-      console.log(bytecode.value.split('\n'));
-      
-      console.log();
-      for (const line of bytecode.value.split('\n')) {
-      
-        
-        s += interpret(line) + "\n";
-      } 
-      instruction.value = s;
-      event.stopPropagation();
-    };
-
-      return s;
-    });
+    const instruction = computed(() =>
+      bytecode.value
+        .trimEnd()
+        .split("\n")
+        .map((v) => interpret(v))
+        .join("\n")
+    );
 
     return {
       bytecode,
