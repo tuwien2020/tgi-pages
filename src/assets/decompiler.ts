@@ -168,7 +168,7 @@ export function interpret(binarycode: string): string {
     }
 
     if(!inst.enS && !inst.mbr && !inst.mar && !inst.ms) {
-        s += a + "; "
+        decompiled += rightSide + "; "
     }
 
     switch(inst.cond) {
