@@ -44,6 +44,12 @@ export default defineComponent({
 
     useMonaco().then((monaco) => {
       monaco.setMonacoOptions((value) => {
+        if (
+          value.languages.getLanguages().some((v) => v.id == "micro16-binary")
+        ) {
+          return;
+        }
+
         value.languages.register({
           id: "micro16-binary",
         });
