@@ -414,8 +414,8 @@ setStackPointer(0xffff);`
       `// R3 <- 17
 r[3] = 17;
 
-// R1 <- memory[R1]
-r[1] = memory[r[1]];
+// if R2 = 0 then R3 = 1;
+if(r[2] == 0) { r[3] = 1; }
 
 // R2 <- memory[memory[B]]
 r[2] = memory[memory[0xb]];
@@ -423,8 +423,8 @@ r[2] = memory[memory[0xb]];
 // push(R1)
 push(1);
 
-// push(R2)
-push(2);
+// lsh(R2)
+r[2] = r[2] << 1;
 
 // memory[-(R1)] <- memory[F]
 memory[--r[1]] = memory[0xf];
@@ -496,7 +496,8 @@ declare const mem: number[];`);
     function runSetup(exposedVariables: object) {
       const setupFunction = Function.apply(null, [
         `{ ${Object.keys(exposedVariables).join(",")} }`,
-        `try { ${setupCode.value}; } catch(e) { console.warn(e); }`,
+        `try { ${setupCode.value}; 
+} catch(e) { console.warn(e); }`,
       ]);
 
       setupFunction(exposedVariables);
@@ -512,7 +513,8 @@ declare const mem: number[];`);
 
       const instructionsFunction = Function.apply(null, [
         `{ ${Object.keys(exposedVariables).join(",")} }`,
-        `try { ${instructionCode.value}; } catch(e) { console.warn(e); }`,
+        `try { ${instructionCode.value}; 
+} catch(e) { console.warn(e); }`,
       ]);
 
       instructionsFunction(exposedVariables);
