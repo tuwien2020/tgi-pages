@@ -110,8 +110,16 @@ export async function useMonaco() {
       setLinePointer,
     };
   }
+
+  function setMonacoOptions(callback: (monaco: Monaco) => void) {
+    if (monaco) {
+      callback(monaco);
+    }
+  }
+
   return {
     addExtraLib,
     createEditor,
+    setMonacoOptions,
   };
 }
