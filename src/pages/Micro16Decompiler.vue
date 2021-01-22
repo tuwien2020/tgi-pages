@@ -35,7 +35,7 @@ export default defineComponent({
       bytecode.value
         .trimEnd()
         .split("\n")
-        .map((v) => interpret(v))
+        .map((v) => interpret(v.replace(/\s/g, "")))
         .join("\n")
     );
 
