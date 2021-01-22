@@ -129,26 +129,6 @@
     </div>
 
     <div class="column">
-      <div class="card" style="height: 25%">
-        <div class="card-content" style="height: 100%">
-          <h4 class="no-margin">Setup</h4>
-          <div ref="monaco-editor-setup" style="height: 100%"></div>
-        </div>
-      </div>
-
-      <br />
-      <br />
-
-      <div class="card" style="height: 50%">
-        <div class="card-content" style="height: 100%">
-          <h4 class="no-margin">Instructions</h4>
-          <div ref="monaco-editor-instructions" style="height: 100%"></div>
-        </div>
-      </div>
-
-      <br />
-      <br />
-
       <div class="columns is-full">
         <div class="column">
           <button class="button is-info is-fullwidth" @click="runCode">
@@ -166,6 +146,23 @@
           <button class="button is-danger is-fullwidth" @click="reset">
             Reset
           </button>
+        </div>
+      </div>
+
+      <div class="card" style="height: 25%">
+        <div class="card-content" style="height: 100%">
+          <h4 class="no-margin">Setup</h4>
+          <div ref="monaco-editor-setup" style="height: 100%"></div>
+        </div>
+      </div>
+
+      <br />
+      <br />
+
+      <div class="card" style="height: 50%">
+        <div class="card-content" style="height: 100%">
+          <h4 class="no-margin">Instructions</h4>
+          <div ref="monaco-editor-instructions" style="height: 100%"></div>
         </div>
       </div>
     </div>
@@ -273,8 +270,6 @@ function createSimulator() {
     stackpointer.value = address;
     updateStackSizeDisplay(address, address);
   }
-
-  // TODO: lsh und rsh
 
   function print(message: any): any {
     outputLog.value.push({
@@ -425,6 +420,7 @@ push(1);
 
 // lsh(R2)
 r[2] = r[2] << 1;
+print("Value of R2 (decimal): " + r[2])
 
 // memory[-(R1)] <- memory[F]
 memory[--r[1]] = memory[0xf];

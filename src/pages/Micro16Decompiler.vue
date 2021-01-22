@@ -269,8 +269,10 @@ export default defineComponent({
 });
 </script>
 <style>
+/* Chrome can't handle this
 .micro16-decompiler .monaco-editor .view-line span {
   padding-left: 2px;
   padding-right: 2px;
 }
+*/
 </style>
