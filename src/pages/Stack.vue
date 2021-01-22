@@ -321,7 +321,7 @@ function createSimulator() {
         if (typeof prop == "string") {
           const index = +prop;
           if (!isNaN(index)) {
-            print(`read(${toHex(index)})[${target[index]}]`);
+            print(`read(${toHex(index)})[${toHex(target[index])}]`);
           } else {
             print(`get memory ${String(prop)}`);
           }
