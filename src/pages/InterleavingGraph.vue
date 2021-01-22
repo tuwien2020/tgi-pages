@@ -70,8 +70,16 @@ export default {
       "variablesCode",
       "let U = 0, T = 0, V = 0, W = 0"
     );
-    const thread1Code = urlRef("thread1Code", "\n\n\n");
-    const thread2Code = urlRef("thread2Code", "\n\n\n");
+    const thread1Code = urlRef(
+      "thread1Code",
+      `U = 1; // U := 1;
+if(T == 0) { V = 1; } // if T = 0 then V := 1;`
+    );
+    const thread2Code = urlRef(
+      "thread2Code",
+      `T = 1; // T := 1;
+if(U == 0) { V = 1; } // if U = 0 then V := 1;`
+    );
 
     const threadsInstructions = shallowRef<{
       variableNames: string[];
@@ -129,15 +137,15 @@ export default {
           return lines.map((line) =>
             Function.apply(null, [
               `{ ${variableNames.join(",")} }`,
-              `try { ${line}; } catch(e) { console.warn(e); } return { ${variableNames.join(
-                ","
-              )} };`,
+              `try { ${line}; 
+} catch(e) { console.warn(e); } return { ${variableNames.join(",")} };`,
             ])
           );
         });
 
         const getInitialState = Function.apply(null, [
-          `${code.value}; return { ${variableNames.join(",")} };`,
+          `${code.value}; 
+return { ${variableNames.join(",")} };`,
         ]);
 
         return {
