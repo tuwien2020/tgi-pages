@@ -9,7 +9,11 @@
     class="is-family-monospace"
   ></textarea>-->
 
-  <div ref="monaco-editor-micro16" style="height: 10em"></div>
+  <div
+    class="micro16-decompiler"
+    ref="monaco-editor-micro16"
+    style="height: 10em"
+  ></div>
 
   <pre>{{ instruction }}</pre>
 </template>
@@ -265,7 +269,7 @@ export default defineComponent({
 });
 </script>
 <style>
-.monaco-editor .view-line span {
+.micro16-decompiler .monaco-editor .view-line span {
   padding-left: 2px;
   padding-right: 2px;
 }
