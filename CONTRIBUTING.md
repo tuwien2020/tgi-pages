@@ -4,6 +4,7 @@ Contributions are very much welcomed!
 
 ## Used Libraries (important ones)
 
+- [Typescript](https://www.typescriptlang.org/) - Typesafe Javascript
 - [Vue 3](https://github.com/vuejs/vue-next/) - Vue 3 with [the composition API](https://vue-composition-api-rfc.netlify.app/api.html)
 - [Vite](https://github.com/vuejs/vite) - a speedy Vue.js framework
 - [KaTeX](https://katex.org/) - rendering LaTeX equations
