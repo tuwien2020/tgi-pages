@@ -83,7 +83,7 @@ function stringToBinaryNumber(value: string): BinaryNumber {
   );
 }
 
-const pBinaryNumber = bnb
+export const pBinaryNumber = bnb
   .match(binaryNumberRegex)
   .map((str) => new BinaryNumberLiteral(stringToBinaryNumber(str)));
 

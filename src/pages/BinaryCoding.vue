@@ -1,6 +1,8 @@
 <template>
   <div>
     <h1>Bin&auml;re Codierungen</h1>
+    <!--<h2>Encoding</h2>
+    <p>Gebe hier eine Bin&auml;re Zahl ein:</p>-->
 
     <h2>Decoding</h2>
     <p>Gebe hier ein Bitmuster ein:</p>
@@ -45,32 +47,12 @@
         </tr>
       </tbody>
     </table>
-
-    <!--<h2>Encoding</h2>
-    <p>Gebe hier eine Bin&auml;re Zahl ein:</p>-->
   </div>
 </template>
 
 <script lang="ts">
-import {
-  ref,
-  defineComponent,
-  watchEffect,
-  watch,
-  computed,
-  shallowRef,
-  readonly,
-  ComputedRef,
-  reactive,
-  unref,
-  Ref,
-} from "vue";
-import {
-  RouteLocationNormalized,
-  Router,
-  useRoute,
-  useRouter,
-} from "vue-router";
+import { defineComponent, computed, shallowRef, ComputedRef, unref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { MathJson, MathJsonNumber } from "../math/MathJson";
 import MathInput from "./../components/MathInput.vue";
 import { tryParseBinaryNumber, tryParseNumber } from "./../assets/grammar-math";
@@ -118,34 +100,30 @@ function useBinaryParsing() {
     }
   }
 
-  // TODO: Replace this with tryParseBinaryNumber() from grammar-single-op.ts
-  function stringToBinaryNumber(value: string): BinaryNumber {
-    const matchResults = (value ?? "").match(/([+-])?([0-1]+)([.,][0-1]+)?/);
-    if (matchResults === null) return new BinaryNumber(false, [], 0);
-
-    const [_, sign, numberValue, fractionalPart] = matchResults;
-
-    let x = (value ?? "").matchAll(/([+-])?([0-1]+)([.,][0-1]+)?/g);
-
-    if (fractionalPart) throw new Error("Fractional numbers not yet supported");
-    return new BinaryNumber(
-      sign === "-",
-      (numberValue ?? "").split("").map((v) => (v === "0" ? false : true)),
-      0
-    );
-  }
-
   // TODO: Handle fractional binary numbers
   function binaryToString(value: BinaryNumber) {
-    return `${unref(value).isNegative ? "-" : "+"}${unref(value)
-      .value.map((v) => (v ? "1" : "0"))
-      .join("")}`;
+    const sign = unref(value).isNegative ? "-" : "+";
+    const beforeDecimal = unref(value)
+      .getValueBeforeDecimal()
+      .map((v) => (v ? "1" : "0"))
+      .join("");
+    const afterDecimal = unref(value)
+      .getValueAfterDecimal()
+      .map((v) => (v ? "1" : "0"))
+      .join("");
+
+    return (
+      sign +
+      beforeDecimal +
+      (afterDecimal !== undefined && afterDecimal.length > 0
+        ? `.${afterDecimal}`
+        : "")
+    );
   }
 
   return {
     parseBitArray,
     parseBinary,
-    stringToBinaryNumber,
     binaryToString,
   };
 }
@@ -158,19 +136,13 @@ export default defineComponent({
     const { urlRef } = useUrlRef(router, route);
     const mathPrinting = useMathPrinting();
 
-    const {
-      parseBitArray,
-      parseBinary,
-      stringToBinaryNumber,
-      binaryToString,
-    } = useBinaryParsing();
+    const { parseBitArray, parseBinary, binaryToString } = useBinaryParsing();
     const userInput = urlRef("input", "0");
     const mathJsonNumber = shallowRef<MathJson>();
 
+    // TODO: This is actually not a valid mathjsonnumber
     const bitPattern: ComputedRef<readonly boolean[]> = computed(
-      () =>
-        stringToBinaryNumber((mathJsonNumber.value as MathJsonNumber)?.value)
-          .value
+      () => (mathJsonNumber.value as any)?.value ?? []
     );
 
     function defineFormat<T extends object>(
@@ -237,7 +209,7 @@ export default defineComponent({
         (value, options) =>
           BinaryNumber.fromOffsetBinary(
             bitPattern.value,
-            stringToBinaryNumber(options.e.value).value
+            tryParseBinaryNumber(options.e.value).value.value
           ),
         {
           e: urlRef("input-offset", "0"),

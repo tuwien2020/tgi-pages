@@ -1,10 +1,6 @@
 import * as bnb from "bread-n-butter";
 import { BinaryNumber } from "./../math/binary-number";
-import {
-  MathExpression,
-  BinaryOperator,
-  BinaryNumberLiteral,
-} from "./grammar-math";
+import { pBinaryNumber, MathExpression, BinaryOperator } from "./grammar-math";
 
 let mathWS = bnb.match(/\s*/);
 
@@ -18,26 +14,6 @@ function operator<S extends string>(value: { operator: S; match: RegExp }) {
     .thru(token)
     .map((v) => value.operator);
 }
-
-const binaryNumberRegex = /([+-])?([0-1]+)([.,]([0-1]+))?/;
-function stringToBinaryNumber(value: string): BinaryNumber {
-  const matchResults = (value ?? "").match(binaryNumberRegex);
-  if (matchResults === null) return new BinaryNumber(false, [], 0);
-
-  const [_, sign, numberValue, __, fractionalPart] = matchResults;
-
-  return new BinaryNumber(
-    sign === "-",
-    ((numberValue ?? "") + (fractionalPart ?? ""))
-      .split("")
-      .map((v) => (v === "0" ? false : true)),
-    fractionalPart?.length ?? 0
-  );
-}
-
-const pBinaryNumber = bnb
-  .match(binaryNumberRegex)
-  .map((str) => new BinaryNumberLiteral(stringToBinaryNumber(str)));
 
 const mathSingleOperator: bnb.Parser<MathExpression> = pBinaryNumber.chain(
   (expr) => {
