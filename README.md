@@ -5,7 +5,7 @@
 ## [View it online](https://tuwien2020.github.io/tgi-pages/#/)
 
 ## Developer Info
-
+0. Make sure that you have [Node 15 or greater](https://nodejs.org/en/)
 1. Clone the repository
 2. `npm install`
 3. `npm run dev`
