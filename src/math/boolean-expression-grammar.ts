@@ -144,7 +144,11 @@ const logicalOrOps: bnb.Parser<LogicalExpression> = logicalAndOps.chain(
 
 const logicalImpliesOp: bnb.Parser<LogicalExpression> = logicalOrOps.chain(
   (expr) => {
-    return operator({ operator: "implies", match: /impl(y|ies)|==?>|⇒/i })
+    return bnb
+      .choice(
+        operator({ operator: "implies", match: /impl(y|ies)|==?>|⇒/i }),
+        operator({ operator: "subset", match: /if|subset|<==?|⊃/i })
+      )
       .and(logicalOrOps)
       .repeat(0)
       .map((pairs) => {

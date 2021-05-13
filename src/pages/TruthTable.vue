@@ -98,6 +98,11 @@
         <td>equals</td>
         <td>=</td>
       </tr>
+      <tr>
+        <td><math-output :value="['subset', 'a', 'b']"></math-output></td>
+        <td>if</td>
+        <td>&lt;=</td>
+      </tr>
     </tbody>
   </table>
 
