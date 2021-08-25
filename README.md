@@ -2,7 +2,8 @@
 
 <!--Krauti, Yousif, Moritz, Møxwell, eSportSuBZero-->
 
-## [View it online](https://tuwien2020.github.io/tgi-pages/#/)
+- [View it online](https://tuwien2020.github.io/tgi-pages/#/)
+- [Contributing](./CONTRIBUTING.md)
 
 ## Developer Info
 0. Make sure that you have [Node 15 or greater](https://nodejs.org/en/)
@@ -10,6 +11,7 @@
 2. `npm install`
 3. `npm run dev`
 4. Start coding or testing
+5. More info in the [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ### Tooling
 
