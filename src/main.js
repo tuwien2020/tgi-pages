@@ -14,8 +14,11 @@ import InterleavingGraph from "./pages/InterleavingGraph.vue";
 import CacheCalc from "./pages/CacheCalc.vue";
 import Stack from "./pages/Stack.vue";
 import Micro16Decompiler from "./pages/Micro16Decompiler.vue";
+import Main from "./pages/Main.vue";
 import { name, version } from "./../package.json";
 import "bulma/css/bulma.css";
+import 'ant-design-vue/dist/antd.css';
+import Antd from "ant-design-vue";
 
 /** @type {import("vue-router").RouteRecordRaw[]} */
 const routes = [
@@ -30,6 +33,7 @@ const routes = [
   { path: "/cache-calc", component: CacheCalc },
   { path: "/stack", component: Stack },
   { path: "/micro16-decompiler", component: Micro16Decompiler },
+  { path: "/test", component: Main},
 ];
 
 if (import.meta.env.PROD) {
@@ -43,4 +47,5 @@ createApp(App)
       routes: routes,
     })
   )
+  .use(Antd)
   .mount("#app");

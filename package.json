@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@monaco-editor/loader": "^1.0.0",
+    "ant-design-vue": "^2.2.6",
     "bread-n-butter": "^0.6.0",
     "bulma": "^0.9.2",
     "katex": "^0.12.0",

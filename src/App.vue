@@ -1,4 +1,5 @@
 <template>
+  <div class="header-block">.</div>
   <nav class="navbar header" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <router-link to="/" class="home-link"
@@ -29,11 +30,22 @@ export default defineComponent({
 <style scoped>
 .header {
   height: 1em;
+  width: 100vw;
   padding: 12px 24px;
   background: #f5f5f5;
   box-shadow: 0 1px 5px -1px rgba(0, 0, 0, 0.2);
   min-height: none;
+  position: fixed;
 }
+
+.header-block {
+  height: 1em;
+  padding: 15px 24px;
+  background: #ffffff00;
+  min-height: none;
+}
+
+
 .home-link {
   text-decoration: none;
   text-transform: uppercase;
