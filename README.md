@@ -4,6 +4,7 @@
 
 - [View it online](https://tuwien2020.github.io/tgi-pages/#/)
 - [Contributing](./CONTRIBUTING.md)
+- [Report an issue](https://github.com/tuwien2020/tgi-pages/issues)
 
 ## Developer Info
 0. Make sure that you have [Node 15 or greater](https://nodejs.org/en/)
