@@ -1,11 +1,14 @@
 <template>
   <h1>Hamming-Code</h1>
 
-  <p>Gebe hier einen Hamming-Code ein:</p>
-  <input v-model="codeBits" pattern="[01]+" />
+  <p>Gebe hier einen Code ein:</p>
+  <input v-model="code" pattern="[01]+" />
 
-  <p>Gebe hier die Datenbits für einen Hamming-Code ein:</p>
-  <input v-model="dataBits" pattern="[01]+" />
+  <label>
+    <!-- Hmm Yes the Floor Here Is Made Out of Floor -->
+    <input type="checkbox" v-model="dataOnly" true-value="true" false-value="false" />
+    nur Datenbits
+  </label>
 
   <pre>Hamming-Code: {{ hammingCode.code }} (bereits korrigiert)</pre>
   <pre>Datenbits: {{ hammingCode.data }}</pre>
@@ -74,29 +77,21 @@ export default defineComponent({
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
 
-    const codeBits = urlRef("hamming-code-bits", "");
-    const dataBits = urlRef("hamming-data-bits", "");
+    const code = urlRef("code", "");
+    // TODO: support booleans
+    const dataOnly = urlRef("dataOnly", "false");
 
-    let hammingCode = ref(new HammingCode(""));
-    if (codeBits.value != "") {
-      hammingCode.value = new HammingCode(codeBits.value);
-    } else {
-      hammingCode.value = new HammingCode(dataBits.value)
-    }
+    let hammingCode = ref(new HammingCode(code.value, dataOnly.value != "false"));
+
+    watch(code, (value) => {
+      hammingCode.value = new HammingCode(value, dataOnly.value != "false");
+    });
+
+    watch(dataOnly, (value) => {
+      hammingCode.value = new HammingCode(code.value, value != "false");
+    });
 
     const showCalulations = ref(false);
-
-    watch(codeBits, (value) => {
-      codeBits.value = codeBits.value.replace(/[^01]+$/, "");
-      hammingCode.value = new HammingCode(codeBits.value, false);
-      dataBits.value = "";
-    });
-
-    watch(dataBits, (value) => {
-      dataBits.value = dataBits.value.replace(/[^01]+$/, "");
-      hammingCode.value = new HammingCode(dataBits.value, true);
-      codeBits.value = "";
-    });
 
     const dataBitCalculation = ref(new DataBitCalculation(0));
     const parityBitCalculation = ref(new ParityBitCalculation(0));
@@ -116,8 +111,8 @@ export default defineComponent({
     }, {deep: true});
 
     return {
-      codeBits,
-      dataBits,
+      code,
+      dataOnly,
       hammingCode,
       showCalulations,
       dataBitCalculation,
@@ -341,6 +336,7 @@ function isPowerOfTwo(n: number): boolean {
 }
 
 function flipBinaryString(character: string) : string {
+  if (character == null) return "";
   if (character.length != 1) return character;
   if (character[0] == "0") {
     return "1";
