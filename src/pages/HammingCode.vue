@@ -136,7 +136,6 @@ class HammingCode {
   readonly numParityBits: number = 0;
   readonly parityBits: Array<ParityBit> = [];
   readonly errorBit: number = 0;
-  readonly extractedParityBits: Array<ParityBit> = [];
 
   constructor(data: string, onlyDatabits?: boolean) {
     if (data == "") {
