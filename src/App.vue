@@ -4,7 +4,10 @@
     <div class="navbar-brand">
       <router-link to="/" class="home-link"
         >TGI Pages - {{ version }}
+        <search-bar/>
       </router-link>
+    </div>
+    <div class="navbar-item">
     </div>
   </nav>
 
@@ -16,12 +19,13 @@
 <script lang="ts">
 import { ref, defineComponent, watchEffect, watch, computed } from "vue";
 import { version } from "./../package.json";
+import SearchBar from "./components/SearchBar.vue";
 
 export default defineComponent({
-  components: {},
+  components: {SearchBar},
   setup() {
     return {
-      version,
+      version
     };
   },
 });

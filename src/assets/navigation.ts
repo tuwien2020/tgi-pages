@@ -21,13 +21,16 @@ interface PageEntry {
     page: DefineComponent | null;
 }
 
+interface PageSearchResult {
+    name: string;
+    link: string;
+    internal: boolean;
+}
+
 interface Chapter {
     number: number;
     name: string;
 }
-
-const createChapters = (chapters: string[], offset: number): Chapter[] => 
-    chapters.map((ch, i) => {return  {number: i+offset, name: ch} as Chapter});
 
 const chapters: Chapter[] = [
     {
@@ -327,8 +330,15 @@ const tools: PageEntry[] = [
         page: InterleavingGraph
      }
 ];
+
 export const indexedPages = tools.filter(t => t.category != null);
 export const pages = tools.filter((entry) => entry.internal && entry.page != null);
 export const pagesByCategory = groupBy<Chapter, PageEntry>(indexedPages, p => p.category, (a,b) => a.number - b.number);
+export const searchablePages: PageSearchResult[] = indexedPages.map(p => {return {name: p.name, link: p.link, internal: p.internal}});
+
+
+export const searchTools = (searchText: string): PageSearchResult[] =>{
+    return searchablePages.filter(t => t.name.match(searchText));
+} 
 
 export default tools;
