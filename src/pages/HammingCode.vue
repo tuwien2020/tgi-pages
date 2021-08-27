@@ -238,7 +238,7 @@ class HammingCode {
   }
 
   private calculateError() : number {
-    let error = 0;
+    let errorIndex = 0;
     console.log(this.parityBits);
     
     for (let i = 0; i < this.numParityBits; i++) {
@@ -246,10 +246,10 @@ class HammingCode {
       console.log(codebitIndex);
       
       if (binaryCharacterToNumber(this.code[codebitIndex - 1]) != this.parityBits[i].value) {
-        error += codebitIndex;
+        errorIndex += codebitIndex;
       }
     }
-    return error;
+    return errorIndex;
   }
 
   private correctCodeWord() {
