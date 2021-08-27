@@ -1,19 +1,19 @@
-export interface Group<T> {
-  key: String;
-  values: T[];
+export interface Group<K, V> {
+  key: K;
+  values: V[];
 }
 
-export function groupBy<T>(list:T[], keySelector:(x:T)=>string): Group<T>[] {
-  const result: Group<T>[] = [];
-  let group: Group<T> | null = null;
-  list.sort((a,b) => keySelector(a).localeCompare(keySelector(b))).forEach(val => {
-    let groupName = keySelector(val);
-    if(group === null || group.key.localeCompare(groupName) != 0) {
+export function groupBy<K, V>(list:V[], keySelector:(x:V)=>K, comparator:(a:K, b:K)=>number): Group<K,V>[] {
+  const result: Group<K,V>[] = [];
+  let group: Group<K,V> | null = null;
+  list.sort((a,b) => comparator(keySelector(a),keySelector(b))).forEach(val => {
+    let currKey = keySelector(val);
+    if(group === null || comparator(group.key, currKey) != 0) {
       if(group != null) {
         result.push(group);
       }
       group = {
-        key: groupName,
+        key: currKey,
         values: [val]
       }
     }
@@ -21,6 +21,8 @@ export function groupBy<T>(list:T[], keySelector:(x:T)=>string): Group<T>[] {
       group.values.push(val);
     }
   });
-  result.push(group as Group<T>);
+  if(group != null) {
+    result.push(group as Group<K,V>);
+  }
   return result;
 }
