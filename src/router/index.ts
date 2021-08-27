@@ -1,4 +1,4 @@
-import { pages } from "./../assets/navigation";
+import { pages } from "./navigation";
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import Main from "./../pages/Main.vue";
 

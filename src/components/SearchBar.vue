@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import { filterOption } from "ant-design-vue/lib/vc-mentions/src/util";
-import { searchTools, searchablePages } from "./../assets/navigation";
+import { searchTools, searchablePages } from "../router/navigation";
 import {
   defineComponent,
 } from "vue";

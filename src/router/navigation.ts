@@ -1,7 +1,5 @@
-import { exportSpecifier } from '@babel/types';
-import { map } from 'lodash';
 import { DefineComponent } from 'vue';
-import { groupBy } from './utilities';
+import { groupBy } from '../assets/utilities';
 import HammingCode from './../pages/HammingCode.vue';
 import TruthTable from './../pages/TruthTable.vue';
 import HammingDistance from './../pages/HammingDistance.vue';

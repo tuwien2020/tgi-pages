@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
-import { pagesByCategory, getCategory } from "./../assets/navigation";
+import { pagesByCategory, getCategory } from "../router/navigation";
 import Card from "ant-design-vue/lib/card";
 import Icon from "ant-design-vue/lib/icon";
 
