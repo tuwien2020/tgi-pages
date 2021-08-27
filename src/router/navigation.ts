@@ -14,7 +14,7 @@ import Micro16Decompiler from './../pages/Micro16Decompiler.vue';
 interface PageEntry {
     name: string;
     link: string;
-    category: Chapter | null;
+    category: Chapter;
     internal: boolean;
     page: DefineComponent | null;
 }
