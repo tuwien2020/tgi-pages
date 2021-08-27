@@ -19,22 +19,11 @@ import { name, version } from "./../package.json";
 import "bulma/css/bulma.css";
 import 'ant-design-vue/dist/antd.css';
 import Antd from "ant-design-vue";
+import { pages } from "./assets/navigation";
 
 /** @type {import("vue-router").RouteRecordRaw[]} */
-const routes = [
-  { path: "/", component: Overview },
-  { path: "/hamming-code", component: HammingCode },
-  { path: "/truth-table", component: TruthTable },
-  { path: "/hamming-distance", component: HammingDistance },
-  { path: "/binary-calculator", component: BinaryCalculator },
-  { path: "/binary-coding", component: BinaryCoding },
-  { path: "/pipeline", component: Pipeline },
-  { path: "/interleaving-graph", component: InterleavingGraph },
-  { path: "/cache-calc", component: CacheCalc },
-  { path: "/stack", component: Stack },
-  { path: "/micro16-decompiler", component: Micro16Decompiler },
-  { path: "/test", component: Main},
-];
+const routes = pages.map(p => {return {path: '/' + p.link, component: p.page}});
+routes.push({path: '/', component: Main});
 
 if (import.meta.env.PROD) {
   console.log(`${name} - ${version}`);
