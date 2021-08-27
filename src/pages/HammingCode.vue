@@ -136,6 +136,7 @@ class HammingCode {
   readonly numParityBits: number = 0;
   readonly parityBits: Array<ParityBit> = [];
   readonly errorBit: number = 0;
+  readonly extractedParityBits: Array<ParityBit> = [];
 
   constructor(data: string, onlyDatabits?: boolean) {
     if (data == "") {
@@ -191,7 +192,7 @@ class HammingCode {
     const parityBits = new Array(this.numParityBits);
 
     for (let i = 0; i < this.numParityBits; i++) {
-      const parityBit: ParityBit = {value: 0, involvedCodebits: [], codeIndex: i};
+      let parityBit: ParityBit = {value: 0, involvedCodebits: [], codeIndex: 2**i - 1};
 
       for (let j = 1; j <= this.numCodeBits; j++) {
         if (isPowerOfTwo(j)) continue; 
@@ -200,6 +201,7 @@ class HammingCode {
           parityBit.involvedCodebits.push(j);
         }
       }
+      if(parityBit.involvedCodebits.length == 0) parityBit.value = binaryCharacterToNumber(this.code[parityBit.codeIndex]);
       parityBits[i] = parityBit;
     }
     return parityBits;
@@ -238,9 +240,12 @@ class HammingCode {
 
   private calculateError() : number {
     let error = 0;
+    console.log(this.parityBits);
+    
     for (let i = 0; i < this.numParityBits; i++) {
       const codebitIndex = Math.floor(Math.pow(2, i));
-
+      console.log(codebitIndex);
+      
       if (binaryCharacterToNumber(this.code[codebitIndex - 1]) != this.parityBits[i].value) {
         error += codebitIndex;
       }
