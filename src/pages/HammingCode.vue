@@ -241,7 +241,7 @@ class HammingCode {
     let errorIndex = 0;
     
     for (let i = 0; i < this.numParityBits; i++) {
-      const codebitIndex = Math.floor(Math.pow(2, i));
+      const codebitIndex = 2**i;
       
       if (binaryCharacterToNumber(this.code[codebitIndex - 1]) != this.parityBits[i].value) {
         errorIndex += codebitIndex;
@@ -302,7 +302,7 @@ class ParityBitCalculation {
   }
 
   calculateMaximumCodeAndDataBits() {
-    this.maxCodeBits = Math.pow(2, this.parityBits) - 1;
+    this.maxCodeBits = 2 ** this.parityBits - 1;
     this.maxDataBits = this.maxCodeBits - this.parityBits;
   }
 }
