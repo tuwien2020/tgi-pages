@@ -110,21 +110,11 @@
 </template>
 
 <script lang="ts">
-import {
-  ref,
-  defineComponent,
-  watchEffect,
-  watch,
-  computed,
-  shallowRef,
-} from "vue";
+import { ref, defineComponent, watchEffect, watch, computed, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
 import { MathJson } from "../math/MathJson";
-import {
-  useBooleanExpressions,
-  useBooleanExpressionParsing,
-} from "../math/boolean-expression";
+import { useBooleanExpressions, useBooleanExpressionParsing } from "../math/boolean-expression";
 import { useUrlRef } from "../url-ref";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
@@ -212,9 +202,7 @@ export default defineComponent({
       tableHeaders.value = (getters as MathJson[]).concat(operations);
 
       let binaryNumber = BinaryNumber.fromSize(getters.length);
-      const oneInBinary = BinaryNumber.fromSize(getters.length).add(
-        new BinaryNumber(true, [true], 0)
-      );
+      const oneInBinary = BinaryNumber.fromSize(getters.length).add(new BinaryNumber(true, [true], 0));
 
       const tableWidth = tableHeaders.value.length;
       const tableData = new Array(2 ** getters.length);
@@ -222,15 +210,9 @@ export default defineComponent({
         tableData[i] = new Array(tableWidth);
 
         for (let j = 0; j < getters.length; j++) {
-          tableData[i][j] =
-            binaryNumber.value[flipBits.value ? getters.length - j - 1 : j];
+          tableData[i][j] = binaryNumber.value[flipBits.value ? getters.length - j - 1 : j];
         }
-        const getterData = new Map<string, boolean>(
-          getters.map((v, j) => [
-            v,
-            binaryNumber.value[flipBits.value ? getters.length - j - 1 : j],
-          ])
-        );
+        const getterData = new Map<string, boolean>(getters.map((v, j) => [v, binaryNumber.value[flipBits.value ? getters.length - j - 1 : j]]));
 
         for (let j = getters.length; j < tableWidth; j++) {
           const op = operations[j - getters.length];

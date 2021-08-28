@@ -23,19 +23,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch, watchEffect } from 'vue'
-import { pagesByCategory, getCategory } from '../router/navigation'
-import GithubFilled from '@ant-design/icons-vue/GithubFilled'
+import { defineComponent, computed, ref, watch, watchEffect } from "vue";
+import { pagesByCategory, getCategory } from "../router/navigation";
+import GithubFilled from "@ant-design/icons-vue/GithubFilled";
 
 export default defineComponent({
   components: { GithubFilled },
   setup() {
-    const count = ref(0)
+    const count = ref(0);
     return {
       count,
       pagesByCategory,
       getCategory,
-    }
+    };
   },
-})
+});
 </script>

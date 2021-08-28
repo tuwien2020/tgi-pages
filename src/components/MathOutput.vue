@@ -3,15 +3,7 @@
 </template>
 
 <script lang="ts">
-import {
-  ref,
-  defineComponent,
-  watchEffect,
-  watch,
-  computed,
-  onMounted,
-  nextTick,
-} from "vue";
+import { ref, defineComponent, watchEffect, watch, computed, onMounted, nextTick } from "vue";
 import { MathJson, MathJsonLogicalOperator } from "./../math/MathJson";
 import Katex from "katex";
 import { useMathPrinting } from "./../math/math-printing";
@@ -40,7 +32,7 @@ export default defineComponent({
               Katex.render(latex, mathoutput.value, {
                 displayMode: true,
                 throwOnError: false,
-                output: "html"
+                output: "html",
               });
             }
           });

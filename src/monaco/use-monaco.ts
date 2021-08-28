@@ -47,10 +47,7 @@ export async function useMonaco() {
     );
   }
 
-  function createEditor(
-    element: Ref<HTMLElement | undefined>,
-    options: editor.IStandaloneEditorConstructionOptions
-  ) {
+  function createEditor(element: Ref<HTMLElement | undefined>, options: editor.IStandaloneEditorConstructionOptions) {
     const editor = shallowRef<editor.IStandaloneCodeEditor>();
     const code = ref("");
     let decorations = [] as string[];

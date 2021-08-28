@@ -4,11 +4,7 @@ import { tryParse } from "./boolean-expression-grammar";
 export function useBooleanExpressionParsing() {
   function toMathJsonRecursive(ast: any): MathJson {
     if (ast.left) {
-      return [
-        ast.operator,
-        toMathJsonRecursive(ast.left),
-        toMathJsonRecursive(ast.right),
-      ];
+      return [ast.operator, toMathJsonRecursive(ast.left), toMathJsonRecursive(ast.right)];
     } else if (ast.right && ast.operator) {
       return [ast.operator, toMathJsonRecursive(ast.right)];
     } else if (ast.right) {
@@ -51,10 +47,7 @@ export function useBooleanExpressions() {
     return getters;
   }
 
-  const mathJsonOperatorMap = new Map<
-    MathJsonLogicalOperator,
-    (a: boolean, b: boolean) => boolean
-  >([
+  const mathJsonOperatorMap = new Map<MathJsonLogicalOperator, (a: boolean, b: boolean) => boolean>([
     ["not", (a) => !a],
     ["implies", (a, b) => !a || b],
     ["and", (a, b) => a && b],
@@ -66,19 +59,13 @@ export function useBooleanExpressions() {
     ["subset", (a, b) => !b || a],
   ]);
 
-  function evaluateRecursive(
-    ast: MathJson,
-    getters: Map<string, boolean>
-  ): boolean {
+  function evaluateRecursive(ast: MathJson, getters: Map<string, boolean>): boolean {
     if (Array.isArray(ast)) {
       const op = mathJsonOperatorMap.get(ast[0] as MathJsonLogicalOperator);
       if (!op) throw new Error("Unknown operation " + ast);
 
       if (ast.length === 3) {
-        return op(
-          evaluateRecursive(ast[1], getters),
-          evaluateRecursive(ast[2], getters)
-        );
+        return op(evaluateRecursive(ast[1], getters), evaluateRecursive(ast[2], getters));
       } else if (ast.length === 2) {
         return op(evaluateRecursive(ast[1], getters), false);
       } else {

@@ -150,94 +150,94 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch, watchEffect } from 'vue'
+import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 
 interface PipelineStage {
-  readonly name: string
-  readonly isRead: boolean
-  readonly isWrite: boolean
+  readonly name: string;
+  readonly isRead: boolean;
+  readonly isWrite: boolean;
 }
 
 interface PipelineCommand {
-  readonly name: string
-  readonly readRegisters: readonly number[]
-  readonly writeRegisters: readonly number[]
+  readonly name: string;
+  readonly readRegisters: readonly number[];
+  readonly writeRegisters: readonly number[];
 }
 
 function parseCommand(name: string, readRegisters: string[], writeRegisters: string[]): PipelineCommand {
   return {
     name: name,
-    readRegisters: readRegisters.map((v) => +v.replace(/r|R/, '')),
-    writeRegisters: writeRegisters.map((v) => +v.replace(/r|R/, '')),
-  }
+    readRegisters: readRegisters.map((v) => +v.replace(/r|R/, "")),
+    writeRegisters: writeRegisters.map((v) => +v.replace(/r|R/, "")),
+  };
 }
 
 function usePipelineSimulator(stages: PipelineStage[], commands: PipelineCommand[], canReadWhileWrite: boolean) {
-  const nextCommands = commands.slice()
-  const pipeline = new Array<PipelineCommand | null>(stages.length).fill(null)
+  const nextCommands = commands.slice();
+  const pipeline = new Array<PipelineCommand | null>(stages.length).fill(null);
 
   function step() {
-    const oldPipeline = pipeline.slice()
+    const oldPipeline = pipeline.slice();
 
-    let isStalled = false
+    let isStalled = false;
 
     for (let i = pipeline.length - 2; i >= 0; i--) {
       if (stages[i].isRead) {
         // Lookahead and potentially pause the pipeline
-        const registersToRead = pipeline[i]?.readRegisters ?? []
+        const registersToRead = pipeline[i]?.readRegisters ?? [];
 
         for (let j = i + 1; j < pipeline.length; j++) {
-          const registersToWrite = (canReadWhileWrite ? pipeline : oldPipeline)[j]?.writeRegisters ?? []
+          const registersToWrite = (canReadWhileWrite ? pipeline : oldPipeline)[j]?.writeRegisters ?? [];
 
-          const hasReadAfterWrite = registersToWrite.some((v) => registersToRead.includes(v))
+          const hasReadAfterWrite = registersToWrite.some((v) => registersToRead.includes(v));
 
           if (hasReadAfterWrite) {
-            isStalled = true
-            break
+            isStalled = true;
+            break;
           }
 
-          if (stages[j].isWrite) break
+          if (stages[j].isWrite) break;
         }
 
         if (isStalled) {
           // Hazard detected
         } else {
-          pipeline[i + 1] = pipeline[i]
-          pipeline[i] = null
+          pipeline[i + 1] = pipeline[i];
+          pipeline[i] = null;
         }
       } else if (isStalled) {
         // Keep the current command
       } else {
-        pipeline[i + 1] = pipeline[i]
-        pipeline[i] = null
+        pipeline[i + 1] = pipeline[i];
+        pipeline[i] = null;
       }
     }
 
     if (pipeline[0] == null) {
-      pipeline[0] = nextCommands.shift() ?? null
+      pipeline[0] = nextCommands.shift() ?? null;
     }
   }
 
   function pipelineToString() {
-    return pipeline.slice().map((v) => (v == null ? '<noop>' : v.name))
+    return pipeline.slice().map((v) => (v == null ? "<noop>" : v.name));
   }
 
   function isEmpty() {
-    return pipeline.filter((d) => !!d).length === 0
+    return pipeline.filter((d) => !!d).length === 0;
   }
 
   function run() {
     // 2D-Array to return
-    let pipelineStates = []
+    let pipelineStates = [];
 
     // run through Pipeline-states
-    step()
+    step();
     while (!isEmpty()) {
-      pipelineStates.push(pipeline.slice())
-      step()
+      pipelineStates.push(pipeline.slice());
+      step();
     }
 
-    return pipelineStates
+    return pipelineStates;
   }
 
   return {
@@ -247,71 +247,71 @@ function usePipelineSimulator(stages: PipelineStage[], commands: PipelineCommand
     pipelineToString,
     isEmpty,
     run,
-  }
+  };
 }
 
 function setupPipeline() {
-  let dirty = ref<boolean>(false)
-  let readWhileWrite = ref<boolean>(false)
+  let dirty = ref<boolean>(false);
+  let readWhileWrite = ref<boolean>(false);
 
   // Pipeline-Stages
   let pipelineStages = ref<PipelineStage[]>([
-    { name: 'FETCH', isRead: false, isWrite: false },
-    { name: 'DECODE', isRead: true, isWrite: false },
-    { name: 'EXECUTE', isRead: false, isWrite: false },
-    { name: 'STORE', isRead: false, isWrite: true },
-  ])
+    { name: "FETCH", isRead: false, isWrite: false },
+    { name: "DECODE", isRead: true, isWrite: false },
+    { name: "EXECUTE", isRead: false, isWrite: false },
+    { name: "STORE", isRead: false, isWrite: true },
+  ]);
 
   let onDeleteStage = (index: number) => {
-    pipelineStages.value.splice(index, 1)
-  }
+    pipelineStages.value.splice(index, 1);
+  };
 
   let onAddStage = () => {
-    pipelineStages.value.push({ name: '', isRead: false, isWrite: false })
-  }
+    pipelineStages.value.push({ name: "", isRead: false, isWrite: false });
+  };
 
   // Commands
   let pipelineCommands = ref<PipelineCommand[]>([
-    parseCommand('ADD', ['R1', 'R2'], ['R1']),
-    parseCommand('PUSH', ['R2'], []),
-    parseCommand('INC', ['R1'], ['R1']),
-    parseCommand('DIV', ['R3', 'R4'], ['R5']),
-    parseCommand('SUB', ['R5', 'R1'], ['R6']),
-    parseCommand('MULT', ['R5', 'R6'], ['R1']),
-    parseCommand('POP', [], ['R3']),
-  ])
+    parseCommand("ADD", ["R1", "R2"], ["R1"]),
+    parseCommand("PUSH", ["R2"], []),
+    parseCommand("INC", ["R1"], ["R1"]),
+    parseCommand("DIV", ["R3", "R4"], ["R5"]),
+    parseCommand("SUB", ["R5", "R1"], ["R6"]),
+    parseCommand("MULT", ["R5", "R6"], ["R1"]),
+    parseCommand("POP", [], ["R3"]),
+  ]);
 
   let onDeleteCommand = (index: number) => {
-    pipelineCommands.value.splice(index, 1)
-  }
+    pipelineCommands.value.splice(index, 1);
+  };
 
   let onAddCommand = () => {
-    pipelineCommands.value.push(parseCommand('', [], []))
-  }
+    pipelineCommands.value.push(parseCommand("", [], []));
+  };
 
   // Run
-  let pipelineStates = ref<(PipelineCommand | null)[][]>()
+  let pipelineStates = ref<(PipelineCommand | null)[][]>();
   let run = () => {
-    let pipelineSimulator = usePipelineSimulator(pipelineStages.value, pipelineCommands.value, readWhileWrite.value)
-    pipelineStates.value = pipelineSimulator.run()
-    dirty.value = false
-  }
-  run()
+    let pipelineSimulator = usePipelineSimulator(pipelineStages.value, pipelineCommands.value, readWhileWrite.value);
+    pipelineStates.value = pipelineSimulator.run();
+    dirty.value = false;
+  };
+  run();
 
   // watch for dirty
   watch([pipelineStages, pipelineCommands, readWhileWrite], () => (dirty.value = true), {
     deep: true,
-  })
+  });
 
-  let timeoutId = 0
+  let timeoutId = 0;
   watch(dirty, (value) => {
-    clearTimeout(timeoutId)
+    clearTimeout(timeoutId);
     if (value) {
       timeoutId = setTimeout(() => {
-        run()
-      }, 250)
+        run();
+      }, 250);
     }
-  })
+  });
 
   return {
     pipelineStages,
@@ -324,22 +324,22 @@ function setupPipeline() {
     onDeleteCommand,
     onAddCommand,
     run,
-  }
+  };
 }
 
 export default defineComponent({
   components: {},
   setup() {
-    return { ...setupPipeline() }
+    return { ...setupPipeline() };
   },
-})
+});
 </script>
 
 <style scoped>
 tr,
 td,
 th,
-input[type='text'],
+input[type="text"],
 button {
   height: 25px !important;
 }
@@ -354,7 +354,7 @@ th {
   text-align: center !important;
 }
 
-input[type='checkbox'] {
+input[type="checkbox"] {
   transform: scale(1.5);
 }
 

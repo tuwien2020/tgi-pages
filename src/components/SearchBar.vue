@@ -8,21 +8,21 @@
 </template>
 
 <script lang="ts">
-import { searchTools, searchablePages } from '../router/navigation'
-import { defineComponent } from 'vue'
+import { searchTools, searchablePages } from "../router/navigation";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   setup(props, context) {
     const filterOptions = (input, option) => {
-      return option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0
-    }
+      return option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    };
 
     return {
       searchablePages,
       filterOptions,
-    }
+    };
   },
-})
+});
 </script>
 
 <style scoped>

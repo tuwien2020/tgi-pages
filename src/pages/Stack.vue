@@ -12,25 +12,15 @@
           >
             <thead>
               <th>Adresse:</th>
-              <th
-                v-for="address in section.to - section.from + 1"
-                :key="address"
-              >
-                <span class="hex-prefix">0x</span
-                >{{ toHex(address - 1 + section.from) }}
+              <th v-for="address in section.to - section.from + 1" :key="address">
+                <span class="hex-prefix">0x</span>{{ toHex(address - 1 + section.from) }}
               </th>
             </thead>
 
             <tbody>
               <tr>
                 <td>Wert:</td>
-                <td
-                  v-for="(item, index) in simulator.memory.value.slice(
-                    section.from,
-                    section.to + 1
-                  )"
-                  :key="index"
-                >
+                <td v-for="(item, index) in simulator.memory.value.slice(section.from, section.to + 1)" :key="index">
                   <span class="hex-prefix">0x</span>{{ toHex(item) }}
                 </td>
               </tr>
@@ -54,13 +44,7 @@
             </thead>
 
             <tbody>
-              <tr
-                v-for="(item, index) in simulator.register.value.slice(
-                  section.from,
-                  section.to + 1
-                )"
-                :key="index"
-              >
+              <tr v-for="(item, index) in simulator.register.value.slice(section.from, section.to + 1)" :key="index">
                 <td>
                   {{ "R" + (index + section.from) }}
                 </td>
@@ -81,21 +65,15 @@
 
             <tbody>
               <tr
-                v-for="(item, index) in simulator.memory.value.slice(
-                  simulator.stackSizeDisplay.value.from,
-                  simulator.stackSizeDisplay.value.to + 1
-                )"
+                v-for="(item, index) in simulator.memory.value.slice(simulator.stackSizeDisplay.value.from, simulator.stackSizeDisplay.value.to + 1)"
                 :key="index"
               >
                 <td
                   :class="{
-                    stackpointer:
-                      simulator.stackSizeDisplay.value.from + index ==
-                      simulator.stackpointer.value,
+                    stackpointer: simulator.stackSizeDisplay.value.from + index == simulator.stackpointer.value,
                   }"
                 >
-                  <span class="hex-prefix">0x</span
-                  >{{ toHex(simulator.stackSizeDisplay.value.from + index) }}
+                  <span class="hex-prefix">0x</span>{{ toHex(simulator.stackSizeDisplay.value.from + index) }}
                 </td>
 
                 <td><span class="hex-prefix">0x</span>{{ toHex(item) }}</td>
@@ -109,11 +87,7 @@
         <div>
           <h4 class="no-margin">Debug log</h4>
           <div class="is-family-monospace">
-            <div
-              v-for="(item, index) in simulator.outputLog.value"
-              :key="index"
-              class="is-family-monospace"
-            >
+            <div v-for="(item, index) in simulator.outputLog.value" :key="index" class="is-family-monospace">
               <span
                 :class="{
                   warning: item.type == 'warning',
@@ -131,9 +105,7 @@
     <div class="column">
       <div class="columns is-full">
         <div class="column">
-          <button class="button is-info is-fullwidth" @click="runCode">
-            Run
-          </button>
+          <button class="button is-info is-fullwidth" @click="runCode">Run</button>
         </div>
 
         <div class="column">
@@ -143,9 +115,7 @@
         </div>
 
         <div class="column">
-          <button class="button is-danger is-fullwidth" @click="reset">
-            Reset
-          </button>
+          <button class="button is-danger is-fullwidth" @click="reset">Reset</button>
         </div>
       </div>
 
@@ -170,17 +140,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  computed,
-  ref,
-  watch,
-  watchEffect,
-  onMounted,
-  Ref,
-  shallowRef,
-  toRaw,
-} from "vue";
+import { defineComponent, computed, ref, watch, watchEffect, onMounted, Ref, shallowRef, toRaw } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
 import { useMonaco } from "../monaco/use-monaco";
@@ -389,9 +349,7 @@ export default defineComponent({
     const monacoEditorSetup = ref<HTMLElement>();
     const monacoEditorInstructions = ref<HTMLElement>();
 
-    const simulator = shallowRef<ReturnType<typeof createSimulator>>(
-      createSimulator()
-    );
+    const simulator = shallowRef<ReturnType<typeof createSimulator>>(createSimulator());
 
     const steppingLineNumber = ref(0);
     let steppingGenerator: null | Generator;
@@ -532,8 +490,7 @@ declare const mem: number[];`);
         const exposedVariables = simulator.value.getExposedVariables();
         runSetup(exposedVariables);
 
-        const GeneratorFunction = Object.getPrototypeOf(function* () {})
-          .constructor;
+        const GeneratorFunction = Object.getPrototypeOf(function* () {}).constructor;
 
         steppingGenerator = GeneratorFunction.apply(null, [
           `{ ${Object.keys(exposedVariables).join(",")} }`,
@@ -554,8 +511,7 @@ declare const mem: number[];`);
           steppingLineNumber.value = 0;
           return;
         }
-        steppingLineNumber.value =
-          (steppingGenerator?.next()?.value as any) ?? 0;
+        steppingLineNumber.value = (steppingGenerator?.next()?.value as any) ?? 0;
       }
     }
 

@@ -9,11 +9,7 @@
     class="is-family-monospace"
   ></textarea>-->
 
-  <div
-    class="micro16-decompiler"
-    ref="monaco-editor-micro16"
-    style="height: 10em"
-  ></div>
+  <div class="micro16-decompiler" ref="monaco-editor-micro16" style="height: 10em"></div>
 
   <pre>{{ instruction }}</pre>
 </template>
@@ -23,12 +19,7 @@ import { useMonaco } from "../monaco/use-monaco";
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
-import {
-  ParsedInstruction,
-  parse,
-  getRegistry,
-  interpret,
-} from "./../assets/decompiler";
+import { ParsedInstruction, parse, getRegistry, interpret } from "./../assets/decompiler";
 
 export default defineComponent({
   components: {},
@@ -48,9 +39,7 @@ export default defineComponent({
 
     useMonaco().then((monaco) => {
       monaco.setMonacoOptions((value) => {
-        if (
-          value.languages.getLanguages().some((v) => v.id == "micro16-binary")
-        ) {
+        if (value.languages.getLanguages().some((v) => v.id == "micro16-binary")) {
           return;
         }
 
@@ -215,22 +204,11 @@ export default defineComponent({
         value.languages.registerHoverProvider("micro16-binary", {
           provideHover: function (model, position) {
             for (let i = 0, column = 1; i < tokens.length; i++) {
-              if (
-                column <= position.column &&
-                position.column < column + tokens[i].length
-              ) {
+              if (column <= position.column && position.column < column + tokens[i].length) {
                 console.log(column, position.column, column + tokens[i].length);
                 return {
-                  range: new value.Range(
-                    position.lineNumber,
-                    column,
-                    position.lineNumber,
-                    column + tokens[i].length
-                  ),
-                  contents: [
-                    { value: `**${tokens[i].longName}**` },
-                    { value: tokens[i].description },
-                  ],
+                  range: new value.Range(position.lineNumber, column, position.lineNumber, column + tokens[i].length),
+                  contents: [{ value: `**${tokens[i].longName}**` }, { value: tokens[i].description }],
                 };
               }
               column += tokens[i].length;

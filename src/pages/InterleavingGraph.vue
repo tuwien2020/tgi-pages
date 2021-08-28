@@ -21,22 +21,8 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  computed,
-  ref,
-  watch,
-  watchEffect,
-  onMounted,
-  Ref,
-  shallowRef,
-} from "vue";
-import {
-  Network,
-  Edge as VisEdge,
-  Node as VisNode,
-  Options,
-} from "vis-network";
+import { defineComponent, computed, ref, watch, watchEffect, onMounted, Ref, shallowRef } from "vue";
+import { Network, Edge as VisEdge, Node as VisNode, Options } from "vis-network";
 import { DataSet } from "vis-data";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
@@ -66,10 +52,7 @@ export default {
     const monacoEditorThread1 = ref<HTMLElement>();
     const monacoEditorThread2 = ref<HTMLElement>();
 
-    const variablesCode = urlRef(
-      "variablesCode",
-      "let U = 0, T = 0, V = 0, W = 0"
-    );
+    const variablesCode = urlRef("variablesCode", "let U = 0, T = 0, V = 0, W = 0");
     const thread1Code = urlRef(
       "thread1Code",
       `U = 1; // U := 1;
@@ -81,27 +64,25 @@ if(T == 0) { V = 1; } // if T = 0 then V := 1;`
 if(U == 0) { V = 1; } // if U = 0 then V := 1;`
     );
 
-    const threadsInstructions = shallowRef<{
-      variableNames: string[];
-      initialState: object;
-      instructions: Function[][];
-    }>();
+    const threadsInstructions =
+      shallowRef<{
+        variableNames: string[];
+        initialState: object;
+        instructions: Function[][];
+      }>();
 
     useMonaco().then((monaco) => {
-      const { code, getVariableNames } = monaco.createEditor(
-        monacoEditorVariables,
-        {
-          value: variablesCode.value,
-          language: "javascript",
-          minimap: {
-            enabled: false,
-          },
-          lineNumbers: function (original) {
-            return `Setup`;
-          },
-          scrollBeyondLastLine: false,
-        }
-      );
+      const { code, getVariableNames } = monaco.createEditor(monacoEditorVariables, {
+        value: variablesCode.value,
+        language: "javascript",
+        minimap: {
+          enabled: false,
+        },
+        lineNumbers: function (original) {
+          return `Setup`;
+        },
+        scrollBeyondLastLine: false,
+      });
       watchEffect(() => (variablesCode.value = code.value));
 
       const thread1Monaco = monaco.createEditor(monacoEditorThread1, {
@@ -201,16 +182,14 @@ return { ${variableNames.join(",")} };`,
           instructionPointer: 0,
         };
 
-        let resultNodes = Array.from(
-          { length: thread2.instructions.length + 1 },
-          (v1, i) =>
-            Array.from({ length: thread1.instructions.length + 1 }, (v2, j) => {
-              return {
-                states: [],
-                edges: [],
-                id: j * (thread2.instructions.length + 1) + i,
-              } as Node;
-            })
+        let resultNodes = Array.from({ length: thread2.instructions.length + 1 }, (v1, i) =>
+          Array.from({ length: thread1.instructions.length + 1 }, (v2, j) => {
+            return {
+              states: [],
+              edges: [],
+              id: j * (thread2.instructions.length + 1) + i,
+            } as Node;
+          })
         );
 
         resultNodes[0][0].states.push(value.initialState as any);
@@ -239,9 +218,7 @@ function showGraphNetwork(resultNodes: Node[][], variableNames: string[]) {
       let node = resultNodes[i][j];
       visNodes.push({
         id: node.id,
-        label: node.states
-          .map((state) => `(${variableNames.map((v) => state[v]).join(",")})`)
-          .join("\n"),
+        label: node.states.map((state) => `(${variableNames.map((v) => state[v]).join(",")})`).join("\n"),
         x: j * 10,
         y: i * 10,
       });
@@ -272,13 +249,8 @@ function showGraphNetwork(resultNodes: Node[][], variableNames: string[]) {
   let network = new Network(container, data, options); // TODO: HTML Ref
 }
 
-function generateGraphNetwork(
-  threadA: Thread,
-  threadB: Thread,
-  resultNodes: Node[][]
-) {
-  let currentNode =
-    resultNodes[threadB.instructionPointer][threadA.instructionPointer];
+function generateGraphNetwork(threadA: Thread, threadB: Thread, resultNodes: Node[][]) {
+  let currentNode = resultNodes[threadB.instructionPointer][threadA.instructionPointer];
 
   if (threadA.instructionPointer < threadA.instructions.length) {
     let instruction = threadA.instructions[threadA.instructionPointer];
@@ -287,8 +259,7 @@ function generateGraphNetwork(
 
     threadCopy.instructionPointer++;
 
-    let nextNode =
-      resultNodes[threadB.instructionPointer][threadCopy.instructionPointer];
+    let nextNode = resultNodes[threadB.instructionPointer][threadCopy.instructionPointer];
     // TODO: check if state already exists
 
     for (let state of newStates) {
@@ -313,8 +284,7 @@ function generateGraphNetwork(
     let threadCopy = { ...threadB };
     threadCopy.instructionPointer++;
 
-    let nextNode =
-      resultNodes[threadCopy.instructionPointer][threadA.instructionPointer];
+    let nextNode = resultNodes[threadCopy.instructionPointer][threadA.instructionPointer];
     // TODO: check if state already exists
 
     for (let state of newStates) {
@@ -332,10 +302,7 @@ function generateGraphNetwork(
     generateGraphNetwork(threadA, threadCopy, resultNodes);
   }
 
-  function executeInstruction(
-    instruction: Instruction,
-    currentNode: Node
-  ): State[] {
+  function executeInstruction(instruction: Instruction, currentNode: Node): State[] {
     let resultStates: State[] = [];
     for (let state of currentNode.states) {
       let stateCopy = { ...state };
@@ -347,10 +314,7 @@ function generateGraphNetwork(
 
 function edgeAlreadyExists(edges: Edge[], current: Edge) {
   for (let edge of edges) {
-    if (
-      edge.nextNode === current.nextNode &&
-      edge.instruction === current.instruction
-    ) {
+    if (edge.nextNode === current.nextNode && edge.instruction === current.instruction) {
       return true;
     }
   }

@@ -22,7 +22,7 @@ export function useMathPrinting() {
     ["subtract", "-"],
     ["multiply", "\\cdot"],
     ["divide", "\\div"],
-    ["subset", "\\subset"]
+    ["subset", "\\subset"],
   ]);
 
   function needsBrackets(ast: MathJson) {
@@ -43,10 +43,7 @@ export function useMathPrinting() {
     }
   }
 
-  function toLatexRecursive(
-    ast: MathJson,
-    options?: MathFormattingOptions
-  ): string {
+  function toLatexRecursive(ast: MathJson, options?: MathFormattingOptions): string {
     if (Array.isArray(ast)) {
       const op = mathJsonOperatorMap.get(ast[0]);
       if (!op) {
@@ -87,13 +84,9 @@ export function useMathPrinting() {
         const [beforeDecimal, afterDecimal] = ast.value.split(".");
 
         if (afterDecimal !== undefined && afterDecimal.length > 0) {
-          return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
-            "\\,"
-          )}.${splitIntoChunks(afterDecimal ?? "", 4).join("\\,")}}`;
+          return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join("\\,")}.${splitIntoChunks(afterDecimal ?? "", 4).join("\\,")}}`;
         } else {
-          return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join(
-            "\\,"
-          )}}`;
+          return `\\mathtt{${splitIntoChunks(beforeDecimal ?? "", 4, true).join("\\,")}}`;
         }
       } else {
         return ast.value;
@@ -103,11 +96,7 @@ export function useMathPrinting() {
     }
   }
 
-  function splitIntoChunks(
-    value: string,
-    chunkSize: number,
-    backwards: boolean = false
-  ) {
+  function splitIntoChunks(value: string, chunkSize: number, backwards: boolean = false) {
     const chunkCount = Math.ceil(value.length / chunkSize);
     const chunks = new Array(chunkCount);
 
@@ -124,10 +113,7 @@ export function useMathPrinting() {
   }
 
   // TODO: Pass formatting options?
-  function mathToLatex(
-    value: { mathJson?: MathJson; error?: string },
-    options?: MathFormattingOptions
-  ): string {
+  function mathToLatex(value: { mathJson?: MathJson; error?: string }, options?: MathFormattingOptions): string {
     if (value.mathJson) {
       try {
         const output = toLatexRecursive(value.mathJson, options);
@@ -171,14 +157,7 @@ export function useMathPrinting() {
       ...options,
     };
 
-    const sign =
-      printOptions.showSign === "never"
-        ? ""
-        : value.isNegative
-        ? "-"
-        : printOptions.showSign === "always"
-        ? "+"
-        : "";
+    const sign = printOptions.showSign === "never" ? "" : value.isNegative ? "-" : printOptions.showSign === "always" ? "+" : "";
 
     let beforeDecimal = value
       .getValueBeforeDecimal()
@@ -198,9 +177,7 @@ export function useMathPrinting() {
     let output = `\\texttt{\\mathllap{${sign}}}` + `\\mathtt{${beforeDecimal}}`;
 
     if (afterDecimal !== undefined && afterDecimal.length > 0) {
-      const decimalPoint = printOptions.zeroWidthDecimal
-        ? "\\mathclap{\\raisebox{-0.1em}{.}}"
-        : "\\mathtt{.}";
+      const decimalPoint = printOptions.zeroWidthDecimal ? "\\mathclap{\\raisebox{-0.1em}{.}}" : "\\mathtt{.}";
 
       output += decimalPoint + `\\mathtt{${afterDecimal}}`;
     }

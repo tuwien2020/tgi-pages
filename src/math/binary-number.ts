@@ -39,10 +39,7 @@ function addBitArray(a: ReadonlyArray<boolean>, b: ReadonlyArray<boolean>) {
  * a must be larger than b
  * TODO: Handle underflow?
  */
-function subtractBitArray(
-  a: ReadonlyArray<boolean>,
-  b: ReadonlyArray<boolean>
-) {
+function subtractBitArray(a: ReadonlyArray<boolean>, b: ReadonlyArray<boolean>) {
   if (a.length !== b.length) throw new Error("Not equal lengths");
   const result = new Array(a.length).fill(false);
 
@@ -65,12 +62,7 @@ function subtractBitArray(
 /**
  * Compares two binary arrays
  */
-function compareBinaryArray(
-  a: ReadonlyArray<boolean>,
-  aDecimalPoint: number,
-  b: ReadonlyArray<boolean>,
-  bDecimalPoint: number
-) {
+function compareBinaryArray(a: ReadonlyArray<boolean>, aDecimalPoint: number, b: ReadonlyArray<boolean>, bDecimalPoint: number) {
   // a > b would be rewritten as compareBinaryArray(a,b) > 0
   const aBeforeDecimal = a.length - aDecimalPoint;
   const bBeforeDecimal = b.length - bDecimalPoint;
@@ -110,11 +102,7 @@ export class BinaryNumber {
    */
   public readonly decimalPoint: number;
 
-  constructor(
-    isNegative: boolean,
-    value: ReadonlyArray<boolean>,
-    decimalPoint: number
-  ) {
+  constructor(isNegative: boolean, value: ReadonlyArray<boolean>, decimalPoint: number) {
     this.isNegative = isNegative;
     this.value = value.slice();
     this.decimalPoint = Math.round(decimalPoint);
@@ -148,9 +136,7 @@ export class BinaryNumber {
       }
 
       const oneInBinary = new BinaryNumber(false, [true], 0);
-      const bitArrayPlusOne = new BinaryNumber(false, bitArray, 0).add(
-        oneInBinary
-      );
+      const bitArrayPlusOne = new BinaryNumber(false, bitArray, 0).add(oneInBinary);
 
       return new BinaryNumber(isNegative, bitArrayPlusOne.value, 0);
     } else {
@@ -158,13 +144,8 @@ export class BinaryNumber {
     }
   }
 
-  static fromOffsetBinary(
-    value: ReadonlyArray<boolean>,
-    offset: ReadonlyArray<boolean>
-  ) {
-    return new BinaryNumber(false, value, 0).subtract(
-      new BinaryNumber(false, offset, 0)
-    );
+  static fromOffsetBinary(value: ReadonlyArray<boolean>, offset: ReadonlyArray<boolean>) {
+    return new BinaryNumber(false, value, 0).subtract(new BinaryNumber(false, offset, 0));
   }
 
   getValueBeforeDecimal() {
@@ -180,22 +161,11 @@ export class BinaryNumber {
   }
 
   extend(length: number, lengthOfFractional: number = 0) {
-    if (
-      length > this.value.length - this.decimalPoint ||
-      lengthOfFractional > this.decimalPoint
-    ) {
-      const paddingLeft: boolean[] = new Array(
-        length - (this.value.length - this.decimalPoint)
-      ).fill(false);
-      const paddingRight: boolean[] = new Array(
-        lengthOfFractional - this.decimalPoint
-      ).fill(false);
+    if (length > this.value.length - this.decimalPoint || lengthOfFractional > this.decimalPoint) {
+      const paddingLeft: boolean[] = new Array(length - (this.value.length - this.decimalPoint)).fill(false);
+      const paddingRight: boolean[] = new Array(lengthOfFractional - this.decimalPoint).fill(false);
 
-      return new BinaryNumber(
-        this.isNegative,
-        paddingLeft.concat(this.value).concat(paddingRight),
-        lengthOfFractional
-      );
+      return new BinaryNumber(this.isNegative, paddingLeft.concat(this.value).concat(paddingRight), lengthOfFractional);
     } else {
       return this;
     }
@@ -212,11 +182,7 @@ export class BinaryNumber {
         skipZeros++;
       }
     }
-    return new BinaryNumber(
-      this.isNegative,
-      this.value.slice(skipZeros),
-      this.decimalPoint
-    );
+    return new BinaryNumber(this.isNegative, this.value.slice(skipZeros), this.decimalPoint);
   }
 
   add(other: BinaryNumber): BinaryNumber {
@@ -224,21 +190,14 @@ export class BinaryNumber {
     let b = other;
 
     // Pad the numbers
-    const paddingBeforeDecimal = Math.max(
-      a.value.length - a.decimalPoint,
-      b.value.length - b.decimalPoint
-    );
+    const paddingBeforeDecimal = Math.max(a.value.length - a.decimalPoint, b.value.length - b.decimalPoint);
     const paddingAfterDecimal = Math.max(a.decimalPoint, b.decimalPoint);
     a = a.extend(paddingBeforeDecimal, paddingAfterDecimal);
     b = b.extend(paddingBeforeDecimal, paddingAfterDecimal);
 
     if (a.isNegative == b.isNegative) {
       // a and b have the same sign
-      return new BinaryNumber(
-        a.isNegative,
-        addBitArray(a.value, b.value),
-        a.decimalPoint
-      );
+      return new BinaryNumber(a.isNegative, addBitArray(a.value, b.value), a.decimalPoint);
     } else {
       // Test cases
       // -10 + 1   => -
@@ -251,18 +210,10 @@ export class BinaryNumber {
         return BinaryNumber.fromSize(a.value.length, a.decimalPoint);
       } else if (comparison > 0) {
         // a is larger than b
-        return new BinaryNumber(
-          a.isNegative,
-          subtractBitArray(a.value, b.value),
-          a.decimalPoint
-        );
+        return new BinaryNumber(a.isNegative, subtractBitArray(a.value, b.value), a.decimalPoint);
       } else {
         // b is larger than a
-        return new BinaryNumber(
-          b.isNegative,
-          subtractBitArray(b.value, a.value),
-          b.decimalPoint
-        );
+        return new BinaryNumber(b.isNegative, subtractBitArray(b.value, a.value), b.decimalPoint);
       }
     }
   }
@@ -297,46 +248,28 @@ export class BinaryNumber {
       }
     }
 
-    return new BinaryNumber(
-      xor(this.isNegative, other.isNegative),
-      resultBits.value,
-      this.decimalPoint + other.decimalPoint
-    );
+    return new BinaryNumber(xor(this.isNegative, other.isNegative), resultBits.value, this.decimalPoint + other.decimalPoint);
   }
 
   multiplyByPowerOfTwo(value: number) {
     if (value == 0) return this;
     if (value > 0) {
       if (this.decimalPoint - value >= 0) {
-        return new BinaryNumber(
-          this.isNegative,
-          this.value,
-          this.decimalPoint - value
-        );
+        return new BinaryNumber(this.isNegative, this.value, this.decimalPoint - value);
       } else {
         const paddingArray = new Array(value - this.decimalPoint).fill(false);
-        return new BinaryNumber(
-          this.isNegative,
-          this.value.concat(paddingArray),
-          0
-        );
+        return new BinaryNumber(this.isNegative, this.value.concat(paddingArray), 0);
       }
     } else {
       throw new Error("Negative powers of two are not supported yet");
     }
   }
 
-  divide(
-    other: BinaryNumber,
-    placesAfterDecimal: number
-  ): { result: BinaryNumber; remainder: boolean[]; divisionByZero: boolean } {
+  divide(other: BinaryNumber, placesAfterDecimal: number): { result: BinaryNumber; remainder: boolean[]; divisionByZero: boolean } {
     // Shift the decimal points away
     const maxDecimal = Math.max(this.decimalPoint, other.decimalPoint);
     const a = this.setSign(false).multiplyByPowerOfTwo(maxDecimal);
-    const b = other
-      .setSign(false)
-      .multiplyByPowerOfTwo(maxDecimal)
-      .trimZerosBeforeDecimal();
+    const b = other.setSign(false).multiplyByPowerOfTwo(maxDecimal).trimZerosBeforeDecimal();
 
     if (b.value.length <= 0) {
       return {
@@ -368,11 +301,7 @@ export class BinaryNumber {
     }
 
     return {
-      result: new BinaryNumber(
-        xor(this.isNegative, other.isNegative),
-        resultBits,
-        placesAfterDecimal
-      ),
+      result: new BinaryNumber(xor(this.isNegative, other.isNegative), resultBits, placesAfterDecimal),
       remainder: remainder.value.slice(),
       divisionByZero: false,
     };
@@ -381,12 +310,7 @@ export class BinaryNumber {
   compareTo(other: BinaryNumber): number {
     // a < b gets rewritten as a.compareTo(b) < 0
     if (this.isNegative == other.isNegative) {
-      const comparison = compareBinaryArray(
-        this.value,
-        this.decimalPoint,
-        other.value,
-        other.decimalPoint
-      );
+      const comparison = compareBinaryArray(this.value, this.decimalPoint, other.value, other.decimalPoint);
       if (comparison == 0) {
         return 0;
       } else {

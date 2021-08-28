@@ -30,39 +30,20 @@
 
   <p v-if="showCalulations">Berechnung der Paritybits:</p>
 
-  <pre v-if="showCalulations">{{
-    hammingCode.getFormattedHammingCodeParityFormulas(true)
-  }}</pre>
+  <pre v-if="showCalulations">{{ hammingCode.getFormattedHammingCodeParityFormulas(true) }}</pre>
 
   <h2>Berechnungen</h2>
 
-  <p>
-    Wie viele Paritybits werden für einen Hamming-Code mit d Datenbits benötigt?
-  </p>
-  <input
-    placeholder="Daten Bit Anzahl"
-    v-model="dataBitCalculation.dataBits"
-    type="number"
-  />
+  <p>Wie viele Paritybits werden für einen Hamming-Code mit d Datenbits benötigt?</p>
+  <input placeholder="Daten Bit Anzahl" v-model="dataBitCalculation.dataBits" type="number" />
   <pre>mindestens {{ dataBitCalculation.minParityBits }} Paritybits</pre>
 
-  <p>
-    Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn
-    dieser p Paritybits hat?
-  </p>
-  <input
-    placeholder="Parity Bit Anzahl"
-    v-model="parityBitCalculation.parityBits"
-    type="number"
-  />
+  <p>Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn dieser p Paritybits hat?</p>
+  <input placeholder="Parity Bit Anzahl" v-model="parityBitCalculation.parityBits" type="number" />
   <pre>maximal {{ parityBitCalculation.maxCodeBits }} Code- und {{ parityBitCalculation.maxDataBits }} Datenbits  </pre>
 
   <p>Wie viele Paritybits brauche ich für einen Hamming-Code mit c Codebits?</p>
-  <input
-    placeholder="Code Bit Anzahl"
-    v-model="codeBitCalculation.codeBits"
-    type="number"
-  />
+  <input placeholder="Code Bit Anzahl" v-model="codeBitCalculation.codeBits" type="number" />
   <pre>mindestens {{ codeBitCalculation.parityBits }} Paritybits</pre>
 </template>
 
@@ -97,19 +78,30 @@ export default defineComponent({
     const dataBitCalculation = ref(new DataBitCalculation(0));
     const parityBitCalculation = ref(new ParityBitCalculation(0));
     const codeBitCalculation = ref(new CodeBitCalculation(0));
-    
 
-    watch(dataBitCalculation, (value) => {
-      value.recalculateMinParityBits();
-    }, {deep: true});
+    watch(
+      dataBitCalculation,
+      (value) => {
+        value.recalculateMinParityBits();
+      },
+      { deep: true }
+    );
 
-    watch(parityBitCalculation, (value) => {
-      value.calculateMaximumCodeAndDataBits()
-    }, {deep: true});
+    watch(
+      parityBitCalculation,
+      (value) => {
+        value.calculateMaximumCodeAndDataBits();
+      },
+      { deep: true }
+    );
 
-    watch(codeBitCalculation, (value) => {
-      value.calculateMinParityAndDataBits()
-    }, {deep: true});
+    watch(
+      codeBitCalculation,
+      (value) => {
+        value.calculateMinParityAndDataBits();
+      },
+      { deep: true }
+    );
 
     return {
       code,
@@ -126,8 +118,8 @@ export default defineComponent({
 interface ParityBit {
   codeIndex: number;
   involvedCodebits: Array<number>;
-  value: number; 
-};
+  value: number;
+}
 
 class HammingCode {
   readonly code: string = "";
@@ -171,15 +163,17 @@ class HammingCode {
   getFormattedHammingCodeParityFormulas(valueMode?: boolean): string {
     let output = "";
     for (let i = 0; i < this.parityBits.length; i++) {
-      const prefix = "[p" + (i+1) + "]";
+      const prefix = "[p" + (i + 1) + "]";
 
-      const formula = this.parityBits[i].involvedCodebits.map(c => {
-        if (valueMode) {
-          return this.code[c-1]
-        } else {
-          return "c" + c
-        }
-      }).join( " ^ ");
+      const formula = this.parityBits[i].involvedCodebits
+        .map((c) => {
+          if (valueMode) {
+            return this.code[c - 1];
+          } else {
+            return "c" + c;
+          }
+        })
+        .join(" ^ ");
 
       const value = this.parityBits[i].value;
 
@@ -188,27 +182,26 @@ class HammingCode {
     return output;
   }
 
-  private calculateParityBits() : Array<ParityBit> {
+  private calculateParityBits(): Array<ParityBit> {
     const parityBits = new Array(this.numParityBits);
 
     for (let i = 0; i < this.numParityBits; i++) {
-      let parityBit: ParityBit = {value: 0, involvedCodebits: [], codeIndex: 2**i};
+      let parityBit: ParityBit = { value: 0, involvedCodebits: [], codeIndex: 2 ** i };
 
       for (let j = 1; j <= this.numCodeBits; j++) {
-        if (isPowerOfTwo(j)) continue; 
+        if (isPowerOfTwo(j)) continue;
         if (((1 << i) & j) != 0) {
-          parityBit.value ^= binaryCharacterToNumber(this.code[j-1]); // '0' ascii is 48
+          parityBit.value ^= binaryCharacterToNumber(this.code[j - 1]); // '0' ascii is 48
           parityBit.involvedCodebits.push(j);
         }
       }
-      if(parityBit.involvedCodebits.length == 0) parityBit.value = binaryCharacterToNumber(this.code[parityBit.codeIndex-1]);
+      if (parityBit.involvedCodebits.length == 0) parityBit.value = binaryCharacterToNumber(this.code[parityBit.codeIndex - 1]);
       parityBits[i] = parityBit;
     }
     return parityBits;
   }
 
-
-  private fillDataBitsWithParityBits() : string {
+  private fillDataBitsWithParityBits(): string {
     let code = "";
     let dataBitIndex = 0;
     let i = 1;
@@ -224,7 +217,7 @@ class HammingCode {
     return code;
   }
 
-  private placeParityBitsInCodeWord() : string {
+  private placeParityBitsInCodeWord(): string {
     let correctedCode = "";
     let parityBitIndex = 0;
     for (let i = 1; i <= this.numCodeBits; i++) {
@@ -234,16 +227,16 @@ class HammingCode {
       } else {
         correctedCode += this.code[i - 1];
       }
-    } 
+    }
     return correctedCode;
   }
 
-  private calculateError() : number { 
+  private calculateError(): number {
     let errorBit = 0;
-    
+
     for (let i = 0; i < this.numParityBits; i++) {
       let parityBit = this.parityBits[i];
-      
+
       if (binaryCharacterToNumber(this.code[parityBit.codeIndex - 1]) != this.parityBits[i].value) {
         errorBit += parityBit.codeIndex;
       }
@@ -253,22 +246,22 @@ class HammingCode {
 
   private correctCodeWord() {
     if (this.errorBit <= 0 || this.errorBit > this.code.length) return this.code;
-    return replaceCharAt(this.code, this.errorBit-1, (flipBinaryString(this.code[this.errorBit-1])));
+    return replaceCharAt(this.code, this.errorBit - 1, flipBinaryString(this.code[this.errorBit - 1]));
   }
 
-  private getDataBitsFromCodeWord() : string { 
+  private getDataBitsFromCodeWord(): string {
     let dataword = "";
     for (let i = 1; i <= this.numCodeBits; i++) {
       if (isPowerOfTwo(i)) continue;
       dataword += this.code.charAt(i - 1);
     }
     return dataword;
-  } 
+  }
 }
 
 class DataBitCalculation {
   dataBits: number = 0;
-  
+
   minParityBits: number = 0;
 
   constructor(dataBits: number) {
@@ -326,7 +319,7 @@ class CodeBitCalculation {
   }
 }
 
-function binaryCharacterToNumber(character: string) : number {
+function binaryCharacterToNumber(character: string): number {
   if (character.length != 1) return -1;
   return character.charCodeAt(0) - 48; // '0' is ascii 48
 }
@@ -339,19 +332,18 @@ function isPowerOfTwo(n: number): boolean {
   return (n & (n - 1)) == 0;
 }
 
-function flipBinaryString(character: string) : string {
+function flipBinaryString(character: string): string {
   if (character.length != 1) return character;
   if (character[0] == "0") {
     return "1";
   } else if (character[0] == "1") {
     return "0";
   }
-  return character; 
+  return character;
 }
 
-function replaceCharAt(value: string, index: number, replacement: string) : string {
-  if (replacement.length != 1) return value; 
+function replaceCharAt(value: string, index: number, replacement: string): string {
+  if (replacement.length != 1) return value;
   return value.substring(0, index) + replacement + value.substring(index + replacement.length);
 }
-
 </script>

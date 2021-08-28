@@ -8,11 +8,7 @@ export class UnaryOperator implements MathExpression {
 }
 
 export class BinaryOperator implements MathExpression {
-  constructor(
-    public operator: string,
-    public left: MathExpression,
-    public right: MathExpression
-  ) {}
+  constructor(public operator: string, public left: MathExpression, public right: MathExpression) {}
 }
 
 export class BinaryNumberLiteral implements MathExpression {
@@ -51,10 +47,7 @@ function operator<S extends string>(value: { operator: S; match: RegExp }) {
     .map((v) => value.operator);
 }
 
-const pUnaryOperators = [
-  operator({ operator: "unaryMinus", match: /-/i }),
-  operator({ operator: "unaryPlus", match: /\+/i }),
-];
+const pUnaryOperators = [operator({ operator: "unaryMinus", match: /-/i }), operator({ operator: "unaryPlus", match: /\+/i })];
 
 // Each precedence level builds upon the previous one. Meaning that the previous
 // parser is used in the next parser, over and over. An astute reader could
@@ -63,9 +56,7 @@ const pUnaryOperators = [
 
 // Highest level
 
-const pVar = bnb
-  .match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/)
-  .map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
+const pVar = bnb.match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/).map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
 
 const binaryNumberRegex = /([+-])?([0-1]+)([.,]([0-1]+))?/;
 function stringToBinaryNumber(value: string): BinaryNumber {
@@ -76,25 +67,16 @@ function stringToBinaryNumber(value: string): BinaryNumber {
 
   return new BinaryNumber(
     sign === "-",
-    ((numberValue ?? "") + (fractionalPart ?? ""))
-      .split("")
-      .map((v) => (v === "0" ? false : true)),
+    ((numberValue ?? "") + (fractionalPart ?? "")).split("").map((v) => (v === "0" ? false : true)),
     fractionalPart?.length ?? 0
   );
 }
 
-export const pBinaryNumber = bnb
-  .match(binaryNumberRegex)
-  .map((str) => new BinaryNumberLiteral(stringToBinaryNumber(str)));
+export const pBinaryNumber = bnb.match(binaryNumberRegex).map((str) => new BinaryNumberLiteral(stringToBinaryNumber(str)));
 
 // Next level
 const mathBasic: bnb.Parser<MathExpression> = bnb.lazy(() => {
-  return mathExpr
-    .thru(token)
-    .wrap(bnb.text("("), bnb.text(")"))
-    .or(pBinaryNumber)
-    .or(pVar)
-    .trim(mathWS);
+  return mathExpr.thru(token).wrap(bnb.text("("), bnb.text(")")).or(pBinaryNumber).or(pVar).trim(mathWS);
 });
 
 // Next level
@@ -120,10 +102,7 @@ const mathPow: bnb.Parser<MathExpression> = mathUnaryPrefix.chain((expr) => {
 
 const mathMulDiv: bnb.Parser<MathExpression> = mathUnaryPrefix.chain((expr) => {
   return bnb
-    .choice(
-      operator({ operator: "multiply", match: /\*/ }),
-      operator({ operator: "divide" as const, match: /\// })
-    )
+    .choice(operator({ operator: "multiply", match: /\*/ }), operator({ operator: "divide" as const, match: /\// }))
     .and(mathUnaryPrefix)
     .repeat(0)
     .map((pairs) => {
@@ -136,10 +115,7 @@ const mathMulDiv: bnb.Parser<MathExpression> = mathUnaryPrefix.chain((expr) => {
 // Next level
 const mathAddSub: bnb.Parser<MathExpression> = mathMulDiv.chain((expr) => {
   return bnb
-    .choice(
-      operator({ operator: "add", match: /\+/ }),
-      operator({ operator: "subtract", match: /-/ })
-    )
+    .choice(operator({ operator: "add", match: /\+/ }), operator({ operator: "subtract", match: /-/ }))
     .and(mathMulDiv)
     .repeat(0)
     .map((pairs) => {
@@ -163,18 +139,11 @@ const mathEqualsOp: bnb.Parser<MathExpression> = mathAddSub.chain((expr) => {
 // Lowest level
 const mathExpr = mathEqualsOp;
 
-const pNumber = bnb
-  .match(/[+-]?[0-9]+([.,][0-9]+)?/)
-  .map((str) => new NumberLiteral(str.replace(/,/, ".")));
+const pNumber = bnb.match(/[+-]?[0-9]+([.,][0-9]+)?/).map((str) => new NumberLiteral(str.replace(/,/, ".")));
 
-const pAnyBaseNumber = bnb
-  .match(/[+-]?[0-9a-zA-Z]+([.,][0-9a-zA-Z]+)?/)
-  .map((str) => new NumberLiteral(str.replace(/,/, ".")));
+const pAnyBaseNumber = bnb.match(/[+-]?[0-9a-zA-Z]+([.,][0-9a-zA-Z]+)?/).map((str) => new NumberLiteral(str.replace(/,/, ".")));
 
-export function tryParseNumber(
-  value: string,
-  options?: { type?: "number" | "binary" | "any-base" }
-) {
+export function tryParseNumber(value: string, options?: { type?: "number" | "binary" | "any-base" }) {
   const numberType = options?.type ?? "binary";
   if (numberType == "number") {
     return pNumber.tryParse(value);

@@ -27,11 +27,7 @@ export function findBlocksInKVDiagram(diagram: KVDiagram): Array<KVBlock> {
       getWrappedPosition(col, 3, 1, width, height),
     ];
 
-    if (
-      positions.every(
-        (position) => values[position] == "1" || values[position] == "X"
-      )
-    ) {
+    if (positions.every((position) => values[position] == "1" || values[position] == "X")) {
       blocks.push(new KVBlock(positions));
     }
   }
@@ -45,11 +41,7 @@ export function findBlocksInKVDiagram(diagram: KVDiagram): Array<KVBlock> {
       getWrappedPosition(cell, 1, 1, width, height),
     ];
 
-    if (
-      positions.every(
-        (position) => values[position] == "1" || values[position] == "X"
-      )
-    ) {
+    if (positions.every((position) => values[position] == "1" || values[position] == "X")) {
       blocks.push(new KVBlock(positions));
     }
   }
@@ -63,11 +55,7 @@ export function findBlocksInKVDiagram(diagram: KVDiagram): Array<KVBlock> {
       getWrappedPosition(row * 4, 0, 3, width, height),
     ];
 
-    if (
-      positions.every(
-        (position) => values[position] == "1" || values[position] == "X"
-      )
-    ) {
+    if (positions.every((position) => values[position] == "1" || values[position] == "X")) {
       blocks.push(new KVBlock(positions));
     }
   }
@@ -81,43 +69,25 @@ export function findBlocksInKVDiagram(diagram: KVDiagram): Array<KVBlock> {
       getWrappedPosition(col, 3, 0, width, height),
     ];
 
-    if (
-      positions.every(
-        (position) => values[position] == "1" || values[position] == "X"
-      )
-    ) {
+    if (positions.every((position) => values[position] == "1" || values[position] == "X")) {
       blocks.push(new KVBlock(positions));
     }
   }
 
   // find 2x1 vertical pairs
   for (let cell = 0; cell < 16; cell++) {
-    let positions = [
-      getWrappedPosition(cell, 0, 0, width, height),
-      getWrappedPosition(cell, 0, 1, width, height),
-    ];
+    let positions = [getWrappedPosition(cell, 0, 0, width, height), getWrappedPosition(cell, 0, 1, width, height)];
 
-    if (
-      positions.every(
-        (position) => values[position] == "1" || values[position] == "X"
-      )
-    ) {
+    if (positions.every((position) => values[position] == "1" || values[position] == "X")) {
       blocks.push(new KVBlock(positions));
     }
   }
 
   // find 2x1 horizontal pairs
   for (let cell = 0; cell < 16; cell++) {
-    let positions = [
-      getWrappedPosition(cell, 0, 0, width, height),
-      getWrappedPosition(cell, 1, 0, width, height),
-    ];
+    let positions = [getWrappedPosition(cell, 0, 0, width, height), getWrappedPosition(cell, 1, 0, width, height)];
 
-    if (
-      positions.every(
-        (position) => values[position] == "1" || values[position] == "X"
-      )
-    ) {
+    if (positions.every((position) => values[position] == "1" || values[position] == "X")) {
       blocks.push(new KVBlock(positions));
     }
   }
@@ -126,16 +96,12 @@ export function findBlocksInKVDiagram(diagram: KVDiagram): Array<KVBlock> {
   for (let cell = 0; cell < 16; cell++) {
     let positions = [getWrappedPosition(cell, 0, 0, width, height)];
 
-    if (
-      positions.every(
-        (position) => values[position] == "1" || values[position] == "X"
-      )
-    ) {
+    if (positions.every((position) => values[position] == "1" || values[position] == "X")) {
       blocks.push(new KVBlock(positions));
     }
   }
 
-  return reduce(blocks);;
+  return reduce(blocks);
 }
 
 function reduce(blocks: Array<KVBlock>) {
@@ -161,13 +127,7 @@ function reduce(blocks: Array<KVBlock>) {
   return filter;
 }
 
-function getWrappedPosition(
-  index: number,
-  rowShift: number,
-  colShift: number,
-  numRows: number,
-  numCols: number
-) {
+function getWrappedPosition(index: number, rowShift: number, colShift: number, numRows: number, numCols: number) {
   let x = index % numCols;
   let y = Math.floor(index / numCols);
 

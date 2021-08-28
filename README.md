@@ -7,6 +7,7 @@
 - [Report an issue](https://github.com/tuwien2020/tgi-pages/issues)
 
 ## Developer Info
+
 0. Make sure that you have [Node 15 or greater](https://nodejs.org/en/)
 1. Clone the repository
 2. `npm install`
@@ -19,7 +20,8 @@
 - NodeJS
 - VSCode
 
-### TGI 
+### TGI
+
 TGI Teststoff
 
 - Rundungsfunktionen Test 2018W 6)b) nachschauen
@@ -95,7 +97,6 @@ TGI Teststoff
   - Out of order execution
   - Multithreading (locks)
   - Interleaving
-  
 - Stack
 - Pipelining
   - Tasks with different durations

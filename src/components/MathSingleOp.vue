@@ -2,17 +2,7 @@
   <div class="math-output" ref="mathoutput"></div>
 </template>
 <script lang="ts">
-import {
-  ref,
-  defineComponent,
-  watchEffect,
-  watch,
-  computed,
-  shallowRef,
-  PropType,
-  onMounted,
-  nextTick,
-} from "vue";
+import { ref, defineComponent, watchEffect, watch, computed, shallowRef, PropType, onMounted, nextTick } from "vue";
 import { BinaryNumber } from "../math/binary-number";
 import { MathJson, MathJsonMathOperator } from "../math/MathJson";
 import { useMathPrinting } from "../math/math-printing";
@@ -40,18 +30,13 @@ function useMathWithStepsPrinting() {
     const placesAfterDecimal = options?.placesAfterDecimal ?? 0;
 
     if (operator == "add" || operator == "subtract") {
-      const result =
-        operator == "add" ? valueA.add(valueB) : valueA.subtract(valueB);
+      const result = operator == "add" ? valueA.add(valueB) : valueA.subtract(valueB);
 
       let output = "";
 
       const formatLatexNumber = (op: string, value: BinaryNumber) =>
-        `& \\texttt{${op}} & \\mathtt{${bitArray(
-          value.getValueBeforeDecimal()
-        )}} & \\mathtt{${
-          value.decimalPoint > 0
-            ? "." + bitArray(value.getValueAfterDecimal())
-            : ""
+        `& \\texttt{${op}} & \\mathtt{${bitArray(value.getValueBeforeDecimal())}} & \\mathtt{${
+          value.decimalPoint > 0 ? "." + bitArray(value.getValueAfterDecimal()) : ""
         }} &`;
 
       // see binary-number.ts
@@ -64,10 +49,7 @@ function useMathWithStepsPrinting() {
         let firstNumber = formatLatexNumber("", valueA);
         if (result.isNegative) {
           // Slap a minus sign around the operation
-          firstNumber =
-            `\\smash{\\raisebox{-0.75em}{$-\\Bigg($}}` +
-            firstNumber +
-            `\\smash{\\raisebox{-0.75em}{$\\Bigg)$}}`;
+          firstNumber = `\\smash{\\raisebox{-0.75em}{$-\\Bigg($}}` + firstNumber + `\\smash{\\raisebox{-0.75em}{$\\Bigg)$}}`;
         }
         output += firstNumber;
         output += "\\\\\n";
@@ -75,9 +57,7 @@ function useMathWithStepsPrinting() {
         output += secondNumber;
       } else {
         // Subtraction
-        const comparison = valueA
-          .setSign(false)
-          .compareTo(valueB.setSign(false));
+        const comparison = valueA.setSign(false).compareTo(valueB.setSign(false));
         if (comparison < 0) {
           const temp = valueA;
           valueA = valueB;
@@ -86,10 +66,7 @@ function useMathWithStepsPrinting() {
         let firstNumber = formatLatexNumber("", valueA);
         if (result.isNegative) {
           // Slap a minus sign around the operation
-          firstNumber =
-            `\\smash{\\raisebox{-0.75em}{$-\\Bigg($}}` +
-            firstNumber +
-            `\\smash{\\raisebox{-0.75em}{$\\Bigg)$}}`;
+          firstNumber = `\\smash{\\raisebox{-0.75em}{$-\\Bigg($}}` + firstNumber + `\\smash{\\raisebox{-0.75em}{$\\Bigg)$}}`;
         }
         output += firstNumber;
         output += "\\\\\n";
@@ -97,10 +74,7 @@ function useMathWithStepsPrinting() {
         output += secondNumber;
       }
 
-      output += `\\\\\n\\hline ${formatLatexNumber(
-        result.isNegative ? "-" : "",
-        result
-      )}`;
+      output += `\\\\\n\\hline ${formatLatexNumber(result.isNegative ? "-" : "", result)}`;
 
       output = `\\begin{alignedat}{3}\n${output}\n\\end{alignedat}`;
       return output;
@@ -111,16 +85,12 @@ function useMathWithStepsPrinting() {
       const lastLineLength = valueA.value.length + valueB.value.length - 1;
       const resultLength = result.value.length ?? 0;
 
-      const requiredPadding =
-        resultLength > lastLineLength ? resultLength - lastLineLength : 0;
+      const requiredPadding = resultLength > lastLineLength ? resultLength - lastLineLength : 0;
 
-      output += `& ${pad(requiredPadding)} ${mathPrinting.binaryNumberToLatex(
-        valueA,
-        {
-          zeroWidthDecimal: true,
-          groupZeros: false,
-        }
-      )} \\times ${mathPrinting.binaryNumberToLatex(valueB, {
+      output += `& ${pad(requiredPadding)} ${mathPrinting.binaryNumberToLatex(valueA, {
+        zeroWidthDecimal: true,
+        groupZeros: false,
+      })} \\times ${mathPrinting.binaryNumberToLatex(valueB, {
         zeroWidthDecimal: true,
         groupZeros: false,
       })} \\\\\n`;
@@ -132,11 +102,7 @@ function useMathWithStepsPrinting() {
       for (let i = 0; i < valueB.value.length; i++) {
         const bitB = valueB.value[i];
         if (bitB) {
-          output += `&${pad(
-            i - extraZeros + requiredPadding
-          )} \\mathtt{${"0".repeat(extraZeros)} ${bitArray(
-            valueA.value
-          )}} \\\\\n`;
+          output += `&${pad(i - extraZeros + requiredPadding)} \\mathtt{${"0".repeat(extraZeros)} ${bitArray(valueA.value)}} \\\\\n`;
           extraZeros = 0;
         } else {
           extraZeros++;
@@ -146,17 +112,13 @@ function useMathWithStepsPrinting() {
       // If the last line is "missing", add it
       if (extraZeros) {
         extraZeros--;
-        output += `&${pad(
-          valueB.value.length - 1 - extraZeros + requiredPadding
-        )} \\mathtt{${"0".repeat(extraZeros + valueA.value.length)}} \\\\\n`;
+        output += `&${pad(valueB.value.length - 1 - extraZeros + requiredPadding)} \\mathtt{${"0".repeat(extraZeros + valueA.value.length)}} \\\\\n`;
       }
 
       output += `\\hline \\\\\n`;
 
       // Result
-      output += `&${pad(
-        lastLineLength - resultLength + requiredPadding
-      )} ${mathPrinting.binaryNumberToLatex(result, {
+      output += `&${pad(lastLineLength - resultLength + requiredPadding)} ${mathPrinting.binaryNumberToLatex(result, {
         zeroWidthDecimal: true,
         groupZeros: false,
       })}`;
@@ -170,9 +132,7 @@ function useMathWithStepsPrinting() {
       output += `&${pad(1)} ${mathPrinting.binaryNumberToLatex(valueA, {
         zeroWidthDecimal: true,
         groupZeros: false,
-      })} ${pad(2)} \\mathllap{\\div} ${pad(
-        1
-      )} ${mathPrinting.binaryNumberToLatex(valueB, {
+      })} ${pad(2)} \\mathllap{\\div} ${pad(1)} ${mathPrinting.binaryNumberToLatex(valueB, {
         zeroWidthDecimal: true,
         groupZeros: false,
       })} ${pad(2)} \\mathllap{=} ${pad(1)}`;
@@ -181,23 +141,14 @@ function useMathWithStepsPrinting() {
       // Shift the decimal points away
       const maxDecimal = Math.max(valueA.decimalPoint, valueB.decimalPoint);
       const a = valueA.setSign(false).multiplyByPowerOfTwo(maxDecimal);
-      const b = valueB
-        .setSign(false)
-        .multiplyByPowerOfTwo(maxDecimal)
-        .trimZerosBeforeDecimal();
+      const b = valueB.setSign(false).multiplyByPowerOfTwo(maxDecimal).trimZerosBeforeDecimal();
 
       if (b.value.length <= 0) {
         output += `\\text{Division by zero}`;
       } else {
         // Pretty print the result
-        const remainderIsZero = new BinaryNumber(
-          false,
-          result.remainder,
-          0
-        ).isZero();
-        output += ` ${mathPrinting.binaryNumberToLatex(result.result)} ${
-          remainderIsZero ? "" : "..."
-        }\\\\\n`;
+        const remainderIsZero = new BinaryNumber(false, result.remainder, 0).isZero();
+        output += ` ${mathPrinting.binaryNumberToLatex(result.result)} ${remainderIsZero ? "" : "..."}\\\\\n`;
 
         // Copy of binary-number.ts
         let index = 0;
@@ -205,31 +156,17 @@ function useMathWithStepsPrinting() {
         const resultBits = new Array<boolean>(maxLength).fill(false);
         let remainder = new BinaryNumber(false, [], 0);
 
-        const printPadded = (
-          value: string,
-          valueLength: number,
-          length: number
-        ) =>
-          `&${pad(
-            Math.max(length - valueLength, 0)
-          )} \\mathtt{${value}} \\\\\n`;
+        const printPadded = (value: string, valueLength: number, length: number) =>
+          `&${pad(Math.max(length - valueLength, 0))} \\mathtt{${value}} \\\\\n`;
 
         while (!a.isZero() && index < maxLength) {
           // Pull down the next bit
           const newBit = index < a.value.length ? a.value[index] : false;
-          remainder = new BinaryNumber(
-            false,
-            remainder.value.concat(newBit),
-            0
-          );
+          remainder = new BinaryNumber(false, remainder.value.concat(newBit), 0);
 
           const remainderToPrint = remainder.trimZerosBeforeDecimal().extend(1);
 
-          output += printPadded(
-            bitArray(remainderToPrint.value),
-            remainderToPrint.value.length,
-            1 + remainder.value.length
-          );
+          output += printPadded(bitArray(remainderToPrint.value), remainderToPrint.value.length, 1 + remainder.value.length);
 
           // If we can subtract, do so
           if (remainder.compareTo(b) >= 0) {
@@ -239,18 +176,14 @@ function useMathWithStepsPrinting() {
             const paddingDelta = remainderToPrint.value.length - b.value.length;
 
             output += printPadded(
-              `\\mathllap{-}\\underline{${pad(paddingDelta)}${bitArray(
-                b.value
-              )}}`,
+              `\\mathllap{-}\\underline{${pad(paddingDelta)}${bitArray(b.value)}}`,
               remainderToPrint.value.length,
               1 + remainder.value.length
             );
           } else {
             resultBits[index] = false;
             output += printPadded(
-              `\\mathllap{-}\\underline{${pad(
-                remainderToPrint.value.length - 1
-              )}0}`,
+              `\\mathllap{-}\\underline{${pad(remainderToPrint.value.length - 1)}0}`,
               remainderToPrint.value.length,
               1 + remainder.value.length
             );
@@ -258,19 +191,9 @@ function useMathWithStepsPrinting() {
           index += 1;
         }
 
-        let remainderToPrint = new BinaryNumber(
-          false,
-          result.remainder ?? [],
-          0
-        )
-          .trimZerosBeforeDecimal()
-          .extend(1);
+        let remainderToPrint = new BinaryNumber(false, result.remainder ?? [], 0).trimZerosBeforeDecimal().extend(1);
 
-        output += printPadded(
-          bitArray(remainderToPrint.value) + `\\mathrlap{R}`,
-          remainderToPrint.value.length,
-          1 + remainder.value.length
-        );
+        output += printPadded(bitArray(remainderToPrint.value) + `\\mathrlap{R}`, remainderToPrint.value.length, 1 + remainder.value.length);
       }
 
       output = `\\def\\arraystretch{0.1}\n\\begin{alignedat}{2}\n${output}\n\\end{alignedat}`;
@@ -312,14 +235,9 @@ export default defineComponent({
     }
 
     const output = computed(() =>
-      mathPrinting.calculationToLatex(
-        props.valueA,
-        props.valueB,
-        props.operator,
-        {
-          placesAfterDecimal: placesAfterDecimal.value,
-        }
-      )
+      mathPrinting.calculationToLatex(props.valueA, props.valueB, props.operator, {
+        placesAfterDecimal: placesAfterDecimal.value,
+      })
     );
 
     onMounted(() => {
@@ -336,8 +254,7 @@ export default defineComponent({
                   return context.command == "\\htmlStyle";
                 },
                 macros: {
-                  "\\phantom":
-                    "\\htmlStyle{color: transparent; user-select: none;}{#1}",
+                  "\\phantom": "\\htmlStyle{color: transparent; user-select: none;}{#1}",
                 },
               });
             }

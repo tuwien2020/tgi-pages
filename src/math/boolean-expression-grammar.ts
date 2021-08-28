@@ -7,11 +7,7 @@ export class UnaryOperator implements LogicalExpression {
 }
 
 export class BinaryOperator implements LogicalExpression {
-  constructor(
-    public operator: string,
-    public left: LogicalExpression,
-    public right: LogicalExpression
-  ) {}
+  constructor(public operator: string, public left: LogicalExpression, public right: LogicalExpression) {}
 }
 
 export class BooleanLiteral implements LogicalExpression {
@@ -45,17 +41,11 @@ const pUnaryOperators = [operator({ operator: "not", match: /not|!|¬/i })];
 // Each precedence level builds upon the previous one.
 
 // Highest level
-const pVar = bnb
-  .match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/)
-  .map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
+const pVar = bnb.match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/).map((x) => new VariableLiteral(x.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2")));
 
-const pBooleanFalse = bnb
-  .match(/[Ff][Aa][Ll][Ss]([Ee]|[Cc][Hh])|0/)
-  .map((x) => new BooleanLiteral(false));
+const pBooleanFalse = bnb.match(/[Ff][Aa][Ll][Ss]([Ee]|[Cc][Hh])|0/).map((x) => new BooleanLiteral(false));
 
-const pBooleanTrue = bnb
-  .match(/[Tt][Rr][Uu][Ee]|1|[Ww][Aa][Hh][Rr]/)
-  .map((x) => new BooleanLiteral(true));
+const pBooleanTrue = bnb.match(/[Tt][Rr][Uu][Ee]|1|[Ww][Aa][Hh][Rr]/).map((x) => new BooleanLiteral(true));
 
 const pBoolean = pBooleanFalse.or(pBooleanTrue);
 
@@ -63,9 +53,7 @@ const logicalIte = bnb.lazy(() => {
   return (
     bnb
       .match(/[iI][tT][eE]\(/)
-      .next(
-        mathUnaryPrefix.trim(mathWS).sepBy(bnb.text(","), 3, 3).trim(mathWS)
-      )
+      .next(mathUnaryPrefix.trim(mathWS).sepBy(bnb.text(","), 3, 3).trim(mathWS))
       .skip(bnb.text(")"))
       // Rewrite ITE(a, b, c) as (a and b) or (!a and c)
       .map(
@@ -73,11 +61,7 @@ const logicalIte = bnb.lazy(() => {
           new BinaryOperator(
             "or",
             new BinaryOperator("and", params[0], params[1]),
-            new BinaryOperator(
-              "and",
-              new UnaryOperator("not", params[0]),
-              params[2]
-            )
+            new BinaryOperator("and", new UnaryOperator("not", params[0]), params[2])
           )
       )
   );
@@ -88,13 +72,7 @@ const logicalIte = bnb.lazy(() => {
 // Next level
 // Lazy is being used, because "booleanExpr" is defined all the way at the bottom of the file
 const mathBasic: bnb.Parser<LogicalExpression> = bnb.lazy(() => {
-  return booleanExpr
-    .thru(token)
-    .wrap(bnb.text("("), bnb.text(")"))
-    .or(pBoolean)
-    .or(logicalIte)
-    .or(pVar)
-    .trim(mathWS);
+  return booleanExpr.thru(token).wrap(bnb.text("("), bnb.text(")")).or(pBoolean).or(logicalIte).or(pVar).trim(mathWS);
 });
 
 // Next level
@@ -107,70 +85,56 @@ const mathUnaryPrefix: bnb.Parser<LogicalExpression> = bnb.lazy(() => {
     .or(mathBasic);
 });
 
-const logicalAndOps: bnb.Parser<LogicalExpression> = mathUnaryPrefix.chain(
-  (expr) => {
-    return bnb
-      .choice(
-        operator({ operator: "and", match: /and|&&?|∧/i }),
-        operator({ operator: "nand" as const, match: /nand|!&&?|↑/i })
-      )
-      .and(mathUnaryPrefix)
-      .repeat(0)
-      .map((pairs) => {
-        return pairs.reduce((accum, [operator, expr]) => {
-          return new BinaryOperator(operator, accum, expr);
-        }, expr);
-      });
-  }
-);
+const logicalAndOps: bnb.Parser<LogicalExpression> = mathUnaryPrefix.chain((expr) => {
+  return bnb
+    .choice(operator({ operator: "and", match: /and|&&?|∧/i }), operator({ operator: "nand" as const, match: /nand|!&&?|↑/i }))
+    .and(mathUnaryPrefix)
+    .repeat(0)
+    .map((pairs) => {
+      return pairs.reduce((accum, [operator, expr]) => {
+        return new BinaryOperator(operator, accum, expr);
+      }, expr);
+    });
+});
 
-const logicalOrOps: bnb.Parser<LogicalExpression> = logicalAndOps.chain(
-  (expr) => {
-    return bnb
-      .choice(
-        operator({ operator: "or", match: /or|\|\|?|∨/i }),
-        operator({ operator: "nor" as const, match: /nor|!\|\|?|↓/i }),
-        operator({ operator: "xor" as const, match: /xor|\^|⊕/i })
-      )
-      .and(logicalAndOps)
-      .repeat(0)
-      .map((pairs) => {
-        return pairs.reduce((accum, [operator, expr]) => {
-          return new BinaryOperator(operator, accum, expr);
-        }, expr);
-      });
-  }
-);
+const logicalOrOps: bnb.Parser<LogicalExpression> = logicalAndOps.chain((expr) => {
+  return bnb
+    .choice(
+      operator({ operator: "or", match: /or|\|\|?|∨/i }),
+      operator({ operator: "nor" as const, match: /nor|!\|\|?|↓/i }),
+      operator({ operator: "xor" as const, match: /xor|\^|⊕/i })
+    )
+    .and(logicalAndOps)
+    .repeat(0)
+    .map((pairs) => {
+      return pairs.reduce((accum, [operator, expr]) => {
+        return new BinaryOperator(operator, accum, expr);
+      }, expr);
+    });
+});
 
-const logicalImpliesOp: bnb.Parser<LogicalExpression> = logicalOrOps.chain(
-  (expr) => {
-    return bnb
-      .choice(
-        operator({ operator: "implies", match: /impl(y|ies)|==?>|⇒|⊃/i }),
-        operator({ operator: "subset", match: /if|subset|<==?|⊂/i })
-      )
-      .and(logicalOrOps)
-      .repeat(0)
-      .map((pairs) => {
-        return pairs.reduce((accum, [operator, expr]) => {
-          return new BinaryOperator(operator, accum, expr);
-        }, expr);
-      });
-  }
-);
+const logicalImpliesOp: bnb.Parser<LogicalExpression> = logicalOrOps.chain((expr) => {
+  return bnb
+    .choice(operator({ operator: "implies", match: /impl(y|ies)|==?>|⇒|⊃/i }), operator({ operator: "subset", match: /if|subset|<==?|⊂/i }))
+    .and(logicalOrOps)
+    .repeat(0)
+    .map((pairs) => {
+      return pairs.reduce((accum, [operator, expr]) => {
+        return new BinaryOperator(operator, accum, expr);
+      }, expr);
+    });
+});
 
-const logicalEqualsOp: bnb.Parser<LogicalExpression> = logicalImpliesOp.chain(
-  (expr) => {
-    return operator({ operator: "equals", match: /equal(s)?|==?|<==?>|≡/i })
-      .and(logicalImpliesOp)
-      .repeat(0)
-      .map((pairs) => {
-        return pairs.reduce((accum, [operator, expr]) => {
-          return new BinaryOperator(operator, accum, expr);
-        }, expr);
-      });
-  }
-);
+const logicalEqualsOp: bnb.Parser<LogicalExpression> = logicalImpliesOp.chain((expr) => {
+  return operator({ operator: "equals", match: /equal(s)?|==?|<==?>|≡/i })
+    .and(logicalImpliesOp)
+    .repeat(0)
+    .map((pairs) => {
+      return pairs.reduce((accum, [operator, expr]) => {
+        return new BinaryOperator(operator, accum, expr);
+      }, expr);
+    });
+});
 
 // Lowest level
 const booleanExpr = logicalEqualsOp;

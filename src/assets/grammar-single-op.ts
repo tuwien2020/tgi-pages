@@ -15,21 +15,19 @@ function operator<S extends string>(value: { operator: S; match: RegExp }) {
     .map((v) => value.operator);
 }
 
-const mathSingleOperator: bnb.Parser<MathExpression> = pBinaryNumber.chain(
-  (expr) => {
-    return bnb
-      .choice(
-        operator({ operator: "multiply" as const, match: /\*/ }),
-        operator({ operator: "divide" as const, match: /\// }),
-        operator({ operator: "add" as const, match: /\+/ }),
-        operator({ operator: "subtract" as const, match: /-/ })
-      )
-      .and(pBinaryNumber)
-      .map(([operator, nextExpr]) => {
-        return new BinaryOperator(operator, expr, nextExpr);
-      });
-  }
-);
+const mathSingleOperator: bnb.Parser<MathExpression> = pBinaryNumber.chain((expr) => {
+  return bnb
+    .choice(
+      operator({ operator: "multiply" as const, match: /\*/ }),
+      operator({ operator: "divide" as const, match: /\// }),
+      operator({ operator: "add" as const, match: /\+/ }),
+      operator({ operator: "subtract" as const, match: /-/ })
+    )
+    .and(pBinaryNumber)
+    .map(([operator, nextExpr]) => {
+      return new BinaryOperator(operator, expr, nextExpr);
+    });
+});
 
 export function tryParseBinaryNumber(value: string): BinaryNumber {
   return pBinaryNumber.tryParse(value).value;

@@ -6,12 +6,7 @@
     rows="4"
     cols="50"
     :value="codewords"
-    @input="
-      (event) =>
-        (codewords = event.target.value
-          .replace(/ /g, '')
-          .replace(/[^01\n]/g, ''))
-    "
+    @input="(event) => (codewords = event.target.value.replace(/ /g, '').replace(/[^01\n]/g, ''))"
   ></textarea>
   <pre>Hamming-Distanz: {{ codewordsData.hammingDistance }}</pre>
   <pre>Ist ein Blockcode: {{ codewordsData.isBlockCode }}</pre>
@@ -20,11 +15,7 @@
 
   <br />
   <table class="hammingMatrix" v-if="codewordsData.isBlockCode">
-    <tr
-      v-for="(row, index) in codewordsData.distanceMatrixData"
-      :key="index"
-      tabindex="0"
-    >
+    <tr v-for="(row, index) in codewordsData.distanceMatrixData" :key="index" tabindex="0">
       <td v-for="(item, itemIndex) in row" :key="itemIndex">
         {{ item }}
       </td>
@@ -52,9 +43,7 @@ export default defineComponent({
     watch(codewords, (value) => {
       let codewordStrings = value.split("\n");
 
-      codewordStrings = codewordStrings.filter(
-        (v) => v != null && v.trim() !== ""
-      );
+      codewordStrings = codewordStrings.filter((v) => v != null && v.trim() !== "");
 
       codewordsData.value = new CodewordsData(codewordStrings);
     });
@@ -109,9 +98,7 @@ class CodewordsData {
       for (let j = 0; j < this.codewords.length; j++) {
         if (i == j) continue;
         let codewordB = this.codewords[j];
-        distances.push(
-          bitCount(parseInt(codewordA, 2) ^ parseInt(codewordB, 2))
-        );
+        distances.push(bitCount(parseInt(codewordA, 2) ^ parseInt(codewordB, 2)));
       }
     }
 
@@ -171,10 +158,7 @@ class CodewordsData {
   }
 
   private hammingDistanceMatrix(distances: Array<number>): string[][] {
-    let matrix = Array.from(
-      new Array(this.codewords.length + 1),
-      () => new Array(this.codewords.length + 1)
-    );
+    let matrix = Array.from(new Array(this.codewords.length + 1), () => new Array(this.codewords.length + 1));
     let indexDistanceData = 0;
 
     matrix[0][0] = "";

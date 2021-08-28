@@ -1,25 +1,12 @@
 <template>
   <div class="math-input">
     <input type="text" v-model="mathinput" size="100" />
-    <div
-      ref="mathoutput"
-      @mouseover="hoverOverMath($event)"
-      @mouseout="hoverOverMath($event)"
-    ></div>
+    <div ref="mathoutput" @mouseover="hoverOverMath($event)" @mouseout="hoverOverMath($event)"></div>
   </div>
 </template>
 
 <script lang="ts">
-import {
-  ref,
-  defineComponent,
-  watchEffect,
-  watch,
-  computed,
-  onMounted,
-  nextTick,
-  PropType,
-} from "vue";
+import { ref, defineComponent, watchEffect, watch, computed, onMounted, nextTick, PropType } from "vue";
 import { MathJson, MathJsonLogicalOperator } from "./../math/MathJson";
 import Katex from "katex";
 import { useMathPrinting } from "./../math/math-printing";
@@ -31,9 +18,7 @@ export default defineComponent({
       required: true,
     },
     mathParser: {
-      type: Function as PropType<
-        (value: string) => { mathJson?: MathJson; error?: string }
-      >,
+      type: Function as PropType<(value: string) => { mathJson?: MathJson; error?: string }>,
       required: true,
     },
   },
@@ -54,17 +39,13 @@ export default defineComponent({
 
       if (event.target instanceof HTMLElement && event.type == "mouseover") {
         if (event.target.innerText == "(" || event.target.innerText == ")") {
-          const bracketId = event.target.parentElement?.getAttribute(
-            "data-bracketid"
-          );
-          mathoutput.value
-            ?.querySelectorAll(`[data-bracketid='${bracketId}']`)
-            ?.forEach((v) => {
-              if (v instanceof HTMLElement) {
-                v.style.color = "red";
-                lastTargets.push(v);
-              }
-            });
+          const bracketId = event.target.parentElement?.getAttribute("data-bracketid");
+          mathoutput.value?.querySelectorAll(`[data-bracketid='${bracketId}']`)?.forEach((v) => {
+            if (v instanceof HTMLElement) {
+              v.style.color = "red";
+              lastTargets.push(v);
+            }
+          });
         }
       }
     }

@@ -70,10 +70,7 @@ function parseIteRecursive(value: TokenStream): VariableLiteral | IteNode {
     const variable = currentValue.substring(0, endOfVariable);
     value.consume(endOfVariable);
 
-    return new VariableLiteral(
-      variable.replace(/\!/, ""),
-      variable.startsWith("!")
-    );
+    return new VariableLiteral(variable.replace(/\!/, ""), variable.startsWith("!"));
   }
 }
 
@@ -81,6 +78,4 @@ export function parseIte(value: string) {
   return parseIteRecursive(new TokenStream(value.replace(/\s/g, ""), 0));
 }
 
-console.log(
-  parseIte("ITE(b, ITE(!c, ITE(!b, c, !c), ITE(!c, 1, 0)), ITE(!c, 1, !a))")
-);
+console.log(parseIte("ITE(b, ITE(!c, ITE(!b, c, !c), ITE(!c, 1, 0)), ITE(!c, 1, !a))"));
