@@ -272,6 +272,12 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
+    name: "Digitalschaltungen Simulator (alternativ)",
+    link: "https://logigator.com/editor/",
+    category: getCategory(11),
+    internal: false,
+  },
+  {
     name: "Schaltkreise",
     link: "http://falstad.com/circuit/circuitjs.html",
     category: getCategory(7),
