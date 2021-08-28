@@ -24,8 +24,9 @@
   <p>Formeln für die Paritybits:</p>
   <pre>{{ hammingCode.getFormattedHammingCodeParityFormulas(false) }}</pre>
 
-  <pre v-if="hammingCode.errorBit != 0">Fehler an der Stelle: {{ hammingCode.errorBit }}</pre>
+  <pre v-if="hammingCode.errorBit < 0">Fehler an der Stelle: {{ hammingCode.errorBit }}</pre>
   <pre v-if="hammingCode.errorBit == 0">Kein erkennbarer Fehler</pre>
+  <pre v-if="hammingCode.errorBit > hammingCode.code.length">Fehler nicht korrigierbar</pre>
 
   <p v-if="showCalulations">Berechnung der Paritybits:</p>
 
@@ -78,7 +79,7 @@ export default defineComponent({
     const { urlRef } = useUrlRef(router, route);
 
     const code = urlRef("code", "");
-    // TODO: support booleans
+    // TODO: make urlRef support booleans
     const dataOnly = urlRef("dataOnly", "false");
 
     let hammingCode = ref(new HammingCode(code.value, dataOnly.value != "false"));
@@ -191,7 +192,7 @@ class HammingCode {
     const parityBits = new Array(this.numParityBits);
 
     for (let i = 0; i < this.numParityBits; i++) {
-      let parityBit: ParityBit = {value: 0, involvedCodebits: [], codeIndex: 2**i - 1};
+      let parityBit: ParityBit = {value: 0, involvedCodebits: [], codeIndex: 2**i};
 
       for (let j = 1; j <= this.numCodeBits; j++) {
         if (isPowerOfTwo(j)) continue; 
@@ -200,7 +201,7 @@ class HammingCode {
           parityBit.involvedCodebits.push(j);
         }
       }
-      if(parityBit.involvedCodebits.length == 0) parityBit.value = binaryCharacterToNumber(this.code[parityBit.codeIndex]);
+      if(parityBit.involvedCodebits.length == 0) parityBit.value = binaryCharacterToNumber(this.code[parityBit.codeIndex-1]);
       parityBits[i] = parityBit;
     }
     return parityBits;
@@ -237,20 +238,21 @@ class HammingCode {
     return correctedCode;
   }
 
-  private calculateError() : number {
-    let errorIndex = 0;
+  private calculateError() : number { 
+    let errorBit = 0;
     
     for (let i = 0; i < this.numParityBits; i++) {
-      const codebitIndex = 2**i;
+      let parityBit = this.parityBits[i];
       
-      if (binaryCharacterToNumber(this.code[codebitIndex - 1]) != this.parityBits[i].value) {
-        errorIndex += codebitIndex;
+      if (binaryCharacterToNumber(this.code[parityBit.codeIndex - 1]) != this.parityBits[i].value) {
+        errorBit += parityBit.codeIndex;
       }
     }
-    return errorIndex;
+    return errorBit;
   }
 
   private correctCodeWord() {
+    if (this.errorBit <= 0 || this.errorBit > this.code.length) return this.code;
     return replaceCharAt(this.code, this.errorBit-1, (flipBinaryString(this.code[this.errorBit-1])));
   }
 
@@ -338,7 +340,6 @@ function isPowerOfTwo(n: number): boolean {
 }
 
 function flipBinaryString(character: string) : string {
-  if (character == null) return "";
   if (character.length != 1) return character;
   if (character[0] == "0") {
     return "1";
