@@ -1,46 +1,28 @@
-import { createApp } from "vue";
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createApp, nextTick, onBeforeMount, onMounted, reactive, ref, watch } from "vue";
+import { createRouter, createWebHashHistory, useRoute, useRouter } from "vue-router";
 import App from "./App.vue";
 import "./index.css";
 import "katex/dist/katex.css";
-import Overview from "./pages/Overview.vue";
-import HammingCode from "./pages/HammingCode.vue";
-import TruthTable from "./pages/TruthTable.vue";
-import HammingDistance from "./pages/HammingDistance.vue";
-import BinaryCalculator from "./pages/BinaryCalculator.vue";
-import BinaryCoding from "./pages/BinaryCoding.vue";
-import Pipeline from "./pages/Pipeline.vue";
-import InterleavingGraph from "./pages/InterleavingGraph.vue";
-import CacheCalc from "./pages/CacheCalc.vue";
-import Stack from "./pages/Stack.vue";
-import Micro16Decompiler from "./pages/Micro16Decompiler.vue";
 import { name, version } from "./../package.json";
 import "bulma/css/bulma.css";
-
-/** @type {import("vue-router").RouteRecordRaw[]} */
-const routes = [
-  { path: "/", component: Overview },
-  { path: "/hamming-code", component: HammingCode },
-  { path: "/truth-table", component: TruthTable },
-  { path: "/hamming-distance", component: HammingDistance },
-  { path: "/binary-calculator", component: BinaryCalculator },
-  { path: "/binary-coding", component: BinaryCoding },
-  { path: "/pipeline", component: Pipeline },
-  { path: "/interleaving-graph", component: InterleavingGraph },
-  { path: "/cache-calc", component: CacheCalc },
-  { path: "/stack", component: Stack },
-  { path: "/micro16-decompiler", component: Micro16Decompiler },
-];
+import 'ant-design-vue/dist/antd.css';
+import router from "./router";
+import Antd from 'ant-design-vue';
 
 if (import.meta.env.PROD) {
   console.log(`${name} - ${version}`);
 }
+const app = createApp(App);
+app.use(router);
+app.use(Antd);
 
-createApp(App)
-  .use(
-    createRouter({
-      history: createWebHashHistory(),
-      routes: routes,
-    })
-  )
-  .mount("#app");
+app.config.globalProperties.$ref = ref;
+app.config.globalProperties.$reactive = reactive;
+app.config.globalProperties.$onBeforeMount = onBeforeMount;
+app.config.globalProperties.$onMounted = onMounted;
+app.config.globalProperties.$watch = watch;
+app.config.globalProperties.$nextTick = nextTick;
+app.config.globalProperties.$useRouter = useRouter;
+app.config.globalProperties.$useRoute = useRoute;
+
+app.mount("#app");
