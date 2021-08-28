@@ -8,7 +8,7 @@
     "deploy": "vite build --base=/tgi-pages/ && node utils/publish.js"
   },
   "dependencies": {
-    "@babel/runtime": "^7.15.3",
+    "@ant-design/icons-vue": "^6.0.1",
     "@monaco-editor/loader": "^1.1.1",
     "ant-design-vue": "^2.2.6",
     "bread-n-butter": "^0.6.0",
@@ -28,6 +28,6 @@
     "gh-pages": "^3.2.3",
     "rollup-plugin-copy-assets": "^2.0.3",
     "vite": "^2.5.1",
-    "vite-plugin-import": "^0.4.0"
+    "vite-plugin-components": "^0.13.2"
   }
 }

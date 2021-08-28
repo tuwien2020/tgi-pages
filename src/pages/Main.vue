@@ -2,35 +2,40 @@
   <div class="content">
     <h1>Overview Page</h1>
     <section class="columns is-multiline">
-      <a-card v-for="category in pagesByCategory" :key="category.key.number" v-bind:title="category.key.number.toString() + '. ' + category.key.name" :hoverable="true" :bordered="true" class="column is-one-third">
+      <a-card
+        v-for="category in pagesByCategory"
+        :key="category.key.number"
+        v-bind:title="category.key.number.toString() + '. ' + category.key.name"
+        :hoverable="true"
+        :bordered="true"
+        class="column is-one-third"
+      >
         <div v-for="item in category.values" :key="item.name">
-          <router-link v-if="item.internal" :to="item.link">{{item.name}}</router-link>
-          <a target="_blank" v-if="!item.internal" :href="item.link">{{item.name}}</a>
+          <router-link v-if="item.internal" :to="item.link">{{ item.name }}</router-link>
+          <a target="_blank" v-if="!item.internal" :href="item.link">{{ item.name }}</a>
         </div>
-        
       </a-card>
       <a-card :hoverable="true" :bordered="true" class="column">
-        <a href="https://github.com/tuwien2020/tgi-pages" target="_blank">Github Repository <icon type="github" theme="filled" /></a>
+        <a href="https://github.com/tuwien2020/tgi-pages" target="_blank">Github Repository <GithubFilled /> </a>
       </a-card>
     </section>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch, watchEffect } from "vue";
-import { pagesByCategory, getCategory } from "../router/navigation";
-import Card from "ant-design-vue/lib/card";
-import Icon from "ant-design-vue/lib/icon";
+import { defineComponent, computed, ref, watch, watchEffect } from 'vue'
+import { pagesByCategory, getCategory } from '../router/navigation'
+import GithubFilled from '@ant-design/icons-vue/GithubFilled'
 
 export default defineComponent({
-  components: {Icon, Card},
+  components: { GithubFilled },
   setup() {
-    const count = ref(0);
+    const count = ref(0)
     return {
       count,
       pagesByCategory,
-      getCategory
-    };
+      getCategory,
+    }
   },
-});
+})
 </script>

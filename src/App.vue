@@ -2,13 +2,12 @@
   <div class="header-block">.</div>
   <nav class="navbar header" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <router-link to="/" class="home-link"
-        >TGI Pages - {{ version }}
-        <search-bar/>
+      <router-link to="/" class="home-link">
+        TGI Pages - {{ version }}
+        <search-bar />
       </router-link>
     </div>
-    <div class="navbar-item">
-    </div>
+    <div class="navbar-item"></div>
   </nav>
 
   <div class="content">
@@ -17,18 +16,18 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, watchEffect, watch, computed } from "vue";
-import { version } from "./../package.json";
-import SearchBar from "./components/SearchBar.vue";
+import { ref, defineComponent, watchEffect, watch, computed } from 'vue'
+import { version } from './../package.json'
+import SearchBar from './components/SearchBar.vue'
 
 export default defineComponent({
-  components: {SearchBar},
+  components: { SearchBar },
   setup() {
     return {
-      version
-    };
+      version,
+    }
   },
-});
+})
 </script>
 
 <style scoped>
@@ -48,7 +47,6 @@ export default defineComponent({
   background: #ffffff00;
   min-height: none;
 }
-
 
 .home-link {
   text-decoration: none;
