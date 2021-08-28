@@ -82,7 +82,6 @@ function useBinaryParsing() {
     }
   }
 
-  // TODO: Handle fractional binary numbers
   function binaryToString(value: BinaryNumber) {
     const sign = unref(value).isNegative ? "-" : "+";
     const beforeDecimal = unref(value)

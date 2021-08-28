@@ -4,8 +4,6 @@ function xor(a: boolean, b: boolean) {
   return a ? !b : b;
 }
 
-// TODO: Maybe write a "addOne" function
-
 /**
  * Adds two binary arrays that have the same length.
  * Returns a larger array if there was an overflow

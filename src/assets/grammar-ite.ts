@@ -1,5 +1,7 @@
 // ITE(b, ITE(!c, ITE(!b, c, !c), ITE(!c, 1, 0)), ITE(!c, 1, !a))
 
+type ExpressionTree<Ops, Values> = Values | [string, ...ExpressionTree<Ops, Values>[]];
+
 class VariableLiteral {
   constructor(public value: string, public isNegated: boolean) {}
 }
@@ -36,6 +38,18 @@ class TokenStream {
   }
 
   /**
+   * Checks if the token stream at the current position starts with a string.
+   * If yes, it consumes the tokens
+   */
+  tryConsume(value: string) {
+    if (this.currentValue.startsWith(value)) {
+      this.consume(value.length);
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Checks if it's at the end of the file
    */
   eof() {
@@ -44,16 +58,14 @@ class TokenStream {
 }
 
 function parseIteRecursive(value: TokenStream): VariableLiteral | IteNode {
-  if (value.startsWith("ITE(")) {
-    value.consume(4);
+  if (value.tryConsume("ITE(")) {
     let children = [];
 
     while (true) {
       const returnValue = parseIteRecursive(value);
       children.push(returnValue);
 
-      if (value.startsWith(")")) {
-        value.consume(1);
+      if (value.tryConsume(")")) {
         break;
       } else {
         value.consume(1); // Comma
@@ -79,3 +91,13 @@ export function parseIte(value: string) {
 }
 
 console.log(parseIte("ITE(b, ITE(!c, ITE(!b, c, !c), ITE(!c, 1, 0)), ITE(!c, 1, !a))"));
+
+type MathExpression = ExpressionTree<"plus" | "minus" | "multiply" | "pow", number>;
+
+function parseMathRecursive(value: TokenStream): MathExpression {
+  while (value.tryConsume(" ")) {}
+}
+
+function parseMath(value: string) {
+  return parseMathRecursive(new TokenStream(value, 0));
+}
