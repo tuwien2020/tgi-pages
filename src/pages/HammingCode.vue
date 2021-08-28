@@ -1,11 +1,14 @@
 <template>
   <h1>Hamming-Code</h1>
 
-  <p>Gebe hier einen Hamming-Code ein:</p>
-  <input v-model="codeBits" pattern="[01]+" />
+  <p>Gebe hier einen Code ein:</p>
+  <input v-model="code" pattern="[01]+" />
 
-  <p>Gebe hier die Datenbits für einen Hamming-Code ein:</p>
-  <input v-model="dataBits" pattern="[01]+" />
+  <label>
+    <!-- Hmm Yes the Floor Here Is Made Out of Floor -->
+    <input type="checkbox" v-model="dataOnly" true-value="true" false-value="false" />
+    nur Datenbits
+  </label>
 
   <pre>Hamming-Code: {{ hammingCode.code }} (bereits korrigiert)</pre>
   <pre>Datenbits: {{ hammingCode.data }}</pre>
@@ -21,8 +24,9 @@
   <p>Formeln für die Paritybits:</p>
   <pre>{{ hammingCode.getFormattedHammingCodeParityFormulas(false) }}</pre>
 
-  <pre v-if="hammingCode.errorBit != 0">Fehler an der Stelle: {{ hammingCode.errorBit }}</pre>
+  <pre v-if="hammingCode.errorBit < 0">Fehler an der Stelle: {{ hammingCode.errorBit }}</pre>
   <pre v-if="hammingCode.errorBit == 0">Kein erkennbarer Fehler</pre>
+  <pre v-if="hammingCode.errorBit > hammingCode.code.length">Fehler nicht korrigierbar</pre>
 
   <p v-if="showCalulations">Berechnung der Paritybits:</p>
 
@@ -74,29 +78,21 @@ export default defineComponent({
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
 
-    const codeBits = urlRef("hamming-code-bits", "");
-    const dataBits = urlRef("hamming-data-bits", "");
+    const code = urlRef("code", "");
+    // TODO: make urlRef support booleans
+    const dataOnly = urlRef("dataOnly", "false");
 
-    let hammingCode = ref(new HammingCode(""));
-    if (codeBits.value != "") {
-      hammingCode.value = new HammingCode(codeBits.value);
-    } else {
-      hammingCode.value = new HammingCode(dataBits.value)
-    }
+    let hammingCode = ref(new HammingCode(code.value, dataOnly.value != "false"));
+
+    watch(code, (value) => {
+      hammingCode.value = new HammingCode(value, dataOnly.value != "false");
+    });
+
+    watch(dataOnly, (value) => {
+      hammingCode.value = new HammingCode(code.value, value != "false");
+    });
 
     const showCalulations = ref(false);
-
-    watch(codeBits, (value) => {
-      codeBits.value = codeBits.value.replace(/[^01]+$/, "");
-      hammingCode.value = new HammingCode(codeBits.value, false);
-      dataBits.value = "";
-    });
-
-    watch(dataBits, (value) => {
-      dataBits.value = dataBits.value.replace(/[^01]+$/, "");
-      hammingCode.value = new HammingCode(dataBits.value, true);
-      codeBits.value = "";
-    });
 
     const dataBitCalculation = ref(new DataBitCalculation(0));
     const parityBitCalculation = ref(new ParityBitCalculation(0));
@@ -116,8 +112,8 @@ export default defineComponent({
     }, {deep: true});
 
     return {
-      codeBits,
-      dataBits,
+      code,
+      dataOnly,
       hammingCode,
       showCalulations,
       dataBitCalculation,
@@ -196,7 +192,7 @@ class HammingCode {
     const parityBits = new Array(this.numParityBits);
 
     for (let i = 0; i < this.numParityBits; i++) {
-      const parityBit: ParityBit = {value: 0, involvedCodebits: [], codeIndex: i};
+      let parityBit: ParityBit = {value: 0, involvedCodebits: [], codeIndex: 2**i};
 
       for (let j = 1; j <= this.numCodeBits; j++) {
         if (isPowerOfTwo(j)) continue; 
@@ -205,6 +201,7 @@ class HammingCode {
           parityBit.involvedCodebits.push(j);
         }
       }
+      if(parityBit.involvedCodebits.length == 0) parityBit.value = binaryCharacterToNumber(this.code[parityBit.codeIndex-1]);
       parityBits[i] = parityBit;
     }
     return parityBits;
@@ -241,19 +238,21 @@ class HammingCode {
     return correctedCode;
   }
 
-  private calculateError() : number {
-    let error = 0;
+  private calculateError() : number { 
+    let errorBit = 0;
+    
     for (let i = 0; i < this.numParityBits; i++) {
-      const codebitIndex = Math.floor(Math.pow(2, i));
-
-      if (binaryCharacterToNumber(this.code[codebitIndex - 1]) != this.parityBits[i].value) {
-        error += codebitIndex;
+      let parityBit = this.parityBits[i];
+      
+      if (binaryCharacterToNumber(this.code[parityBit.codeIndex - 1]) != this.parityBits[i].value) {
+        errorBit += parityBit.codeIndex;
       }
     }
-    return error;
+    return errorBit;
   }
 
   private correctCodeWord() {
+    if (this.errorBit <= 0 || this.errorBit > this.code.length) return this.code;
     return replaceCharAt(this.code, this.errorBit-1, (flipBinaryString(this.code[this.errorBit-1])));
   }
 
@@ -305,7 +304,7 @@ class ParityBitCalculation {
   }
 
   calculateMaximumCodeAndDataBits() {
-    this.maxCodeBits = Math.pow(2, this.parityBits) - 1;
+    this.maxCodeBits = 2 ** this.parityBits - 1;
     this.maxDataBits = this.maxCodeBits - this.parityBits;
   }
 }
