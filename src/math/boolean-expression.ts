@@ -63,6 +63,7 @@ export function useBooleanExpressions() {
     ["nand", (a, b) => !(a && b)],
     ["nor", (a, b) => !(a || b)],
     ["equals", (a, b) => a == b],
+    ["subset", (a, b) => !b || a],
   ]);
 
   function evaluateRecursive(

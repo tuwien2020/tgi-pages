@@ -22,6 +22,7 @@ export function useMathPrinting() {
     ["subtract", "-"],
     ["multiply", "\\cdot"],
     ["divide", "\\div"],
+    ["subset", "\\subset"]
   ]);
 
   function needsBrackets(ast: MathJson) {

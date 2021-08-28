@@ -15,7 +15,8 @@ export type MathJsonLogicalOperator =
   | "xor"
   | "nand"
   | "nor"
-  | "equals";
+  | "equals"
+  | "subset";
 
 export type MathJsonMathOperator =
   | "unaryMinus"
