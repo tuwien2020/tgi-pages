@@ -216,4 +216,7 @@ function bitCount(n: number): number {
   text-align: center;
   overflow: hidden;
 }
+textarea {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+}
 </style>
