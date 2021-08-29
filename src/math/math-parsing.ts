@@ -25,7 +25,7 @@ function token<A>(parser: bnb.Parser<A>) {
 function operator<S extends string>(value: { operator: S; match: RegExp }) {
   return match(value.match)
     .thru(token)
-    .map((v) => value.operator);
+    .map(() => value.operator);
 }
 
 /**
