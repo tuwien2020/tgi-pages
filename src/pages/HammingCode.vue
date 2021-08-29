@@ -369,7 +369,7 @@ function replaceCharAt(value: string, index: number, replacement: string): strin
 
 <style scoped>
   input {
-    margin: 1em 0em;
+    margin: 0em 0em 1em 0em;
   }
 
   label {
