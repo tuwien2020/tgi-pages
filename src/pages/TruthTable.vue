@@ -114,7 +114,7 @@
 import { ref, defineComponent, watchEffect, watch, computed, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
-import { MathJson } from "../math/math-parsing";
+import { MathJson, hasError } from "../math/math-parsing";
 import { useBooleanExpressions } from "../math/boolean-expression";
 import { useUrlRef } from "../url-ref";
 import MathInput from "./../components/MathInput.vue";
@@ -191,6 +191,7 @@ export default defineComponent({
 
     function createTable(value: MathJson<boolean> | undefined) {
       if (value === undefined) return;
+      if (hasError(value)) return;
 
       let operations = logicalMath.extractOperations(value);
       if (hideColumns.value) {

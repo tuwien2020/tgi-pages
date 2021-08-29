@@ -237,6 +237,16 @@ export function parseMath(value: string): MathJson {
   }
 }
 
+export function hasError<T>(value: MathJson<T>): boolean {
+  if (Array.isArray(value)) {
+    const [functionName, ...args] = value;
+    if (functionName === "Error") return true;
+    else return args.some((v) => hasError(v));
+  } else {
+    return false;
+  }
+}
+
 // Test cases
 /*
 console.log(expression.parse("a=b"));

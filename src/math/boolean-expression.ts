@@ -24,6 +24,8 @@ export function useBooleanExpressions() {
       const [functionName, ...args] = ast;
       if (mathJsonOperatorMap.has(functionName as any)) {
         return [functionName, ...args.map((v) => transform(v))];
+      } else if (functionName === "Error") {
+        return [functionName, ...args.map((v) => "" + v)];
       } else {
         return ["Error", `Unknown function ${functionName}`];
       }

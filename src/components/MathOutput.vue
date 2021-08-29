@@ -50,20 +50,22 @@ export default defineComponent({
     watchEffect(() => {
       const latex = props.latex || mathPrinting.mathToLatex(props.value as MathJson, props.formatting);
 
-      if (mathoutput.value) {
-        Katex.render(latex, mathoutput.value, {
-          displayMode: true,
-          throwOnError: false,
-          //output: "html",
-          trust: function (context) {
-            return context.command === "\\htmlData" || context.command === "\\htmlStyle";
-          },
-          strict: false,
-          macros: {
-            "\\phantom": "\\htmlStyle{color: transparent; user-select: none;}{#1}",
-          },
-        });
-      }
+      nextTick(() => {
+        if (mathoutput.value) {
+          Katex.render(latex, mathoutput.value, {
+            displayMode: true,
+            throwOnError: false,
+            //output: "html",
+            trust: function (context) {
+              return context.command === "\\htmlData" || context.command === "\\htmlStyle";
+            },
+            strict: false,
+            macros: {
+              "\\phantom": "\\htmlStyle{color: transparent; user-select: none;}{#1}",
+            },
+          });
+        }
+      });
     });
 
     return {
