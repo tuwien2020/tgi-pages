@@ -2,7 +2,6 @@
   <h1>Wahrheitstabelle</h1>
   <p>Gebe hier einen Booleschen Ausdruck ein:</p>
   <math-input
-    type="logical"
     v-model="logicalUserInput"
     :mathTransformer="transform"
     @mathJson="(value) => (logicalMathJson = value)"
