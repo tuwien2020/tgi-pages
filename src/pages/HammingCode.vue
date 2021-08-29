@@ -2,7 +2,7 @@
   <h1>Hamming-Code</h1>
 
   <p>Gebe hier einen Code ein:</p>
-  <input v-model="code" pattern="[01]+" />
+  <input v-model="code" @keypress="onlyBinary($event)" type="text" />
 
   <label>
     <!-- Hmm Yes the Floor Here Is Made Out of Floor -->
@@ -102,6 +102,13 @@ export default defineComponent({
       { deep: true }
     );
 
+    const onlyBinary = (event: KeyboardEvent) => {
+      let keyCode = event.keyCode; 
+      if (keyCode !== 48 && keyCode !== 49) {
+        event.preventDefault();
+      }
+    }
+
     return {
       code,
       dataOnly,
@@ -110,6 +117,7 @@ export default defineComponent({
       dataBitCalculation,
       parityBitCalculation,
       codeBitCalculation,
+      onlyBinary
     };
   },
 });
