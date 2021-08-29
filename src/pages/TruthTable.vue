@@ -4,8 +4,9 @@
   <math-input
     type="logical"
     v-model="logicalUserInput"
-    :mathParser="parse"
+    :mathTransformer="transform"
     @mathJson="(value) => (logicalMathJson = value)"
+    :formatting="{customPrinter}"
   ></math-input>
 
   <div>
@@ -25,7 +26,7 @@
             'right-thick-border': index === tableThickBorderIndex,
           }"
         >
-          <math-output :value="item"></math-output>
+          <math-output :value="item" :formatting="{customPrinter}"></math-output>
         </th>
       </tr>
     </thead>
@@ -59,47 +60,47 @@
     </thead>
     <tbody>
       <tr>
-        <td><math-output :value="['not', 'a']"></math-output></td>
+        <td><math-output :value="['Not', 'a']"></math-output></td>
         <td>not</td>
         <td>!</td>
       </tr>
       <tr>
-        <td><math-output :value="['and', 'a', 'b']"></math-output></td>
+        <td><math-output :value="['And', 'a', 'b']"></math-output></td>
         <td>and</td>
         <td>&&</td>
       </tr>
       <tr>
-        <td><math-output :value="['or', 'a', 'b']"></math-output></td>
+        <td><math-output :value="['Or', 'a', 'b']"></math-output></td>
         <td>or</td>
         <td>||</td>
       </tr>
       <tr>
-        <td><math-output :value="['xor', 'a', 'b']"></math-output></td>
+        <td><math-output :value="['Xor', 'a', 'b']"></math-output></td>
         <td>xor</td>
         <td>^</td>
       </tr>
       <tr>
-        <td><math-output :value="['nand', 'a', 'b']"></math-output></td>
+        <td><math-output :value="['Nand', 'a', 'b']"></math-output></td>
         <td>nand</td>
         <td>!&&</td>
       </tr>
       <tr>
-        <td><math-output :value="['nor', 'a', 'b']"></math-output></td>
+        <td><math-output :value="['Nor', 'a', 'b']"></math-output></td>
         <td>nor</td>
         <td>!||</td>
       </tr>
       <tr>
-        <td><math-output :value="['implies', 'a', 'b']"></math-output></td>
+        <td><math-output :value="['Implies', 'a', 'b']"></math-output></td>
         <td>implies</td>
         <td>=></td>
       </tr>
       <tr>
-        <td><math-output :value="['equals', 'a', 'b']"></math-output></td>
+        <td><math-output :value="['Equal', 'a', 'b']"></math-output></td>
         <td>equals</td>
         <td>=</td>
       </tr>
       <tr>
-        <td><math-output :value="['subset', 'a', 'b']"></math-output></td>
+        <td><math-output :value="['Subset', 'a', 'b']"></math-output></td>
         <td>if</td>
         <td>&lt;=</td>
       </tr>
@@ -113,15 +114,15 @@
 import { ref, defineComponent, watchEffect, watch, computed, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { BinaryNumber } from "../math/binary-number";
-import { MathJson } from "../math/MathJson";
-import { useBooleanExpressions, useBooleanExpressionParsing } from "../math/boolean-expression";
+import { MathJson } from "../math/math-parsing";
+import { useBooleanExpressions } from "../math/boolean-expression";
 import { useUrlRef } from "../url-ref";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
 
-function useLogicalMath() {
-  const logicalExpression = useBooleanExpressions();
-  function isPrimitive(ast: MathJson) {
+function useBooleanMath() {
+  const useBoolean = useBooleanExpressions();
+  function isPrimitive<T>(ast: MathJson<T>) {
     if (Array.isArray(ast)) {
       if (ast.length >= 3) {
         return false;
@@ -139,10 +140,10 @@ function useLogicalMath() {
     }
   }
 
-  function extractOperations(ast: MathJson): MathJson[] {
-    const operations: MathJson[] = [];
+  function extractOperations<T>(ast: MathJson<T>): MathJson<T>[] {
+    const operations: MathJson<T>[] = [];
 
-    function extractOperationsRecursive(ast: MathJson) {
+    function extractOperationsRecursive(ast: MathJson<T>) {
       if (Array.isArray(ast)) {
         const [functionName, ...args] = ast;
 
@@ -162,9 +163,11 @@ function useLogicalMath() {
   }
 
   return {
-    extractGetters: logicalExpression.extractGetters,
+    extractGetters: useBoolean.extractGetters,
     extractOperations,
-    evaluate: logicalExpression.evaluate,
+    evaluate: useBoolean.evaluate,
+    transform: useBoolean.transform,
+    customPrinter: useBoolean.customPrinter,
   };
 }
 
@@ -175,22 +178,20 @@ export default defineComponent({
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
 
-    const { parse } = useBooleanExpressionParsing();
-    const logicalMath = useLogicalMath();
+    const logicalMath = useBooleanMath();
 
     const logicalUserInput = urlRef("input", "a and (b xor 1)");
-    const logicalMathJson = shallowRef<MathJson>();
+    const logicalMathJson = shallowRef<MathJson<boolean>>();
 
-    const tableHeaders = shallowRef<MathJson[]>([]);
+    const tableHeaders = shallowRef<MathJson<boolean>[]>([]);
     const tableRows = ref<boolean[][]>([[]]);
     const flipBits = ref<boolean>(false); // TODO: Make urlRef
     const hideColumns = ref<boolean>(false); // TODO: Make urlRef
     const tableThickBorderIndex = ref(0);
 
-    function createTable(value: MathJson | undefined) {
+    function createTable(value: MathJson<boolean> | undefined) {
       if (value === undefined) return;
 
-      const getterNames = logicalMath.extractGetters(value);
       let operations = logicalMath.extractOperations(value);
       if (hideColumns.value) {
         operations = operations.slice(operations.length - 1);
@@ -199,7 +200,7 @@ export default defineComponent({
       const getters = Array.from(logicalMath.extractGetters(value));
       getters.sort();
 
-      tableHeaders.value = (getters as MathJson[]).concat(operations);
+      tableHeaders.value = (getters as MathJson<boolean>[]).concat(operations);
 
       let binaryNumber = BinaryNumber.fromSize(getters.length);
       const oneInBinary = BinaryNumber.fromSize(getters.length).add(new BinaryNumber(true, [true], 0));
@@ -239,7 +240,8 @@ export default defineComponent({
     });
 
     return {
-      parse,
+      transform: logicalMath.transform,
+      customPrinter: logicalMath.customPrinter,
       logicalUserInput,
       logicalMathJson,
       tableHeaders,

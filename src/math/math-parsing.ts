@@ -5,15 +5,14 @@ export type MathJsonNumber = {
   type: "number";
   value: string;
 };
-export type MathJsonValue = boolean | string | MathJsonNumber;
 
 export type MathJsonLogicalOperator = "Not" | "Implies" | "And" | "Or" | "Xor" | "Nand" | "Nor" | "Equal" | "Subset";
 
 export type MathJsonMathOperator = "Power" | "Multiply" | "Divide" | "Add" | "Subtract" | "Equal" | "Negate" | "Plus";
 
-export type MathJsonOperator = MathJsonLogicalOperator | MathJsonMathOperator;
+export type MathJsonOperator = MathJsonLogicalOperator | MathJsonMathOperator | "Error";
 
-export type MathJson = [operator: MathJsonOperator, ...args: MathJson[]] | MathJsonValue;
+export type MathJson<V = MathJsonNumber> = [operator: MathJsonOperator, ...args: MathJson<V>[]] | string | V;
 
 /** Strips away the whitespace */
 function token<A>(parser: bnb.Parser<A>) {
@@ -44,19 +43,19 @@ function accumulateToMathJson(pairs: [MathJsonOperator, MathJson][], startingExp
 
 const mathLiteral: bnb.Parser<MathJson> = bnb.lazy(() => {
   // An expression with brackets around it
-  const bracketedExpression = expression.thru(token).wrap(bnb.text("("), bnb.text(")"));
+  const bracketedExpression = expressionParser.thru(token).wrap(bnb.text("("), bnb.text(")"));
 
   // TODO: Should we also allow, say, base12 numbers?
   const number = match(/([0-9]+)([.,]([0-9]+))?/)
     .thru(token)
     .map<MathJsonNumber>((v) => {
-      return { type: "number", value: v };
+      return { type: "number", value: v.replace(",", ".") };
     });
 
   // A variable name
   const variable = match(/[a-zA-Z]+((_[a-zA-Z0-9]+)|([0-9]))?/)
     .thru(token)
-    .map<MathJsonValue>((v) => v);
+    .map<string>((v) => v.replace(/^([^_0-9]+)([0-9]+)$/, "$1_$2"));
 
   return bracketedExpression.or(number).or(variable);
 });
@@ -66,6 +65,28 @@ const mathLiteral: bnb.Parser<MathJson> = bnb.lazy(() => {
 // - sqrt()
 // - bit shifts << and >>
 // - remainder %
+// - ITEs
+/*
+const logicalIte = bnb.lazy(() => {
+  return (
+    bnb
+      .match(/[iI][tT][eE]\(/)
+      .next(mathUnaryPrefix.trim(mathWS).sepBy(bnb.text(","), 3, 3).trim(mathWS))
+      .skip(bnb.text(")"))
+      // Rewrite ITE(a, b, c) as (a and b) or (!a and c)
+      .map(
+        (params) =>
+          new BinaryOperator(
+            "or",
+            new BinaryOperator("and", params[0], params[1]),
+            new BinaryOperator("and", new UnaryOperator("not", params[0]), params[2])
+          )
+      )
+  );
+  // TODO: Actually implement ITEs instead of cheating
+  // .map((params) => new ITELiteral(params));
+});
+*/
 
 const operatorExponent: bnb.Parser<MathJson> =
   // We start by parsing a variable (or a number or an expression in brackets)
@@ -200,7 +221,21 @@ const operatorEqual: bnb.Parser<MathJson> =
     });
 
 // Final level (this gets called when we want to parse some maths)
-const expression = operatorEqual;
+const expressionParser = operatorEqual;
+
+export function parseMath(value: string): MathJson {
+  if (!value) return "";
+
+  const result = expressionParser.parse(value);
+  if (result.type === "ParseOK") {
+    return result.value;
+  } else {
+    const { expected, location } = result;
+    const { line, column } = location;
+    const message = `parse error at line ${line} column ${column}: ` + `expected ${expected.join(", ")}`;
+    return ["Error", message];
+  }
+}
 
 // Test cases
 /*
