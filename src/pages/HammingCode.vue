@@ -12,25 +12,24 @@
 
   <pre>Hamming-Code: {{ hammingCode.code }} (bereits korrigiert)</pre>
   <pre>Datenbits: {{ hammingCode.data }}</pre>
-  <pre>Anzahl der Codebits: {{ hammingCode.numCodeBits }}</pre>
-  <pre>Anzahl der Paritybits: {{ hammingCode.numParityBits }}</pre>
-  <pre>Anzahl der Datenbits: {{ hammingCode.numDataBits }}</pre>
+  <pre>
+Anzahl der Codebits: {{ hammingCode.numCodeBits }}
+Anzahl der Paritybits: {{ hammingCode.numParityBits }}
+Anzahl der Datenbits: {{ hammingCode.numDataBits }}
+</pre>
 
+  <p>Formeln für die Paritybits:
   <label>
-    Berechnungen anzeigen
     <input type="checkbox" v-model="showCalulations" />
+    Berechnungen anzeigen
   </label>
-
-  <p>Formeln für die Paritybits:</p>
+  </p> 
   <pre>{{ hammingCode.getFormattedHammingCodeParityFormulas(false) }}</pre>
 
-  <pre v-if="hammingCode.errorBit < 0">Fehler an der Stelle: {{ hammingCode.errorBit }}</pre>
-  <pre v-if="hammingCode.errorBit == 0">Kein erkennbarer Fehler</pre>
-  <pre v-if="hammingCode.errorBit > hammingCode.code.length">Fehler nicht korrigierbar</pre>
-
   <p v-if="showCalulations">Berechnung der Paritybits:</p>
-
   <pre v-if="showCalulations">{{ hammingCode.getFormattedHammingCodeParityFormulas(true) }}</pre>
+
+  <pre>{{ hammingCode.getErrorBitMessage() }}</pre>
 
   <h2>Berechnungen</h2>
 
@@ -173,13 +172,25 @@ class HammingCode {
             return "c" + c;
           }
         })
-        .join(" ^ ");
+        .join(" ⊕ ");
 
       const value = this.parityBits[i].value;
 
       output += prefix + " = " + formula + (formula != "" ? " = " : "") + value + "\n";
     }
     return output;
+  }
+
+  getErrorBitMessage() : string {
+    if (this.errorBit == 0) {
+      return "Kein erkennbarer Fehler";
+    } else if (this.errorBit > this.code.length) {
+      return "Fehler nicht korrigierbar"
+    } else if (this.errorBit > 0 && this.errorBit <= this.code.length){
+      return "Fehler an der Stelle: " + this.errorBit;
+    } else {
+      return "Something went wrong :("
+    }
   }
 
   private calculateParityBits(): Array<ParityBit> {
@@ -347,3 +358,13 @@ function replaceCharAt(value: string, index: number, replacement: string): strin
   return value.substring(0, index) + replacement + value.substring(index + replacement.length);
 }
 </script>
+
+<style scoped>
+  input {
+    margin: 1em 0em;
+  }
+
+  label {
+    margin: 1em;
+  }
+</style>
