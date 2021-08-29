@@ -8,6 +8,7 @@ export type MathJsonNumber = {
 
 export type MathJsonLogicalOperator = "Not" | "Implies" | "And" | "Or" | "Xor" | "Nand" | "Nor" | "Equal" | "Subset";
 
+// FYI "Negate" and "Plus" are unary operators
 export type MathJsonMathOperator = "Power" | "Multiply" | "Divide" | "Add" | "Subtract" | "Equal" | "Negate" | "Plus";
 
 export type MathJsonOperator = MathJsonLogicalOperator | MathJsonMathOperator | "Error";

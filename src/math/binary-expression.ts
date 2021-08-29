@@ -28,10 +28,27 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
 
   function transform(ast: MathJson): MathJson<BinaryNumber> {
     if (Array.isArray(ast)) {
-      // TODO: Negate should put a minus sign in front of the number
-      // TODO: Plus should be ignored
       const [functionName, ...args] = ast;
-      if (mathJsonOperatorMap.has(functionName as any)) {
+      if (functionName === "Plus") {
+        // Plus should be ignored
+        if (args.length != 1) {
+          return ["Error", `Invalid MathJson ${ast}`];
+        } else {
+          return transform(args[0]);
+        }
+      } else if (functionName === "Negate") {
+        // Negate should put a minus sign in front of the number
+        if (args.length != 1) {
+          return ["Error", `Invalid MathJson ${ast}`];
+        } else {
+          const value = transform(args[0]);
+          if (value instanceof BinaryNumber) {
+            return value.setSign(!value.isNegative);
+          } else {
+            return value;
+          }
+        }
+      } else if (mathJsonOperatorMap.has(functionName as any)) {
         return [functionName, ...args.map((v) => transform(v))];
       } else if (functionName === "Error") {
         return [functionName, ...args.map((v) => "" + v)];
