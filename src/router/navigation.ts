@@ -130,26 +130,8 @@ const tools: PageEntry[] = [
     page: BinaryCalculator,
   },
   {
-    name: "Binär Rechner (extern)",
-    link: "https://atozmath.com/NumberOperation.aspx?q=2&op=4#tblSolution",
-    category: getCategory(2),
-    internal: false,
-  },
-  {
     name: "Binär umrechnen (Bei direkten Umrechnungen kann es Rundungsfehler geben)",
     link: "https://www.arndt-bruenner.de/mathe/scripts/Zahlensysteme.htm",
-    category: getCategory(2),
-    internal: false,
-  },
-  {
-    name: "Binär Operationen (Komma Zahlen funktionieren nicht)",
-    link: "https://miniwebtool.com/de/binary-calculator/?number1=-110101&operate=1&number2=1001",
-    category: getCategory(2),
-    internal: false,
-  },
-  {
-    name: "Binär Operationen ",
-    link: "https://www.exploringbinary.com/binary-calculator/",
     category: getCategory(2),
     internal: false,
   },
