@@ -62,14 +62,20 @@ export default defineComponent({
     // TODO: make urlRef support booleans
     const dataOnly = urlRef("dataOnly", "false");
 
-    let hammingCode = ref(new HammingCode(code.value, dataOnly.value != "false"));
+    // url cleanup
+    code.value = code.value.replace(/[^01]/g, '');
+    if (dataOnly.value !== "true" && dataOnly.value !== "false") {
+      dataOnly.value = "false";
+    }
+
+    let hammingCode = ref(new HammingCode(code.value, dataOnly.value !== "false"));
 
     watch(code, (value) => {
-      hammingCode.value = new HammingCode(value, dataOnly.value != "false");
+      hammingCode.value = new HammingCode(value, dataOnly.value !== "false");
     });
 
     watch(dataOnly, (value) => {
-      hammingCode.value = new HammingCode(code.value, value != "false");
+      hammingCode.value = new HammingCode(code.value, value !== "false");
     });
 
     const showCalulations = ref(false);
@@ -104,7 +110,7 @@ export default defineComponent({
 
     const onlyBinary = (event: KeyboardEvent) => {
       let keyCode = event.keyCode; 
-      if (keyCode !== 48 && keyCode !== 49) {
+      if (keyCode != 48 && keyCode != 49) {
         event.preventDefault();
       }
     }
