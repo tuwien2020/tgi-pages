@@ -31,8 +31,8 @@ export function useBooleanExpressions() {
       }
     } else {
       if (typeof ast === "string") {
-        const isFalse = /false|falsch|0/i.test(ast);
-        const isTrue = /true|wahr|1/i.test(ast);
+        const isFalse = /^(false|falsch|0)$/i.test(ast);
+        const isTrue = /^(true|wahr|1)$/i.test(ast);
         if (isFalse) {
           return false;
         } else if (isTrue) {
@@ -48,7 +48,7 @@ export function useBooleanExpressions() {
           return true;
         }
       }
-      return ["Error", `Expected true or false: ${ast}`];
+      return ["Error", `Expected true or false: ${JSON.stringify(ast)}`];
     }
   }
 
