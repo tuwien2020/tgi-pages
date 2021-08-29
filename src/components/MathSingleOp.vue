@@ -1,5 +1,5 @@
 <template>
-  <div class="math-output" ref="mathoutput"></div>
+  <math-output :latex="value"></math-output>
 </template>
 <script lang="ts">
 import { ref, defineComponent, watchEffect, watch, computed, shallowRef, PropType, onMounted, nextTick } from "vue";
@@ -7,7 +7,7 @@ import { BinaryNumber } from "../math/binary-number";
 import { MathJsonMathOperator } from "../math/math-parsing";
 import { useMathPrinting } from "../math/math-printing";
 import { useBinaryExpressions } from "../math/binary-expression";
-import Katex from "katex";
+import MathOutput from "./MathOutput.vue";
 
 function useMathWithStepsPrinting() {
   const mathPrinting = useMathPrinting();
@@ -211,7 +211,7 @@ function useMathWithStepsPrinting() {
 }
 
 export default defineComponent({
-  components: {},
+  components: { MathOutput },
   props: {
     valueA: {
       type: Object as PropType<BinaryNumber>,
@@ -226,50 +226,22 @@ export default defineComponent({
       type: String as PropType<MathJsonMathOperator>,
       default: () => "plus" as MathJsonMathOperator,
     },
+    divisionDecimals: {
+      type: Number,
+      default: () => 7,
+    },
   },
   setup(props, context) {
-    const mathoutput = ref<HTMLElement>();
-    const placesAfterDecimal = ref(7);
     const mathPrinting = useMathWithStepsPrinting();
-
-    function printBitArray(value: readonly boolean[] | undefined) {
-      return (value ?? []).map((v) => (v ? "1" : "0")).join("");
-    }
 
     const output = computed(() =>
       mathPrinting.calculationToLatex(props.valueA, props.valueB, props.operator, {
-        placesAfterDecimal: placesAfterDecimal.value,
+        placesAfterDecimal: props.divisionDecimals,
       })
     );
 
-    onMounted(() => {
-      watch(
-        output,
-        (value) => {
-          nextTick(() => {
-            if (mathoutput.value) {
-              Katex.render(value, mathoutput.value, {
-                displayMode: true,
-                throwOnError: false,
-                output: "html",
-                trust: function (context) {
-                  return context.command == "\\htmlStyle";
-                },
-                macros: {
-                  "\\phantom": "\\htmlStyle{color: transparent; user-select: none;}{#1}",
-                },
-              });
-            }
-          });
-        },
-        {
-          immediate: true,
-        }
-      );
-    });
-
     return {
-      mathoutput,
+      value: output,
     };
   },
 });

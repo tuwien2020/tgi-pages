@@ -8,11 +8,17 @@
   ></math-input>
 
   <br />
+  <span v-if="isSingleOpExpression && mathJsonExpression?.[0] === 'Divide'">
+    Decimal places:
+    <input type="number" v-model="divisionDecimals" placeholder="Decimal places" />
+  </span>
+  <br />
   <math-single-op
     v-if="isSingleOpExpression"
     :operator="mathJsonExpression?.[0]"
     :valueA="mathJsonExpression?.[1]"
     :valueB="mathJsonExpression?.[2]"
+    :divisionDecimals="divisionDecimals"
   ></math-single-op>
 </template>
 
@@ -36,6 +42,7 @@ export default defineComponent({
     const userInput = urlRef("input", "101+1110");
     const useBinary = useBinaryExpressions();
     const mathJsonExpression = shallowRef<MathJson>();
+    const divisionDecimals = ref(7);
     const isSingleOpExpression = computed(() => {
       return (
         Array.isArray(mathJsonExpression.value) &&
@@ -51,6 +58,7 @@ export default defineComponent({
       customPrinter: useBinary.customPrinter,
       mathJsonExpression,
       isSingleOpExpression,
+      divisionDecimals,
     };
   },
 });
