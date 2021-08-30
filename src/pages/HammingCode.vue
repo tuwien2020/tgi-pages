@@ -62,7 +62,6 @@ export default defineComponent({
 
     // url cleanup
     code.value = code.value.replace(/[^01]/g, '');
-    console.log(dataOnly.value);
 
     let hammingCode = ref(new HammingCode(code.value, dataOnly.value));
 

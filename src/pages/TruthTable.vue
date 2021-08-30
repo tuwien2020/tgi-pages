@@ -184,7 +184,7 @@ export default defineComponent({
     const tableHeaders = shallowRef<MathJson[]>([]);
     const tableRows = ref<boolean[][]>([[]]);
     const flipBits = urlRef("flipped",false);
-    const hideColumns = urlRef("hideExtra",false);
+    const hideColumns = urlRef("hide-extra",false);
     const tableThickBorderIndex = ref(0);
 
     function createTable(value: MathJson | undefined) {
