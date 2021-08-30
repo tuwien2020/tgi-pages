@@ -4,18 +4,21 @@ import { RouteLocationNormalized, Router } from "vue-router";
 export function useUrlRef(router: Router, route: RouteLocationNormalized) {
   function urlRef(name: string, defaultValue: boolean): Ref<boolean>;
   function urlRef(name: string, defaultValue: string): Ref<string>;
-  function urlRef<T extends string | boolean>(name: string, defaultValue: T): Ref<T> {
+  function urlRef<T>(name: string, defaultValue: T): Ref<T> {
     // Parse the value in the URL
     const type = typeof defaultValue;
     let startingValue = undefined;
     if (type === "string") {
-      startingValue = route.query[name] + "";
+      console.log(route.query[name]);
+      if(route.query[name] !== undefined) {
+        startingValue = route.query[name] + "";
+      }
     } else if (type === "boolean") {
       const maybeBoolean = route.query[name] + "";
-      if (maybeBoolean === "0" || maybeBoolean === "false") {
-        startingValue = false;
-      } else if (maybeBoolean === "1" || maybeBoolean === "true") {
+      if (maybeBoolean === "1" || maybeBoolean === "true") {
         startingValue = true;
+      } else {
+        startingValue = false;
       }
     }
     // Create our ref
