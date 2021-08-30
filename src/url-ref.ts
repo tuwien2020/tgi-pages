@@ -2,8 +2,9 @@ import { watch, Ref, shallowRef } from "vue";
 import { RouteLocationNormalized, Router } from "vue-router";
 
 export function useUrlRef(router: Router, route: RouteLocationNormalized) {
-  // We'll only support the types that we actually need
-  function urlRef<T extends string| boolean = string>(name: string, defaultValue: T): Ref<T> {
+  function urlRef(name: string, defaultValue: boolean): Ref<boolean>;
+  function urlRef(name: string, defaultValue: string): Ref<string>;
+  function urlRef<T extends string | boolean>(name: string, defaultValue: T): Ref<T> {
     // Parse the value in the URL
     const type = typeof defaultValue;
     let startingValue = undefined;
@@ -21,11 +22,15 @@ export function useUrlRef(router: Router, route: RouteLocationNormalized) {
     const value: Ref<T> = shallowRef<T>(startingValue !== undefined ? (startingValue as any) : defaultValue);
 
     // If our ref changes, we update the URL
-    watch(value, (v) => {
-      const routerQuery = { ...route.query };
-      routerQuery[name] = v + ""; // Serializing code, maybe this is good enough, not sure
-      router.replace({ query: routerQuery });
-    }, {immediate: true});
+    watch(
+      value,
+      (v) => {
+        const routerQuery = { ...route.query };
+        routerQuery[name] = v + ""; // Serializing code, maybe this is good enough, not sure
+        router.replace({ query: routerQuery });
+      },
+      { immediate: true }
+    );
 
     return value;
   }

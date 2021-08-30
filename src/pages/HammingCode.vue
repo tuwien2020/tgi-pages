@@ -57,7 +57,7 @@ export default defineComponent({
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
 
-    const code = urlRef<string>("code", "");
+    const code = urlRef("code", "");
     const dataOnly = urlRef("dataOnly", false);
 
     // url cleanup
