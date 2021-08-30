@@ -5,8 +5,7 @@
   <input v-model="code" @keypress="onlyBinary($event)" type="text" />
 
   <label>
-    <!-- Hmm Yes the Floor Here Is Made Out of Floor -->
-    <input type="checkbox" v-model="dataOnly" true-value="true" false-value="false" />
+    <input type="checkbox" v-model="dataOnly" />
     nur Datenbits
   </label>
 
@@ -58,24 +57,21 @@ export default defineComponent({
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
 
-    const code = urlRef("code", "");
-    // TODO: make urlRef support booleans
-    const dataOnly = urlRef("dataOnly", "false");
+    const code = urlRef<string>("code", "");
+    const dataOnly = urlRef("dataOnly", false);
 
     // url cleanup
     code.value = code.value.replace(/[^01]/g, '');
-    if (dataOnly.value !== "true" && dataOnly.value !== "false") {
-      dataOnly.value = "false";
-    }
+    console.log(dataOnly.value);
 
-    let hammingCode = ref(new HammingCode(code.value, dataOnly.value !== "false"));
+    let hammingCode = ref(new HammingCode(code.value, dataOnly.value));
 
     watch(code, (value) => {
-      hammingCode.value = new HammingCode(value, dataOnly.value !== "false");
+      hammingCode.value = new HammingCode(value, dataOnly.value);
     });
 
     watch(dataOnly, (value) => {
-      hammingCode.value = new HammingCode(code.value, value !== "false");
+      hammingCode.value = new HammingCode(code.value, value);
     });
 
     const showCalulations = ref(false);
@@ -109,8 +105,7 @@ export default defineComponent({
     );
 
     const onlyBinary = (event: KeyboardEvent) => {
-      let keyCode = event.keyCode; 
-      if (keyCode != 48 && keyCode != 49) {
+      if (event.key !== "0" && event.key !== "1") {
         event.preventDefault();
       }
     }
