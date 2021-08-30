@@ -32,10 +32,12 @@
           <td class="align-right">{{ binaryToDecimal(item.binaryNumber) }}</td>
           <td>-</td>
           <td>
-            <label v-for="(option, optionName) in item.options" :key="optionName"
-              >{{ optionName }} =
-              <input type="text" :value="option.value" @input="(event) => (option.value = event.target.value.replace(/[^01]/, ''))"
-            /></label>
+            <label v-for="(option, optionName) in item.options" :key="optionName">
+              {{ optionName }} =
+              <!-- TODO: Don't replace (Festpunkt) -->
+              <!-- TODO: Show error/mark as error-having -->
+              <input type="text" :value="option.value" @input="(event) => (option.value = event.target.value)" />
+            </label>
           </td>
         </tr>
       </tbody>
@@ -130,13 +132,17 @@ export default defineComponent({
       defineFormat("VZ und Betrag", (value, options) => BinaryNumber.fromSignMagnitude(value), {}),
       defineFormat("Einerkomplement", (value, options) => BinaryNumber.fromOnesComplement(value), {}),
       defineFormat("Zweierkomplement", (value, options) => BinaryNumber.fromTwosComplement(value), {}),
-      defineFormat("Exzessdarstellung", (value, options) => BinaryNumber.fromOffsetBinary(bitPattern.value, parseBitArray(options.e.value)), {
-        e: urlRef("input-offset", "0"),
-      }),
-      /*TODO:
-      {
-        name: "Festpunkt",
-      },*/
+      defineFormat(
+        "Exzessdarstellung",
+        (value, options) => BinaryNumber.fromOffsetBinary(value, parseBitArray((options.e.value = options.e.value.replaceAll(/[^01]/g, "")))),
+        {
+          e: urlRef("input-offset", "0"),
+        }
+      ),
+      // TODO: Ask Kronegger about how exactly a Festpunkt Zahl would work (Vorzeichen?) (Was bedeutet n=0) (Wie viele Bits?)
+      /*defineFormat("Festpunkt", (value, options) => BinaryNumber.fromSignMagnitude(value).multiplyByPowerOfTwo(-options.e.value), {
+        e: urlRef("input-point", "0"),
+      }),*/
     ];
 
     return {
