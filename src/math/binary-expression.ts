@@ -140,16 +140,7 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
     return chunks;
   }
 
-  const mathJsonOperatorMap = new Map<MathJsonMathOperator, (a: BinaryNumber, b: BinaryNumber) => BinaryNumber>([
-    ["Add", (a, b) => a],
-    ["Subtract", (a, b) => a],
-    ["Multiply", (a, b) => a],
-    ["Divide", (a, b) => a],
-    ["Power", (a, b) => a],
-    ["Equal", (a, b) => a],
-    ["Negate", (a, b) => a],
-    ["Plus", (a, b) => a],
-  ]);
+  const mathJsonOperatorMap = new Set<MathJsonMathOperator>(["Add", "Subtract", "Multiply", "Divide", "Power", "Equal", "Negate", "Plus"]);
 
   return {
     extractGetters,

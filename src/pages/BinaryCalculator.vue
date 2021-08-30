@@ -29,12 +29,11 @@ import { useUrlRef } from "../url-ref";
 import { useBinaryExpressions } from "./../math/binary-expression";
 import { MathJson } from "./../math/math-parsing";
 import MathInput from "./../components/MathInput.vue";
-import MathOutput from "./../components/MathOutput.vue";
 import MathSingleOp from "./../components/MathSingleOp.vue";
 import { BinaryNumber } from "../math/binary-number";
 
 export default defineComponent({
-  components: { MathInput, MathOutput, MathSingleOp },
+  components: { MathInput, MathSingleOp },
   setup() {
     const router = useRouter();
     const route = useRoute();

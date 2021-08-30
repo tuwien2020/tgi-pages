@@ -6,6 +6,8 @@ export type MathJsonNumber = {
   value: string;
 };
 
+// Designed to mimic https://cortexjs.io/math-json/ , but without the cases that make it tricky to use
+
 export type MathJsonLogicalOperator = "Not" | "Implies" | "And" | "Or" | "Xor" | "Nand" | "Nor" | "Equal" | "Subset";
 
 // FYI "Negate" and "Plus" are unary operators
