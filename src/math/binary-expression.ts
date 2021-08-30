@@ -48,7 +48,7 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
             return value;
           }
         }
-      } else if (mathJsonOperatorMap.has(functionName as any)) {
+      } else if (mathJsonOperatorMap.has(functionName as MathJsonMathOperator)) {
         return [functionName, ...args.map((v) => transform(v))];
       } else if (functionName === "Error") {
         return [functionName, ...args.map((v) => "" + v)];

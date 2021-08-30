@@ -20,7 +20,7 @@ export default defineComponent({
       required: false,
     },
     formatting: {
-      type: Object,
+      type: Object as PropType<MathFormattingOptions>,
       required: false,
     },
   },
