@@ -33,10 +33,13 @@
           <td>-</td>
           <td>
             <label v-for="(option, optionName) in item.options" :key="optionName">
-              {{ optionName }} =
-              <!-- TODO: Don't replace (Festpunkt) -->
-              <!-- TODO: Show error/mark as error-having -->
-              <input type="text" :value="option.value" @input="(event) => (option.value = event.target.value)" />
+              {{ option.name }} =
+              <input
+                type="text"
+                :value="option.value.value"
+                @input="(event) => (option.value.value = event.target.value)"
+                :pattern="option.pattern"
+              />
             </label>
           </td>
         </tr>
@@ -46,7 +49,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, shallowRef, ComputedRef, unref } from "vue";
+import { defineComponent, computed, shallowRef, ComputedRef, unref, Ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { MathJson } from "../math/math-parsing";
 import MathInput from "./../components/MathInput.vue";
@@ -70,7 +73,11 @@ export default defineComponent({
 
     const bitPattern: ComputedRef<readonly boolean[]> = computed(() => (isBitPattern ? (mathJsonNumber.value as any)?.value ?? [] : []));
 
-    function defineFormat<T extends object>(name: string, getBinaryNumber: (value: ReadonlyArray<boolean>, options: T) => BinaryNumber, options: T) {
+    function defineFormat<T extends { [key: string]: { value: Ref<string>; name: string; pattern?: RegExp } }>(
+      name: string,
+      getBinaryNumber: (value: ReadonlyArray<boolean>, options: T) => BinaryNumber,
+      options: T
+    ) {
       return {
         name,
         binaryNumber: computed(() => getBinaryNumber(bitPattern.value, options)),
@@ -132,17 +139,25 @@ export default defineComponent({
       defineFormat("VZ und Betrag", (value, options) => BinaryNumber.fromSignMagnitude(value), {}),
       defineFormat("Einerkomplement", (value, options) => BinaryNumber.fromOnesComplement(value), {}),
       defineFormat("Zweierkomplement", (value, options) => BinaryNumber.fromTwosComplement(value), {}),
+      defineFormat("Exzessdarstellung", (value, options) => BinaryNumber.fromOffsetBinary(value, parseBitArray(options.e.value.value)), {
+        e: {
+          name: "Exzess (binär)",
+          value: urlRef("input-offset", "0"),
+          pattern: /^[01]+$/,
+        },
+      }),
       defineFormat(
-        "Exzessdarstellung",
-        (value, options) => BinaryNumber.fromOffsetBinary(value, parseBitArray((options.e.value = options.e.value.replaceAll(/[^01]/g, "")))),
+        "Festpunkt",
+        (value, options) =>
+          BinaryNumber.fromSignMagnitude(value).multiplyByPowerOfTwo(Number.isSafeInteger(-options.n.value.value) ? -options.n.value.value : 0),
         {
-          e: urlRef("input-offset", "0"),
+          n: {
+            name: "Nachkommastellen",
+            value: urlRef("input-point", "0"),
+            pattern: /^[0-9]+$/,
+          },
         }
       ),
-      // TODO: Ask Kronegger about how exactly a Festpunkt Zahl would work (Vorzeichen?) (Was bedeutet n=0) (Wie viele Bits?)
-      /*defineFormat("Festpunkt", (value, options) => BinaryNumber.fromSignMagnitude(value).multiplyByPowerOfTwo(-options.e.value), {
-        e: urlRef("input-point", "0"),
-      }),*/
     ];
 
     return {
