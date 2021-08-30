@@ -3,6 +3,7 @@
     <h1>Bin&auml;re Codierungen</h1>
     <!--<h2>Encoding</h2>
     <p>Gebe hier eine Bin&auml;re Zahl ein:</p>-->
+    <!-- TODO: Encoding -->
 
     <h2>Decoding</h2>
     <p>Gebe hier ein Bitmuster ein:</p>
@@ -30,7 +31,10 @@
             {{ binaryToString(item.binaryNumber) }}
           </td>
           <td class="align-right">{{ binaryToDecimal(item.binaryNumber) }}</td>
-          <td>-</td>
+          <td>
+            -
+            <!-- TODO: Hexadecimal decoding -->
+          </td>
           <td>
             <label v-for="(option, optionName) in item.options" :key="optionName">
               {{ option.name }} =

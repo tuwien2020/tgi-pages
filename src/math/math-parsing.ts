@@ -84,7 +84,6 @@ const logicalIte = bnb.lazy(() => {
           )
       )
   );
-  // TODO: Actually implement ITEs instead of cheating
   // .map((params) => new ITELiteral(params));
 });
 */

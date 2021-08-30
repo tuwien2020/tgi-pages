@@ -1,5 +1,6 @@
 <template>
   <div class="math-output" ref="mathoutput" @mouseover="hoverOverMath($event)" @mouseout="hoverOverMath($event)"></div>
+  <!-- TODO: Right click: Copy as LaTeX -->
 </template>
 
 <script lang="ts">
