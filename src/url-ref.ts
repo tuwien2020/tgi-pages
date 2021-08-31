@@ -11,7 +11,7 @@ export function useUrlRef(router: Router, route: RouteLocationNormalized) {
     let startingValue = undefined;
     const routeParamVal = route.query[name];
     if (type === "string") {
-      if(routeParamVal !== undefined) {
+      if (routeParamVal !== undefined) {
         startingValue = routeParamVal + "";
       }
     } else if (type === "boolean") {
@@ -21,10 +21,9 @@ export function useUrlRef(router: Router, route: RouteLocationNormalized) {
       } else if (maybeBoolean === "0" || maybeBoolean === "false") {
         startingValue = false;
       }
-    }
-    else if (type === "number") {
-      if(routeParamVal !== undefined) {
-        startingValue = Number.parseInt(routeParamVal + "");
+    } else if (type === "number") {
+      if (routeParamVal !== undefined && /^[0-9]+$/.test(routeParamVal + "")) {
+        startingValue = Number.parseInt(routeParamVal + "", 10);
       }
     }
     // Create our ref
