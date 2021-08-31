@@ -1,15 +1,17 @@
 <template>
-  <div class="math-output" ref="mathoutput"></div>
+  <math-output :latex="value"></math-output>
 </template>
 <script lang="ts">
 import { ref, defineComponent, watchEffect, watch, computed, shallowRef, PropType, onMounted, nextTick } from "vue";
 import { BinaryNumber } from "../math/binary-number";
-import { MathJson, MathJsonMathOperator } from "../math/MathJson";
+import { MathJsonMathOperator } from "../math/math-parsing";
 import { useMathPrinting } from "../math/math-printing";
-import Katex from "katex";
+import { useBinaryExpressions } from "../math/binary-expression";
+import MathOutput from "./MathOutput.vue";
 
 function useMathWithStepsPrinting() {
   const mathPrinting = useMathPrinting();
+  const binaryExpression = useBinaryExpressions();
 
   function bitArray(value: readonly boolean[] | undefined) {
     return (value ?? []).map((v) => (v ? "1" : "0")).join("");
@@ -29,8 +31,8 @@ function useMathWithStepsPrinting() {
   ) {
     const placesAfterDecimal = options?.placesAfterDecimal ?? 0;
 
-    if (operator == "add" || operator == "subtract") {
-      const result = operator == "add" ? valueA.add(valueB) : valueA.subtract(valueB);
+    if (operator === "Add" || operator === "Subtract") {
+      const result = operator == "Add" ? valueA.add(valueB) : valueA.subtract(valueB);
 
       let output = "";
 
@@ -40,7 +42,7 @@ function useMathWithStepsPrinting() {
         }} &`;
 
       // see binary-number.ts
-      if (operator == "subtract") {
+      if (operator === "Subtract") {
         valueB = valueB.setSign(!valueB.isNegative);
       }
 
@@ -78,7 +80,7 @@ function useMathWithStepsPrinting() {
 
       output = `\\begin{alignedat}{3}\n${output}\n\\end{alignedat}`;
       return output;
-    } else if (operator == "multiply") {
+    } else if (operator === "Multiply") {
       const result = valueA.multiply(valueB);
       let output = "";
 
@@ -87,10 +89,10 @@ function useMathWithStepsPrinting() {
 
       const requiredPadding = resultLength > lastLineLength ? resultLength - lastLineLength : 0;
 
-      output += `& ${pad(requiredPadding)} ${mathPrinting.binaryNumberToLatex(valueA, {
+      output += `& ${pad(requiredPadding)} ${binaryExpression.binaryNumberToLatex(valueA, {
         zeroWidthDecimal: true,
         groupZeros: false,
-      })} \\times ${mathPrinting.binaryNumberToLatex(valueB, {
+      })} \\times ${binaryExpression.binaryNumberToLatex(valueB, {
         zeroWidthDecimal: true,
         groupZeros: false,
       })} \\\\\n`;
@@ -118,21 +120,21 @@ function useMathWithStepsPrinting() {
       output += `\\hline \\\\\n`;
 
       // Result
-      output += `&${pad(lastLineLength - resultLength + requiredPadding)} ${mathPrinting.binaryNumberToLatex(result, {
+      output += `&${pad(lastLineLength - resultLength + requiredPadding)} ${binaryExpression.binaryNumberToLatex(result, {
         zeroWidthDecimal: true,
         groupZeros: false,
       })}`;
       output = `\\def\\arraystretch{0.1}\n\\begin{alignedat}{1}\n${output}\n\\end{alignedat}`;
       return output;
-    } else if (operator == "divide") {
+    } else if (operator === "Divide") {
       // TODO: Stop after finding a value = 0
       const result = valueA.divide(valueB, placesAfterDecimal);
       let output = "";
 
-      output += `&${pad(1)} ${mathPrinting.binaryNumberToLatex(valueA, {
+      output += `&${pad(1)} ${binaryExpression.binaryNumberToLatex(valueA, {
         zeroWidthDecimal: true,
         groupZeros: false,
-      })} ${pad(2)} \\mathllap{\\div} ${pad(1)} ${mathPrinting.binaryNumberToLatex(valueB, {
+      })} ${pad(2)} \\mathllap{\\div} ${pad(1)} ${binaryExpression.binaryNumberToLatex(valueB, {
         zeroWidthDecimal: true,
         groupZeros: false,
       })} ${pad(2)} \\mathllap{=} ${pad(1)}`;
@@ -148,7 +150,7 @@ function useMathWithStepsPrinting() {
       } else {
         // Pretty print the result
         const remainderIsZero = new BinaryNumber(false, result.remainder, 0).isZero();
-        output += ` ${mathPrinting.binaryNumberToLatex(result.result)} ${remainderIsZero ? "" : "..."}\\\\\n`;
+        output += ` ${binaryExpression.binaryNumberToLatex(result.result)} ${remainderIsZero ? "" : "..."}\\\\\n`;
 
         // Copy of binary-number.ts
         let index = 0;
@@ -209,7 +211,7 @@ function useMathWithStepsPrinting() {
 }
 
 export default defineComponent({
-  components: {},
+  components: { MathOutput },
   props: {
     valueA: {
       type: Object as PropType<BinaryNumber>,
@@ -224,50 +226,22 @@ export default defineComponent({
       type: String as PropType<MathJsonMathOperator>,
       default: () => "plus" as MathJsonMathOperator,
     },
+    divisionDecimals: {
+      type: Number,
+      default: () => 7,
+    },
   },
   setup(props, context) {
-    const mathoutput = ref<HTMLElement>();
-    const placesAfterDecimal = ref(7);
     const mathPrinting = useMathWithStepsPrinting();
-
-    function printBitArray(value: readonly boolean[] | undefined) {
-      return (value ?? []).map((v) => (v ? "1" : "0")).join("");
-    }
 
     const output = computed(() =>
       mathPrinting.calculationToLatex(props.valueA, props.valueB, props.operator, {
-        placesAfterDecimal: placesAfterDecimal.value,
+        placesAfterDecimal: props.divisionDecimals,
       })
     );
 
-    onMounted(() => {
-      watch(
-        output,
-        (value) => {
-          nextTick(() => {
-            if (mathoutput.value) {
-              Katex.render(value, mathoutput.value, {
-                displayMode: true,
-                throwOnError: false,
-                output: "html",
-                trust: function (context) {
-                  return context.command == "\\htmlStyle";
-                },
-                macros: {
-                  "\\phantom": "\\htmlStyle{color: transparent; user-select: none;}{#1}",
-                },
-              });
-            }
-          });
-        },
-        {
-          immediate: true,
-        }
-      );
-    });
-
     return {
-      mathoutput,
+      value: output,
     };
   },
 });

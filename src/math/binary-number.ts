@@ -98,7 +98,7 @@ export class BinaryNumber {
   public readonly value: ReadonlyArray<boolean>;
 
   /**
-   * Tells you where the decimal point is
+   * Tells you where the decimal point is, starting from the end
    */
   public readonly decimalPoint: number;
 
@@ -254,6 +254,7 @@ export class BinaryNumber {
   multiplyByPowerOfTwo(value: number) {
     if (value == 0) return this;
     if (value > 0) {
+      // Make number larger
       if (this.decimalPoint - value >= 0) {
         return new BinaryNumber(this.isNegative, this.value, this.decimalPoint - value);
       } else {
@@ -261,7 +262,14 @@ export class BinaryNumber {
         return new BinaryNumber(this.isNegative, this.value.concat(paddingArray), 0);
       }
     } else {
-      throw new Error("Negative powers of two are not supported yet");
+      // Make number smaller
+      const shift = Math.abs(value);
+      if (shift < this.value.length - this.decimalPoint) {
+        return new BinaryNumber(this.isNegative, this.value, this.decimalPoint + shift);
+      } else {
+        const paddingArray = new Array(shift - (this.value.length - this.decimalPoint) + 1).fill(false);
+        return new BinaryNumber(this.isNegative, paddingArray.concat(this.value), this.decimalPoint + shift);
+      }
     }
   }
 

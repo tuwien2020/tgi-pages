@@ -1,10 +1,11 @@
 <template>
-  <div class="math-output" ref="mathoutput"></div>
+  <div class="math-output" ref="mathoutput" @mouseover="hoverOverMath($event)" @mouseout="hoverOverMath($event)"></div>
+  <!-- TODO: Right click: Copy as LaTeX -->
 </template>
 
 <script lang="ts">
 import { ref, defineComponent, watchEffect, watch, computed, onMounted, nextTick } from "vue";
-import { MathJson, MathJsonLogicalOperator } from "./../math/MathJson";
+import { MathJson } from "./../math/math-parsing";
 import Katex from "katex";
 import { useMathPrinting } from "./../math/math-printing";
 
@@ -12,39 +13,65 @@ export default defineComponent({
   props: {
     value: {
       type: [Object, String, Array, Boolean],
-      required: true,
+      required: false,
+    },
+    latex: {
+      type: String,
+      required: false,
+    },
+    formatting: {
+      type: Object as PropType<MathFormattingOptions>,
+      required: false,
     },
   },
   setup(props, context) {
     const mathPrinting = useMathPrinting();
     const mathoutput = ref<HTMLElement>();
 
-    onMounted(() => {
-      watch(
-        () => props.value,
-        (value) => {
-          nextTick(() => {
-            const latex = mathPrinting.mathToLatex({
-              mathJson: value as MathJson,
-            });
+    // For coloring bracket pairs
+    const lastTargets: HTMLElement[] = [];
+    function hoverOverMath(event: MouseEvent) {
+      lastTargets.forEach((t) => (t.style.color = ""));
+      lastTargets.length = 0;
 
-            if (mathoutput.value) {
-              Katex.render(latex, mathoutput.value, {
-                displayMode: true,
-                throwOnError: false,
-                output: "html",
-              });
+      if (event.target instanceof HTMLElement && event.type == "mouseover") {
+        if (event.target.innerText == "(" || event.target.innerText == ")") {
+          const bracketId = event.target.parentElement?.getAttribute("data-bracketid");
+          mathoutput.value?.querySelectorAll(`[data-bracketid='${bracketId}']`)?.forEach((v) => {
+            if (v instanceof HTMLElement) {
+              v.style.color = "red";
+              lastTargets.push(v);
             }
           });
-        },
-        {
-          immediate: true,
         }
-      );
+      }
+    }
+
+    // Output the latex
+    watchEffect(() => {
+      const latex = props.latex || mathPrinting.mathToLatex(props.value as MathJson, props.formatting);
+
+      nextTick(() => {
+        if (mathoutput.value) {
+          Katex.render(latex, mathoutput.value, {
+            displayMode: true,
+            throwOnError: false,
+            //output: "html",
+            trust: function (context) {
+              return context.command === "\\htmlData" || context.command === "\\htmlStyle";
+            },
+            strict: false,
+            macros: {
+              "\\phantom": "\\htmlStyle{color: transparent; user-select: none;}{#1}",
+            },
+          });
+        }
+      });
     });
 
     return {
       mathoutput,
+      hoverOverMath,
     };
   },
 });

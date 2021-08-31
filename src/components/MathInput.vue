@@ -1,25 +1,31 @@
 <template>
   <div class="math-input">
-    <input type="text" v-model="mathinput" size="100" />
-    <div ref="mathoutput" @mouseover="hoverOverMath($event)" @mouseout="hoverOverMath($event)"></div>
+    <input type="text" v-model="mathInput" size="100" /> <br />
+    <math-output :value="mathJson" :formatting="formatting"></math-output>
   </div>
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, watchEffect, watch, computed, onMounted, nextTick, PropType } from "vue";
-import { MathJson, MathJsonLogicalOperator } from "./../math/MathJson";
-import Katex from "katex";
-import { useMathPrinting } from "./../math/math-printing";
+import { ref, defineComponent, watch, PropType, shallowRef } from "vue";
+import { MathJson, parseMath } from "./../math/math-parsing";
+import MathOutput from "./MathOutput.vue";
 
 export default defineComponent({
+  components: {
+    MathOutput,
+  },
   props: {
     modelValue: {
       type: String,
       required: true,
     },
-    mathParser: {
-      type: Function as PropType<(value: string) => { mathJson?: MathJson; error?: string }>,
+    mathTransformer: {
+      type: Function as PropType<(value: MathJson) => MathJson<any>>,
       required: true,
+    },
+    formatting: {
+      type: Object,
+      required: false,
     },
   },
   emits: {
@@ -27,69 +33,31 @@ export default defineComponent({
     mathJson: (value: MathJson) => true,
   },
   setup(props, context) {
-    const mathPrinting = useMathPrinting();
-
-    const mathinput = ref("" + props.modelValue);
-    const mathoutput = ref<HTMLElement>();
-
-    const lastTargets: HTMLElement[] = [];
-    function hoverOverMath(event: MouseEvent) {
-      lastTargets.forEach((t) => (t.style.color = ""));
-      lastTargets.length = 0;
-
-      if (event.target instanceof HTMLElement && event.type == "mouseover") {
-        if (event.target.innerText == "(" || event.target.innerText == ")") {
-          const bracketId = event.target.parentElement?.getAttribute("data-bracketid");
-          mathoutput.value?.querySelectorAll(`[data-bracketid='${bracketId}']`)?.forEach((v) => {
-            if (v instanceof HTMLElement) {
-              v.style.color = "red";
-              lastTargets.push(v);
-            }
-          });
-        }
-      }
-    }
+    const mathInput = ref("" + props.modelValue);
+    const mathJson = shallowRef<MathJson>("");
 
     watch(
       () => props.modelValue,
       (value) => {
-        mathinput.value = value;
-        let parsedAst = props.mathParser(value);
-
-        if (parsedAst.mathJson && !parsedAst.error) {
-          context.emit("mathJson", parsedAst.mathJson);
-        }
-
-        nextTick(() => {
-          const latex = mathPrinting.mathToLatex(parsedAst, {
-            bracketIds: true,
-          });
-
-          if (mathoutput.value) {
-            Katex.render(latex, mathoutput.value, {
-              displayMode: true,
-              throwOnError: false,
-              output: "html",
-              trust: function (context) {
-                return context.command == "\\htmlData";
-              },
-            });
-          }
-        });
+        mathInput.value = value;
+        const parsed = parseMath(value);
+        let transformed: MathJson<any> = props.mathTransformer(parsed);
+        context.emit("mathJson", transformed);
+        mathJson.value = transformed;
       },
       {
         immediate: true,
       }
     );
 
-    watch(mathinput, (value) => {
+    watch(mathInput, (value) => {
       context.emit("update:modelValue", value);
     });
 
     return {
-      mathinput,
-      mathoutput,
-      hoverOverMath,
+      mathInput,
+      mathJson,
+      formatting: props.formatting,
     };
   },
 });
