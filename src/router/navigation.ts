@@ -10,6 +10,7 @@ import InterleavingGraph from "./../pages/InterleavingGraph.vue";
 import CacheCalc from "./../pages/CacheCalc.vue";
 import Stack from "./../pages/Stack.vue";
 import Micro16Decompiler from "./../pages/Micro16Decompiler.vue";
+import HuffmanCode from "./../pages/HuffmanCode.vue";
 
 type PageEntry =
   | {
@@ -228,6 +229,13 @@ const tools: PageEntry[] = [
     link: "https://planetcalc.com/2481/",
     category: getCategory(4),
     internal: false,
+  },
+  {
+    name: "Huffman-Code WIP",
+    link: "huffman-code",
+    category: getCategory(4),
+    internal: true,
+    page: HuffmanCode,
   },
   {
     name: "log2 - Wolfram Alpha",
