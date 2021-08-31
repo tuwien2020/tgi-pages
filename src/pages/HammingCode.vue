@@ -9,20 +9,26 @@
     nur Datenbits
   </label>
 
-  <pre>Hamming-Code: {{ hammingCode.code }} (bereits korrigiert)</pre>
+  <pre>Hamming-Code: <span v-for="(bit, index) in hammingCode.code.split('')" 
+    :key="index" v-bind:class="[index + 1 == hammingCode.errorBit ? 'errorbit' : '', 
+    isPowerOfTwo(index+1) ? 'paritybit' : 'codebit']">{{bit}}</span> (bereits korrigiert)</pre>
+
   <pre>Datenbits: {{ hammingCode.data }}</pre>
+
   <pre>
 Anzahl der Codebits: {{ hammingCode.numCodeBits }}
 Anzahl der Paritybits: {{ hammingCode.numParityBits }}
 Anzahl der Datenbits: {{ hammingCode.numDataBits }}
-</pre>
+</pre
+  >
 
-  <p>Formeln für die Paritybits:
-  <label>
-    <input type="checkbox" v-model="showCalulations" />
-    Berechnungen anzeigen
-  </label>
-  </p> 
+  <p>
+    Formeln für die Paritybits:
+    <label>
+      <input type="checkbox" v-model="showCalulations" />
+      Berechnungen anzeigen
+    </label>
+  </p>
   <pre>{{ hammingCode.getFormattedHammingCodeParityFormulas(false) }}</pre>
 
   <p v-if="showCalulations">Berechnung der Paritybits:</p>
@@ -61,7 +67,7 @@ export default defineComponent({
     const dataOnly = urlRef("dataOnly", false);
 
     // url cleanup
-    code.value = code.value.replace(/[^01]/g, '');
+    code.value = code.value.replace(/[^01]/g, "");
 
     let hammingCode = ref(new HammingCode(code.value, dataOnly.value));
 
@@ -107,7 +113,7 @@ export default defineComponent({
       if (event.key !== "0" && event.key !== "1") {
         event.preventDefault();
       }
-    }
+    };
 
     return {
       code,
@@ -117,7 +123,8 @@ export default defineComponent({
       dataBitCalculation,
       parityBitCalculation,
       codeBitCalculation,
-      onlyBinary
+      onlyBinary,
+      isPowerOfTwo,
     };
   },
 });
@@ -169,6 +176,9 @@ class HammingCode {
 
   getFormattedHammingCodeParityFormulas(valueMode?: boolean): string {
     let output = "";
+
+    let numDigits = Math.ceil(Math.log10(this.numCodeBits));
+
     for (let i = 0; i < this.parityBits.length; i++) {
       const prefix = "[p" + (i + 1) + "]";
 
@@ -177,7 +187,7 @@ class HammingCode {
           if (valueMode) {
             return this.code[c - 1];
           } else {
-            return "c" + c;
+            return "c" + c.toString().padEnd(numDigits);
           }
         })
         .join(" ⊕ ");
@@ -189,15 +199,15 @@ class HammingCode {
     return output;
   }
 
-  getErrorBitMessage() : string {
+  getErrorBitMessage(): string {
     if (this.errorBit == 0) {
       return "Kein erkennbarer Fehler";
     } else if (this.errorBit > this.code.length) {
-      return "Fehler nicht korrigierbar"
-    } else if (this.errorBit > 0 && this.errorBit <= this.code.length){
+      return "Fehler nicht korrigierbar";
+    } else if (this.errorBit > 0 && this.errorBit <= this.code.length) {
       return "Fehler an der Stelle: " + this.errorBit;
     } else {
-      return "Something went wrong :("
+      return "Something went wrong :(";
     }
   }
 
@@ -368,11 +378,25 @@ function replaceCharAt(value: string, index: number, replacement: string): strin
 </script>
 
 <style scoped>
-  input {
-    margin: 0em 0em 1em 0em;
-  }
+input {
+  margin: 0em 0em 1em 0em;
+}
 
-  label {
-    margin: 1em;
-  }
+label {
+  margin: 1em;
+}
+
+.codebit {
+  color: green;
+}
+
+.errorbit {
+  text-decoration: underline;
+  text-decoration-color: springgreen;
+  text-decoration-thickness: 3px;
+}
+
+.paritybit {
+  color: blue;
+}
 </style>
