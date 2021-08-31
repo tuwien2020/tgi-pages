@@ -1,18 +1,28 @@
 <template>
   <div>
     <h1>Bin&auml;re Codierungen</h1>
-    <!--<h2>Encoding</h2>
-    <p>Gebe hier eine Bin&auml;re Zahl ein:</p>-->
-    <!-- TODO: Encoding -->
+    <h2>Encoding</h2>
+    <p>Gebe hier eine Bin&auml;re Zahl ein:</p>
+    <math-input
+      v-model="userInputEncoding"
+      :mathTransformer="transform"
+      @mathJson="(value) => (mathJsonEncoding = value)"
+      :formatting="{ customPrinter }"
+    ></math-input>
+    <br />
+    <span v-if="!isBinaryNumber" class="error-message">Expected a binary number</span>
 
+    <br />
     <h2>Decoding</h2>
     <p>Gebe hier ein Bitmuster ein:</p>
     <math-input
-      v-model="userInput"
+      v-model="userInputDecoding"
       :mathTransformer="transform"
-      @mathJson="(value) => (mathJsonNumber = value)"
+      @mathJson="(value) => (mathJsonDecoding = value)"
       :formatting="{ customPrinter }"
     ></math-input>
+    <!-- TODO: Improve the error message (maybe with a custom tranform?) -->
+    <br />
     <span v-if="!isBitPattern" class="error-message">Expected a bit pattern</span>
     <table>
       <thead>
@@ -69,13 +79,17 @@ export default defineComponent({
     const { urlRef } = useUrlRef(router, route);
     const useBinary = useBinaryExpressions();
 
-    const userInput = urlRef("input", "0");
-    const mathJsonNumber = shallowRef<MathJson<BinaryNumber>>();
+    const userInputEncoding = urlRef("input-encoding", "0");
+    const mathJsonEncoding = shallowRef<MathJson<BinaryNumber>>();
+    const isBinaryNumber = computed(() => mathJsonEncoding.value instanceof BinaryNumber);
+
+    const userInputDecoding = urlRef("input-decoding", "0");
+    const mathJsonDecoding = shallowRef<MathJson<BinaryNumber>>();
     const isBitPattern = computed(
-      () => mathJsonNumber.value instanceof BinaryNumber && mathJsonNumber.value.decimalPoint === 0 && !mathJsonNumber.value.isNegative
+      () => mathJsonDecoding.value instanceof BinaryNumber && mathJsonDecoding.value.decimalPoint === 0 && !mathJsonDecoding.value.isNegative
     );
 
-    const bitPattern: ComputedRef<readonly boolean[]> = computed(() => (isBitPattern ? (mathJsonNumber.value as any)?.value ?? [] : []));
+    const bitPattern: ComputedRef<readonly boolean[]> = computed(() => (isBitPattern ? (mathJsonDecoding.value as any)?.value ?? [] : []));
 
     function defineFormat<T extends { [key: string]: { value: Ref<string>; name: string; pattern?: string } }>(
       name: string,
@@ -165,13 +179,16 @@ export default defineComponent({
     ];
 
     return {
-      userInput,
-      mathJsonNumber,
+      userInputEncoding,
+      userInputDecoding,
+      mathJsonEncoding,
+      mathJsonDecoding,
       formats,
       binaryToDecimal,
       binaryToString,
       transform: useBinary.transform,
       customPrinter: useBinary.customPrinter,
+      isBinaryNumber,
       isBitPattern,
     };
   },
