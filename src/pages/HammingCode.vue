@@ -2,35 +2,33 @@
   <h1>Hamming-Code</h1>
 
   <p>Gebe hier einen Code ein:</p>
-  <input v-model="code" pattern="[01]+" />
+  <input v-model="code" @keypress="onlyBinary($event)" type="text" />
 
   <label>
-    <!-- Hmm Yes the Floor Here Is Made Out of Floor -->
-    <input type="checkbox" v-model="dataOnly" true-value="true" false-value="false" />
+    <input type="checkbox" v-model="dataOnly" />
     nur Datenbits
   </label>
 
   <pre>Hamming-Code: {{ hammingCode.code }} (bereits korrigiert)</pre>
   <pre>Datenbits: {{ hammingCode.data }}</pre>
-  <pre>Anzahl der Codebits: {{ hammingCode.numCodeBits }}</pre>
-  <pre>Anzahl der Paritybits: {{ hammingCode.numParityBits }}</pre>
-  <pre>Anzahl der Datenbits: {{ hammingCode.numDataBits }}</pre>
+  <pre>
+Anzahl der Codebits: {{ hammingCode.numCodeBits }}
+Anzahl der Paritybits: {{ hammingCode.numParityBits }}
+Anzahl der Datenbits: {{ hammingCode.numDataBits }}
+</pre>
 
+  <p>Formeln für die Paritybits:
   <label>
-    Berechnungen anzeigen
     <input type="checkbox" v-model="showCalulations" />
+    Berechnungen anzeigen
   </label>
-
-  <p>Formeln für die Paritybits:</p>
+  </p> 
   <pre>{{ hammingCode.getFormattedHammingCodeParityFormulas(false) }}</pre>
 
-  <pre v-if="hammingCode.errorBit < 0">Fehler an der Stelle: {{ hammingCode.errorBit }}</pre>
-  <pre v-if="hammingCode.errorBit == 0">Kein erkennbarer Fehler</pre>
-  <pre v-if="hammingCode.errorBit > hammingCode.code.length">Fehler nicht korrigierbar</pre>
-
   <p v-if="showCalulations">Berechnung der Paritybits:</p>
-
   <pre v-if="showCalulations">{{ hammingCode.getFormattedHammingCodeParityFormulas(true) }}</pre>
+
+  <pre>{{ hammingCode.getErrorBitMessage() }}</pre>
 
   <h2>Berechnungen</h2>
 
@@ -60,17 +58,19 @@ export default defineComponent({
     const { urlRef } = useUrlRef(router, route);
 
     const code = urlRef("code", "");
-    // TODO: make urlRef support booleans
-    const dataOnly = urlRef("dataOnly", "false");
+    const dataOnly = urlRef("dataOnly", false);
 
-    let hammingCode = ref(new HammingCode(code.value, dataOnly.value != "false"));
+    // url cleanup
+    code.value = code.value.replace(/[^01]/g, '');
+
+    let hammingCode = ref(new HammingCode(code.value, dataOnly.value));
 
     watch(code, (value) => {
-      hammingCode.value = new HammingCode(value, dataOnly.value != "false");
+      hammingCode.value = new HammingCode(value, dataOnly.value);
     });
 
     watch(dataOnly, (value) => {
-      hammingCode.value = new HammingCode(code.value, value != "false");
+      hammingCode.value = new HammingCode(code.value, value);
     });
 
     const showCalulations = ref(false);
@@ -103,6 +103,12 @@ export default defineComponent({
       { deep: true }
     );
 
+    const onlyBinary = (event: KeyboardEvent) => {
+      if (event.key !== "0" && event.key !== "1") {
+        event.preventDefault();
+      }
+    }
+
     return {
       code,
       dataOnly,
@@ -111,6 +117,7 @@ export default defineComponent({
       dataBitCalculation,
       parityBitCalculation,
       codeBitCalculation,
+      onlyBinary
     };
   },
 });
@@ -173,13 +180,25 @@ class HammingCode {
             return "c" + c;
           }
         })
-        .join(" ^ ");
+        .join(" ⊕ ");
 
       const value = this.parityBits[i].value;
 
       output += prefix + " = " + formula + (formula != "" ? " = " : "") + value + "\n";
     }
     return output;
+  }
+
+  getErrorBitMessage() : string {
+    if (this.errorBit == 0) {
+      return "Kein erkennbarer Fehler";
+    } else if (this.errorBit > this.code.length) {
+      return "Fehler nicht korrigierbar"
+    } else if (this.errorBit > 0 && this.errorBit <= this.code.length){
+      return "Fehler an der Stelle: " + this.errorBit;
+    } else {
+      return "Something went wrong :("
+    }
   }
 
   private calculateParityBits(): Array<ParityBit> {
@@ -347,3 +366,13 @@ function replaceCharAt(value: string, index: number, replacement: string): strin
   return value.substring(0, index) + replacement + value.substring(index + replacement.length);
 }
 </script>
+
+<style scoped>
+  input {
+    margin: 0em 0em 1em 0em;
+  }
+
+  label {
+    margin: 1em;
+  }
+</style>
