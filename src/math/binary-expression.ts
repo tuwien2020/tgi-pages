@@ -73,7 +73,7 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
   }
 
   function stringToBinaryNumber(value: string): BinaryNumber | null {
-    const binaryNumberRegex = /([+-])?([0-1]+)([.,]([0-1]+))?/;
+    const binaryNumberRegex = /^([+-])?([0-1]+)([.,]([0-1]+))?$/;
 
     const matchResults = (value ?? "").match(binaryNumberRegex);
     if (matchResults === null) return null;
