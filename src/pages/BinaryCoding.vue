@@ -77,7 +77,7 @@ export default defineComponent({
 
     const bitPattern: ComputedRef<readonly boolean[]> = computed(() => (isBitPattern ? (mathJsonNumber.value as any)?.value ?? [] : []));
 
-    function defineFormat<T extends { [key: string]: { value: Ref<string>; name: string; pattern?: RegExp } }>(
+    function defineFormat<T extends { [key: string]: { value: Ref<string>; name: string; pattern?: string } }>(
       name: string,
       getBinaryNumber: (value: ReadonlyArray<boolean>, options: T) => BinaryNumber,
       options: T
@@ -147,7 +147,7 @@ export default defineComponent({
         e: {
           name: "Exzess (binär)",
           value: urlRef("input-offset", "0"),
-          pattern: /^[01]+$/,
+          pattern: "[01]+", // HTML pattern
         },
       }),
       defineFormat(
@@ -158,7 +158,7 @@ export default defineComponent({
           n: {
             name: "Nachkommastellen",
             value: urlRef("input-point", "0"),
-            pattern: /^[0-9]+$/,
+            pattern: "[0-9]+", // HTML pattern
           },
         }
       ),
@@ -190,5 +190,11 @@ export default defineComponent({
 }
 .error-message {
   color: red;
+}
+input:valid {
+  outline: 0px;
+}
+input:invalid {
+  outline: 1px solid red;
 }
 </style>
