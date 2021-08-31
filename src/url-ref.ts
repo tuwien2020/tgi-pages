@@ -35,7 +35,8 @@ export function useUrlRef(router: Router, route: RouteLocationNormalized) {
       (v) => {
         const routerQuery = { ...route.query };
         routerQuery[name] = v + ""; // Serializing code, maybe this is good enough, not sure
-        router.replace({ query: routerQuery });
+        router.replace({ query: routerQuery }); // TODO: When two url refs change at the same time, only the last one happens
+        // router.replace returns a promise
       },
       { immediate: true }
     );
