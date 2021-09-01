@@ -38,15 +38,15 @@
         <tr v-for="(item, index) in formats" :key="index">
           <td>{{ item.name }}</td>
           <td class="align-right">
-            {{ binaryToString(item.binaryNumber) }}
+            {{ binaryToString(item.getBinaryNumber(bitPattern)) }}
           </td>
-          <td class="align-right">{{ binaryToDecimal(item.binaryNumber) }}</td>
+          <td class="align-right">{{ binaryToDecimal(item.getBinaryNumber(bitPattern)) }}</td>
           <td>
             -
             <!-- TODO: Hexadecimal decoding -->
           </td>
           <td>
-            <label v-for="(option, optionName) in item.options" :key="optionName">
+            <label v-for="(option, optionIndex) in item.options" :key="optionIndex">
               {{ option.name }} =
               <input
                 type="text"
@@ -71,6 +71,14 @@ import { BinaryNumber } from "../math/binary-number";
 import { useUrlRef } from "../url-ref";
 import { useBinaryExpressions } from "../math/binary-expression";
 
+interface BinaryFormat {
+  name: string;
+  hasDecimalPoint: boolean;
+  getBits(value: BinaryNumber): boolean[];
+  getBinaryNumber(value: ReadonlyArray<boolean>): BinaryNumber;
+  options: { value: Ref<string>; name: string; pattern?: string }[];
+}
+
 export default defineComponent({
   components: { MathInput },
   setup() {
@@ -91,17 +99,114 @@ export default defineComponent({
 
     const bitPattern: ComputedRef<readonly boolean[]> = computed(() => (isBitPattern ? (mathJsonDecoding.value as any)?.value ?? [] : []));
 
-    function defineFormat<T extends { [key: string]: { value: Ref<string>; name: string; pattern?: string } }>(
-      name: string,
-      getBinaryNumber: (value: ReadonlyArray<boolean>, options: T) => BinaryNumber,
-      options: T
-    ) {
-      return {
-        name,
-        binaryNumber: computed(() => getBinaryNumber(bitPattern.value, options)),
-        options,
-      };
-    }
+    const formats: BinaryFormat[] = [
+      // Abusing closures for private variables
+      (() => {
+        return {
+          name: "VZ und Betrag",
+          hasDecimalPoint: false,
+          options: [],
+          getBits(value) {
+            return [value.isNegative ? 1 : 0, ...value.getValueBeforeDecimal()];
+          },
+          getBinaryNumber(value) {
+            return BinaryNumber.fromSignMagnitude(value);
+          },
+        } as BinaryFormat;
+      })(),
+      (() => {
+        return {
+          name: "Einerkomplement",
+          hasDecimalPoint: false,
+          options: [],
+          getBits(value) {
+            const bitArray = value.getValueBeforeDecimal();
+            if (value.isNegative) {
+              for (let i = 0; i < bitArray.length; i++) {
+                bitArray[i] = !bitArray[i];
+              }
+            }
+            return bitArray;
+          },
+          getBinaryNumber(value) {
+            return BinaryNumber.fromOnesComplement(value);
+          },
+        } as BinaryFormat;
+      })(),
+      (() => {
+        return {
+          name: "Zweierkomplement",
+          hasDecimalPoint: false,
+          options: [],
+          getBits(value) {
+            /*
+            Positive values can simply be passed through.
+            Negative values need to be converted. We could subtract one and then flip the bits.
+            However, the alternative of flipping the bits and adding one also works.
+            And that alternative happens to match up with converting to the twos complement format.
+            */
+            const bitArray = value.getValueBeforeDecimal();
+            if (value.isNegative) {
+              for (let i = 0; i < bitArray.length; i++) {
+                bitArray[i] = !bitArray[i];
+              }
+
+              const oneInBinary = new BinaryNumber(false, [true], 0);
+              const bitArrayPlusOne = new BinaryNumber(false, bitArray, 0).add(oneInBinary);
+              return [...bitArrayPlusOne.value];
+            } else {
+              return bitArray;
+            }
+          },
+          getBinaryNumber(value) {
+            return BinaryNumber.fromTwosComplement(value);
+          },
+        } as BinaryFormat;
+      })(),
+      (() => {
+        const offset = urlRef("input-offset", "0");
+        return {
+          name: "Exzessdarstellung",
+          hasDecimalPoint: false,
+          options: [
+            {
+              name: "Exzess (binär)",
+              value: offset,
+              pattern: "[01]+", // HTML pattern
+            },
+          ],
+          getBits(value) {
+            const offsetValue = new BinaryNumber(false, parseBitArray(offset.value), 0);
+            return value.add(offsetValue).getValueBeforeDecimal();
+          },
+          getBinaryNumber(value) {
+            return BinaryNumber.fromOffsetBinary(value, parseBitArray(offset.value));
+          },
+        } as BinaryFormat;
+      })(),
+      (() => {
+        const afterDecimalPlaces = urlRef("input-point", "0");
+        return {
+          name: "Festpunkt",
+          hasDecimalPoint: true,
+          options: [
+            {
+              name: "Nachkommastellen",
+              value: afterDecimalPlaces,
+              pattern: "[0-9]+", // HTML pattern
+            },
+          ],
+          getBits(value) {
+            return [value.isNegative ? 1 : 0, ...value.value];
+          },
+          getBinaryNumber(value) {
+            return BinaryNumber.fromSignMagnitude(value).multiplyByPowerOfTwo(
+              Number.isSafeInteger(-afterDecimalPlaces.value) ? -afterDecimalPlaces.value : 0
+            );
+          },
+        } as BinaryFormat;
+      })(),
+    ];
 
     function parseBitArray(value: string): boolean[] {
       const bitPatternRegex = /^([0-1]+)$/;
@@ -119,8 +224,9 @@ export default defineComponent({
       const oneAsBigint = BigInt(1);
       const twoAsBigint = BigInt(2);
 
-      for (let i = 0; i < value.value.length; i++) {
-        const bit = value.value[i];
+      const beforeDecimal = value.getValueBeforeDecimal();
+      for (let i = 0; i < beforeDecimal.length; i++) {
+        const bit = beforeDecimal[i];
         result = result * twoAsBigint;
         if (bit) {
           result += oneAsBigint;
@@ -153,37 +259,13 @@ export default defineComponent({
       return sign + beforeDecimal + (afterDecimal !== undefined && afterDecimal.length > 0 ? `.${afterDecimal}` : "");
     }
 
-    const formats = [
-      defineFormat("VZ und Betrag", (value, options) => BinaryNumber.fromSignMagnitude(value), {}),
-      defineFormat("Einerkomplement", (value, options) => BinaryNumber.fromOnesComplement(value), {}),
-      defineFormat("Zweierkomplement", (value, options) => BinaryNumber.fromTwosComplement(value), {}),
-      defineFormat("Exzessdarstellung", (value, options) => BinaryNumber.fromOffsetBinary(value, parseBitArray(options.e.value.value)), {
-        e: {
-          name: "Exzess (binär)",
-          value: urlRef("input-offset", "0"),
-          pattern: "[01]+", // HTML pattern
-        },
-      }),
-      defineFormat(
-        "Festpunkt",
-        (value, options) =>
-          BinaryNumber.fromSignMagnitude(value).multiplyByPowerOfTwo(Number.isSafeInteger(-options.n.value.value) ? -options.n.value.value : 0),
-        {
-          n: {
-            name: "Nachkommastellen",
-            value: urlRef("input-point", "0"),
-            pattern: "[0-9]+", // HTML pattern
-          },
-        }
-      ),
-    ];
-
     return {
       userInputEncoding,
       userInputDecoding,
       mathJsonEncoding,
       mathJsonDecoding,
       formats,
+      bitPattern,
       binaryToDecimal,
       binaryToString,
       transform: useBinary.transform,
