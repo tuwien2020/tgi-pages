@@ -28,7 +28,7 @@
     "@vue/compiler-sfc": "^3.2.6",
     "gh-pages": "^3.2.3",
     "rollup-plugin-copy-assets": "^2.0.3",
-    "vite": "^2.5.1",
+    "vite": "^2.5.2",
     "vite-plugin-components": "^0.13.3"
   }
 }
