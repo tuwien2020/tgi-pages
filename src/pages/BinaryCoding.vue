@@ -1,6 +1,7 @@
 <template>
   <div>
     <h1>Bin&auml;re Codierungen</h1>
+    <!-- TODO: Is this UI fine or is it confusing? -->
     <h2>Encoding</h2>
     <p>Gebe hier eine Bin&auml;re Zahl ein:</p>
     <math-input
@@ -11,6 +12,36 @@
     ></math-input>
     <br />
     <span v-if="!isBinaryNumber" class="error-message">Expected a binary number</span>
+    <table>
+      <thead>
+        <tr>
+          <th>Binärzahl</th>
+          <th>Bin&auml;r-Encoded</th>
+          <th>mit Einstellungen</th>
+        </tr>
+      </thead>
+      <tbody class="monospace">
+        <tr v-for="(item, index) in formats" :key="index">
+          <td>{{ item.name }}</td>
+          <td class="align-right">
+            <!-- TODO: Warn if it has a decimal point -->
+            {{ bitsToString(item.getBits(binaryNumber)) }}
+          </td>
+          <td>
+            <label v-for="(option, optionIndex) in item.options" :key="optionIndex">
+              {{ option.name }} =
+              <!-- TODO: Minor warning: Those are the same options as below, depending on how the UI should look, this may or may not be fine -->
+              <input
+                type="text"
+                :value="option.value.value"
+                @input="(event) => (option.value.value = event.target.value)"
+                :pattern="option.pattern"
+              />
+            </label>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
     <br />
     <h2>Decoding</h2>
@@ -90,6 +121,7 @@ export default defineComponent({
     const userInputEncoding = urlRef("input-encoding", "0");
     const mathJsonEncoding = shallowRef<MathJson<BinaryNumber>>();
     const isBinaryNumber = computed(() => mathJsonEncoding.value instanceof BinaryNumber);
+    const binaryNumber = computed(() => (mathJsonEncoding.value instanceof BinaryNumber ? mathJsonEncoding.value : new BinaryNumber(false, [], 0)));
 
     const userInputDecoding = urlRef("input-decoding", "0");
     const mathJsonDecoding = shallowRef<MathJson<BinaryNumber>>();
@@ -126,7 +158,7 @@ export default defineComponent({
                 bitArray[i] = !bitArray[i];
               }
             }
-            return bitArray;
+            return [value.isNegative ? 1 : 0, ...bitArray];
           },
           getBinaryNumber(value) {
             return BinaryNumber.fromOnesComplement(value);
@@ -139,6 +171,7 @@ export default defineComponent({
           hasDecimalPoint: false,
           options: [],
           getBits(value) {
+            // TODO: -0 cannot be represented in twos complement!
             /*
             Positive values can simply be passed through.
             Negative values need to be converted. We could subtract one and then flip the bits.
@@ -153,9 +186,9 @@ export default defineComponent({
 
               const oneInBinary = new BinaryNumber(false, [true], 0);
               const bitArrayPlusOne = new BinaryNumber(false, bitArray, 0).add(oneInBinary);
-              return [...bitArrayPlusOne.value];
+              return [value.isNegative ? 1 : 0, ...bitArrayPlusOne.value];
             } else {
-              return bitArray;
+              return [value.isNegative ? 1 : 0, ...bitArray];
             }
           },
           getBinaryNumber(value) {
@@ -184,7 +217,8 @@ export default defineComponent({
           },
         } as BinaryFormat;
       })(),
-      (() => {
+      /*(() => {
+        // TODO: How should I deal with the festpunkt format?
         const afterDecimalPlaces = urlRef("input-point", "0");
         return {
           name: "Festpunkt",
@@ -205,7 +239,7 @@ export default defineComponent({
             );
           },
         } as BinaryFormat;
-      })(),
+      })(),*/
     ];
 
     function parseBitArray(value: string): boolean[] {
@@ -259,15 +293,23 @@ export default defineComponent({
       return sign + beforeDecimal + (afterDecimal !== undefined && afterDecimal.length > 0 ? `.${afterDecimal}` : "");
     }
 
+    function bitsToString(value: boolean[]) {
+      return unref(value)
+        .map((v) => (v ? "1" : "0"))
+        .join("");
+    }
+
     return {
       userInputEncoding,
       userInputDecoding,
       mathJsonEncoding,
       mathJsonDecoding,
       formats,
+      binaryNumber,
       bitPattern,
       binaryToDecimal,
       binaryToString,
+      bitsToString,
       transform: useBinary.transform,
       customPrinter: useBinary.customPrinter,
       isBinaryNumber,
