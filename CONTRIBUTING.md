@@ -42,7 +42,10 @@ We are also using
 
 ### Code Structure
 
-- `/src/pages/` contains ...
-  TODO: Write more
+- `/src/pages/` Contains all registered (accessible via its own link) pages. See the chapter Developing a new page for more informations
+- `/src/components/` Contains all components. All components should be as reusable as possible and not just code fragments yanked from one specific page to make it smaller, without providing benefit for other use cases in the future
 - `/public` contains files that will get copied directly to the output
 - `/utils` contains a utility for publishing to GitHub pages
+
+### Developing a new page
+TODO:
