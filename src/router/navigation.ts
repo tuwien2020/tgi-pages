@@ -58,7 +58,7 @@ export enum Chapter {
   Speichermodelle = 19
 }
 
-const chapters: { [c in Chapter]: ChapterEntry } = {
+export const chapters: { [c in Chapter]: ChapterEntry } = {
   [Chapter.Numerik]:  {
     number: 2,
     name: "Numerik",
