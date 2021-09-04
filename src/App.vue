@@ -4,7 +4,7 @@
     <div class="navbar-brand">
       <router-link to="/" class="home-link">
         TGI Pages - {{ version }}
-        <search-bar />
+        <search-bar :options="options" :links="true" />
       </router-link>
     </div>
     <div class="navbar-item"></div>
@@ -19,20 +19,23 @@
 import { ref, defineComponent, watchEffect, watch, computed } from 'vue'
 import { useRoute } from 'vue-router';
 import { version } from './../package.json'
-import SearchBar from './components/SearchBar.vue'
+import SearchBar, {SearchOption} from './components/SearchBar.vue'
+import { searchablePages } from './router/navigation';
 
 export default defineComponent({
   components: { SearchBar },
   setup() {
     const route = useRoute();
-
-
+    
     watch(route, ({name}) => {
       window.document.title = name as string;
     });
 
+    const options: SearchOption[] = searchablePages.map(p => {return {name: p.name, link: p.link, internal: p.internal}});
+    
     return {
       version,
+      options
     }
   },
 })
