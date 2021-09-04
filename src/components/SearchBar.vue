@@ -11,6 +11,7 @@
 <script lang="ts">
 import { searchTools, searchablePages } from "../router/navigation";
 import { defineComponent, PropType } from "vue";
+import fuzzySort from 'fuzzysort';
 
 export type SearchOption = {
   name: string;
@@ -24,7 +25,7 @@ export default defineComponent({
       type: Object as PropType<SearchOption[]>,
       required: true,
     },
-    links: {
+    links: { // unused for now
       type: Boolean,
       requried: false,
       default: true
@@ -32,15 +33,29 @@ export default defineComponent({
     filterOptions: {
       type: Function as PropType<(input: any, output: any) => boolean>,
       required: false
+    },
+    fuzzy: {
+      type: Boolean,
+      required: false,
+      default: true
     }
   },
   setup(props, context) {
-    let filterOptions: (input: any, option: any) => boolean = (input, option) => option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    let filterOptions: (input: any, option: any) => boolean;
     if(props.filterOptions != undefined) {
-      filterOptions = (input, option) => {
-            return props.filterOptions(input.toLowerCase(), option.value.toLowerCase());
+      filterOptions = props.filterOptions;
+    }
+    else if (props.fuzzy) {
+      filterOptions = (input, option) => { 
+        console.log(input);
+        return (fuzzySort.single(input as string, option.value as string)?.score ?? 100000) < 4000; 
       };
     }
+    else {
+      filterOptions = (input, option) => option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    }
+    
+
     const links = props.links;
     const options = props.options;
     
