@@ -17,12 +17,20 @@
 
 <script lang="ts">
 import { ref, defineComponent, watchEffect, watch, computed } from 'vue'
+import { useRoute } from 'vue-router';
 import { version } from './../package.json'
 import SearchBar from './components/SearchBar.vue'
 
 export default defineComponent({
   components: { SearchBar },
   setup() {
+    const route = useRoute();
+
+
+    watch(route, ({name}) => {
+      window.document.title = name as string;
+    });
+
     return {
       version,
     }
