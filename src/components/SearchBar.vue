@@ -54,11 +54,9 @@ export default defineComponent({
     else {
       filterOptions = (input, option) => option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
     }
-    
 
     const links = props.links;
     const options = props.options;
-    
 
     return {
       options,
