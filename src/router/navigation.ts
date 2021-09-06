@@ -312,7 +312,7 @@ const tools: PageEntry[] = [
   },
   {
     name: "Interleaving Graph",
-    link: "pipeline",
+    link: "interleaving-graph",
     category: chapters[Chapter.Speichermodelle],
     internal: true,
     page: InterleavingGraph,
