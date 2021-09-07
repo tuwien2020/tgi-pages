@@ -122,7 +122,8 @@ const operatorUnaryPrefix: bnb.Parser<MathJson> = bnb.lazy(() => {
       .choice(
         // Unary operators
         operator({ operator: "Negate", match: /-/i }),
-        operator({ operator: "Plus", match: /\+/i })
+        operator({ operator: "Plus", match: /\+/i }),
+        operator({ operator: "Not", match: /not|!|¬/i })
       )
       // And keep parsing more unary operators
       .and(operatorUnaryPrefix)
