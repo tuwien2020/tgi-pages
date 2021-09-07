@@ -1,6 +1,6 @@
 <template>
   <h1>Wahrheitstabelle</h1>
-  <p>Gebe hier einen Booleschen Ausdruck ein:</p>
+  <p>Gebe hier einen Boole'schen Ausdruck ein:</p>
   <math-input
     v-model="logicalUserInput"
     :mathTransformer="transform"
