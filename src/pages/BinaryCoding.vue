@@ -6,12 +6,11 @@
     <p>Gebe hier eine Bin&auml;re Zahl ein:</p>
     <math-input
       v-model="userInputEncoding"
-      :mathTransformer="transform"
+      :mathTransformer="transformForEncoding"
       @mathJson="(value) => (mathJsonEncoding = value)"
       :formatting="{ customPrinter }"
     ></math-input>
     <br />
-    <span v-if="!isBinaryNumber" class="error-message">Expected a binary number</span>
     <table>
       <thead>
         <tr>
@@ -24,7 +23,6 @@
         <tr v-for="(item, index) in formats" :key="index">
           <td>{{ item.name }}</td>
           <td class="align-right">
-            <!-- TODO: Warn if it has a decimal point -->
             {{ bitsToString(item.getBits(binaryNumber)) }}
           </td>
           <td>
@@ -48,13 +46,11 @@
     <p>Gebe hier ein Bitmuster ein:</p>
     <math-input
       v-model="userInputDecoding"
-      :mathTransformer="transform"
+      :mathTransformer="transformForDecoding"
       @mathJson="(value) => (mathJsonDecoding = value)"
       :formatting="{ customPrinter }"
     ></math-input>
-    <!-- TODO: Improve the error message (maybe with a custom tranform?) -->
     <br />
-    <span v-if="!isBitPattern" class="error-message">Expected a bit pattern</span>
     <table>
       <thead>
         <tr>
@@ -120,17 +116,15 @@ export default defineComponent({
 
     const userInputEncoding = urlRef("input-encoding", "0");
     const mathJsonEncoding = shallowRef<MathJson<BinaryNumber>>();
-    const isBinaryNumber = computed(() => mathJsonEncoding.value instanceof BinaryNumber);
     const binaryNumber = computed(() => (mathJsonEncoding.value instanceof BinaryNumber ? mathJsonEncoding.value : new BinaryNumber(false, [], 0)));
 
     const userInputDecoding = urlRef("input-decoding", "0");
     const mathJsonDecoding = shallowRef<MathJson<BinaryNumber>>();
-    const isBitPattern = computed(
-      () => mathJsonDecoding.value instanceof BinaryNumber && mathJsonDecoding.value.decimalPoint === 0 && !mathJsonDecoding.value.isNegative
+    const bitPattern: ComputedRef<readonly boolean[]> = computed(() =>
+      mathJsonDecoding.value instanceof BinaryNumber ? mathJsonDecoding.value?.value ?? [] : []
     );
 
-    const bitPattern: ComputedRef<readonly boolean[]> = computed(() => (isBitPattern ? (mathJsonDecoding.value as any)?.value ?? [] : []));
-
+    // TODO: Maybe we should strip the zeros at the beginning?
     const formats: BinaryFormat[] = [
       // Abusing closures for private variables
       (() => {
@@ -171,13 +165,17 @@ export default defineComponent({
           hasDecimalPoint: false,
           options: [],
           getBits(value) {
-            // TODO: -0 cannot be represented in twos complement!
             /*
             Positive values can simply be passed through.
             Negative values need to be converted. We could subtract one and then flip the bits.
             However, the alternative of flipping the bits and adding one also works.
             And that alternative happens to match up with converting to the twos complement format.
             */
+            if (value.isNegative && value.isZero()) {
+              // -0 cannot be represented in twos complement!
+              return [];
+            }
+
             const bitArray = value.getValueBeforeDecimal();
             if (value.isNegative) {
               for (let i = 0; i < bitArray.length; i++) {
@@ -217,29 +215,6 @@ export default defineComponent({
           },
         } as BinaryFormat;
       })(),
-      /*(() => {
-        // TODO: How should I deal with the festpunkt format?
-        const afterDecimalPlaces = urlRef("input-point", "0");
-        return {
-          name: "Festpunkt",
-          hasDecimalPoint: true,
-          options: [
-            {
-              name: "Nachkommastellen",
-              value: afterDecimalPlaces,
-              pattern: "[0-9]+", // HTML pattern
-            },
-          ],
-          getBits(value) {
-            return [value.isNegative ? 1 : 0, ...value.value];
-          },
-          getBinaryNumber(value) {
-            return BinaryNumber.fromSignMagnitude(value).multiplyByPowerOfTwo(
-              Number.isSafeInteger(-afterDecimalPlaces.value) ? -afterDecimalPlaces.value : 0
-            );
-          },
-        } as BinaryFormat;
-      })(),*/
     ];
 
     function parseBitArray(value: string): boolean[] {
@@ -273,6 +248,7 @@ export default defineComponent({
 
       if (value.decimalPoint > 0) {
         // TODO: Support decimal points > 0
+        // This would require a fair bit of extra work
         console.warn("not supported");
       }
 
@@ -299,6 +275,31 @@ export default defineComponent({
         .join("");
     }
 
+    function transformForEncoding(ast: MathJson): MathJson<BinaryNumber> {
+      const value = useBinary.transform(ast);
+      if (!(value instanceof BinaryNumber)) {
+        return ["Error", "Expected a binary number"];
+      }
+      if (value.decimalPoint !== 0) {
+        return ["Error", "Expected a whole number"];
+      }
+      return value;
+    }
+
+    function transformForDecoding(ast: MathJson): MathJson<BinaryNumber> {
+      const value = useBinary.transform(ast);
+      if (!(value instanceof BinaryNumber)) {
+        return ["Error", "Expected a binary number"];
+      }
+      if (value.decimalPoint !== 0) {
+        return ["Error", "Expected a whole number"];
+      }
+      if (value.isNegative) {
+        return ["Error", "Expected a positive number"];
+      }
+      return value;
+    }
+
     return {
       userInputEncoding,
       userInputDecoding,
@@ -310,10 +311,9 @@ export default defineComponent({
       binaryToDecimal,
       binaryToString,
       bitsToString,
-      transform: useBinary.transform,
+      transformForEncoding,
+      transformForDecoding,
       customPrinter: useBinary.customPrinter,
-      isBinaryNumber,
-      isBitPattern,
     };
   },
 });
