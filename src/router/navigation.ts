@@ -38,6 +38,7 @@ interface ChapterEntry {
 }
 
 export enum Chapter {
+  Zahlendarstellung = 1,
   Numerik = 2,
   Codierung = 3,
   Informationstheorie = 4,
@@ -59,6 +60,10 @@ export enum Chapter {
 }
 
 export const chapters: { [c in Chapter]: ChapterEntry } = {
+  [Chapter.Zahlendarstellung]:  {
+    number: 1,
+    name: "Zahlendarstellung",
+  },
   [Chapter.Numerik]:  {
     number: 2,
     name: "Numerik",
@@ -144,20 +149,20 @@ const tools: PageEntry[] = [
   {
     name: "Binär Rechner",
     link: "binary-calculator",
-    category: chapters[Chapter.Codierung],
+    category: chapters[Chapter.Zahlendarstellung],
     internal: true,
     page: BinaryCalculator,
   },
   {
     name: "Binär umrechnen (Bei direkten Umrechnungen kann es Rundungsfehler geben)",
     link: "https://www.arndt-bruenner.de/mathe/scripts/Zahlensysteme.htm",
-    category: chapters[Chapter.Codierung],
+    category: chapters[Chapter.Zahlendarstellung],
     internal: false,
   },
   {
     name: "IEEE Rechner",
     link: "http://weitz.de/ieee/",
-    category: chapters[Chapter.Codierung],
+    category: chapters[Chapter.Numerik],
     internal: false,
   },
   {
