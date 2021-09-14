@@ -1,6 +1,5 @@
 import vue from "@vitejs/plugin-vue";
 import copy from "rollup-plugin-copy-assets";
-import ViteComponents, { AntDesignVueResolver } from "vite-plugin-components";
 const { resolve } = require("path");
 
 export default {
@@ -8,12 +7,16 @@ export default {
     exclude: ["monaco-editor"],
   },
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          // treat all tags with a dash as custom elements
+          isCustomElement: (tag) => tag.startsWith("elix-"),
+        },
+      },
+    }),
     copy({
       assets: ["node_modules/monaco-editor/min/vs"],
-    }),
-    ViteComponents({
-      customComponentResolvers: [AntDesignVueResolver()],
     }),
   ],
   build: {

@@ -8,11 +8,10 @@
     "deploy": "vite build --base=/tgi-pages/ && node utils/publish.js"
   },
   "dependencies": {
-    "@ant-design/icons-vue": "^6.0.1",
     "@monaco-editor/loader": "^1.1.1",
-    "ant-design-vue": "^2.2.6",
     "bread-n-butter": "^0.6.0",
     "bulma": "^0.9.3",
+    "elix": "=15.0.0",
     "fuzzysort": "^1.1.4",
     "katex": "^0.13.18",
     "monaco-editor": "^0.27.0",
@@ -29,7 +28,6 @@
     "@vue/compiler-sfc": "^3.2.9",
     "gh-pages": "^3.2.3",
     "rollup-plugin-copy-assets": "^2.0.3",
-    "vite": "^2.5.3",
-    "vite-plugin-components": "^0.13.3"
+    "vite": "^2.5.3"
   }
 }
