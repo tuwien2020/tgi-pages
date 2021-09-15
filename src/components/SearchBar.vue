@@ -1,9 +1,10 @@
 <template>
-  <elix-filter-combo-box placeholder="Search" aria-label="Search">
+  <elix-filter-combo-box placeholder="Search" aria-label="Search" class="search-box" @close="searchClosed">
     <!--show-search  option-filter-prop="value" style="width: 200px" :allowClear="true" :filter-option="filterOptions"> -->
     <div v-for="option in options" :key="option.name" :value="option.name">
-      <router-link v-if="option.internal" :to="option.link">{{ option.name }}</router-link>
-      <a target="_blank" v-else :href="option.link">{{ option.name }}</a>
+      {{ option.name }}
+      <!--<router-link v-if="option.internal" :to="option.link">{{ option.name }}</router-link>
+      <a target="_blank" v-else :href="option.link">{{ option.name }}</a>-->
     </div>
   </elix-filter-combo-box>
 </template>
@@ -29,12 +30,6 @@ export default defineComponent({
       type: Object as PropType<SearchOption[]>,
       required: true,
     },
-    links: {
-      // unused for now
-      type: Boolean,
-      requried: false,
-      default: true,
-    },
     filterOptions: {
       type: Function as PropType<(input: any, output: any) => boolean>,
       required: false,
@@ -46,6 +41,8 @@ export default defineComponent({
     },
   },
   setup(props, context) {
+    // TODO: Hook up fuzzy sort again?
+    // (Maybe by hooking into the internal https://component.kitchen/elix/FilterListBox and changing the itemMatchesFilter method?)
     let filterOptions: (input: any, option: any) => boolean;
     if (props.filterOptions != undefined) {
       filterOptions = props.filterOptions;
@@ -58,14 +55,26 @@ export default defineComponent({
       filterOptions = (input, option) => option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
     }
 
-    const links = props.links;
     const options = props.options;
+
+    async function searchClosed(e: any) {
+      console.log(e.detail);
+      /*const closeResult = await e.target.whenClosed();
+      console.log(closeResult);
+      const selectedValue = closeResult?.value;
+      console.log(selectedValue);*/
+    }
 
     return {
       options,
       filterOptions,
-      links,
+      searchClosed,
     };
   },
 });
 </script>
+<style scoped>
+.search-box::part(popup) {
+  max-height: 30vh;
+}
+</style>
