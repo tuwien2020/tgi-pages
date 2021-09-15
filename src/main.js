@@ -4,14 +4,17 @@ import "./index.css";
 import "katex/dist/katex.css";
 import { name, version } from "./../package.json";
 import "bulma/css/bulma.css";
-import "ant-design-vue/dist/antd.css";
-import Antd from "ant-design-vue";
+import "vuetify/styles";
+import { createVuetify } from "vuetify";
 import router from "./router";
 
 if (import.meta.env.PROD) {
   console.log(`${name} - ${version}`);
 }
+
+const vuetify = createVuetify();
+
 const app = createApp(App);
 app.use(router);
-app.use(Antd);
+app.use(vuetify);
 app.mount("#app");
