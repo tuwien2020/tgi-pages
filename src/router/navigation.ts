@@ -56,25 +56,25 @@ export enum Chapter {
   Pipelining = 16,
   Speichermanagement = 17,
   Multicore = 18,
-  Speichermodelle = 19
+  Speichermodelle = 19,
 }
 
 export const chapters: { [c in Chapter]: ChapterEntry } = {
-  [Chapter.Zahlendarstellung]:  {
+  [Chapter.Zahlendarstellung]: {
     number: 1,
-    name: "Zahlendarstellung",
+    name: "category.numberFormats",
   },
-  [Chapter.Numerik]:  {
+  [Chapter.Numerik]: {
     number: 2,
-    name: "Numerik",
+    name: "category.numerical",
   },
   [Chapter.Codierung]: {
     number: 3,
-    name: "Codierung",
+    name: "category.encodingDecoding",
   },
   [Chapter.Informationstheorie]: {
     number: 4,
-    name: "Informationstheorie",
+    name: "category.informationTheory",
   },
   [Chapter.BoolescheAlgebra]: {
     number: 5,
@@ -136,7 +136,7 @@ export const chapters: { [c in Chapter]: ChapterEntry } = {
     number: 19,
     name: "Speichermodelle",
   },
-}
+};
 
 const tools: PageEntry[] = [
   {
@@ -302,21 +302,21 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Stack Simulator",
+    name: "page.stackSimulator",
     link: "stack",
     category: chapters[Chapter.Befehlssatz],
     internal: true,
     page: Stack,
   },
   {
-    name: "Pipeline Simulator (not recommended)",
+    name: "page.pipelineSimulator",
     link: "pipeline",
     category: chapters[Chapter.Pipelining],
     internal: true,
     page: Pipeline,
   },
   {
-    name: "Interleaving Graph",
+    name: "page.interleavingGraph",
     link: "interleaving-graph",
     category: chapters[Chapter.Speichermodelle],
     internal: true,

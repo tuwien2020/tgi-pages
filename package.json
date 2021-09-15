@@ -20,6 +20,7 @@
     "vis-data": "^7.1.2",
     "vis-network": "^9.1.0",
     "vue": "^3.2.9",
+    "vue-i18n": "^9.1.7",
     "vue-router": "^4.0.11"
   },
   "devDependencies": {
