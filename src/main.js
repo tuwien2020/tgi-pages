@@ -8,7 +8,7 @@ import "ant-design-vue/dist/antd.css";
 import Antd from "ant-design-vue";
 import { createI18n } from "vue-i18n";
 import router from "./router";
-import { translations } from "./translations";
+import { translations } from "./translations/translations";
 
 if (import.meta.env.PROD) {
   console.log(`${name} - ${version}`);

@@ -1,0 +1,13 @@
+{
+  "category": {
+    "numberFormats": "Number Formats",
+    "numerical": "Numerical",
+    "encodingDecoding": "Encoding/Decoding",
+    "informationTheory": "Information Theory"
+  },
+  "page": {
+    "stackSimulator": "Stack Simulator",
+    "pipelineSimulator": "Pipeline Simulator (not recommended)",
+    "interleavingGraph": "Interleaving Graph"
+  }
+}
