@@ -1,25 +1,67 @@
 <template>
   <a-select show-search placeholder="Search" option-filter-prop="value" style="width: 200px" :allowClear="true" :filter-option="filterOptions">
-    <a-select-option v-for="page in searchablePages" :key="page.name" :value="page.name">
-      <router-link v-if="page.internal" :to="page.link" class="search-link">{{ page.name }}</router-link>
-      <a target="_blank" v-else :href="page.link" class="search-link">{{ page.name }}</a>
+    <a-select-option v-for="option in options" :key="option.name" :value="option.name">
+      <router-link v-if="option.internal" :to="option.link" class="search-link">{{ option.name }}</router-link>
+      <a target="_blank" v-else :href="option.link" class="search-link">{{ option.name }}</a>
+
     </a-select-option>
   </a-select>
 </template>
 
 <script lang="ts">
 import { searchTools, searchablePages } from "../router/navigation";
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
+import fuzzySort from 'fuzzysort';
+
+export type SearchOption = {
+  name: string;
+  internal: boolean;
+  link: string;
+}
 
 export default defineComponent({
+  props: {
+    options: {
+      type: Object as PropType<SearchOption[]>,
+      required: true,
+    },
+    links: { // unused for now
+      type: Boolean,
+      requried: false,
+      default: true
+    },
+    filterOptions: {
+      type: Function as PropType<(input: any, output: any) => boolean>,
+      required: false
+    },
+    fuzzy: {
+      type: Boolean,
+      required: false,
+      default: true
+    }
+  },
   setup(props, context) {
-    const filterOptions = (input, option) => {
-      return option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-    };
+    let filterOptions: (input: any, option: any) => boolean;
+    if(props.filterOptions != undefined) {
+      filterOptions = props.filterOptions;
+    }
+    else if (props.fuzzy) {
+      filterOptions = (input, option) => { 
+        console.log(input);
+        return (fuzzySort.single(input as string, option.value as string)?.score ?? 100000) < 4000; 
+      };
+    }
+    else {
+      filterOptions = (input, option) => option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    }
+
+    const links = props.links;
+    const options = props.options;
 
     return {
-      searchablePages,
+      options,
       filterOptions,
+      links
     };
   },
 });
