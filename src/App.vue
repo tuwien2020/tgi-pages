@@ -2,10 +2,8 @@
   <div class="header-block">.</div>
   <nav class="navbar header" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <router-link to="/" class="home-link">
-        TGI Pages - {{ version }}
-        <search-bar :options="options" :links="true" />
-      </router-link>
+      <router-link to="/" class="home-link"> TGI Pages - {{ version }} </router-link>
+      <search-bar :options="options" :links="true" />
     </div>
     <div class="navbar-item"></div>
   </nav>
@@ -16,29 +14,31 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, watchEffect, watch, computed } from 'vue'
-import { useRoute } from 'vue-router';
-import { version } from './../package.json'
-import SearchBar, {SearchOption} from './components/SearchBar.vue'
-import { searchablePages } from './router/navigation';
+import { ref, defineComponent, watchEffect, watch, computed } from "vue";
+import { useRoute } from "vue-router";
+import { version } from "./../package.json";
+import SearchBar, { SearchOption } from "./components/SearchBar.vue";
+import { searchablePages } from "./router/navigation";
 
 export default defineComponent({
   components: { SearchBar },
   setup() {
     const route = useRoute();
-    
-    watch(route, ({name}) => {
+
+    watch(route, ({ name }) => {
       window.document.title = name as string;
     });
 
-    const options: SearchOption[] = searchablePages.map(p => {return {name: p.name, link: p.link, internal: p.internal}});
-    
+    const options: SearchOption[] = searchablePages.map((p) => {
+      return { name: p.name, link: p.link, internal: p.internal };
+    });
+
     return {
       version,
-      options
-    }
+      options,
+    };
   },
-})
+});
 </script>
 
 <style scoped>
