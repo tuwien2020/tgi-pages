@@ -1,5 +1,5 @@
 <template>
-  <span class="search-bar">
+  <span class="search-bar" @keyup="onKeyUp">
     <input type="text" placeholder="Search" v-model="searchText" class="search-input" />
     <div class="search-options">
       <div v-for="option in filteredOptions" :key="option.name" :value="option.name">
@@ -59,10 +59,17 @@ export default defineComponent({
     const links = props.links;
     const filteredOptions = computed(() => props.options.filter((opt) => (searchText.value ? filterOptions(searchText.value, opt) : true)));
 
+    function onKeyUp(ev: KeyboardEvent) {
+      if (ev.key === "Escape") {
+        (ev.target as HTMLElement)?.blur?.();
+      }
+    }
+
     return {
       searchText,
       filteredOptions,
       links,
+      onKeyUp,
     };
   },
 });
