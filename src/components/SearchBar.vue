@@ -1,4 +1,5 @@
 <template>
+  <!-- Or I could just have used a datalist -->
   <span class="search-bar" @keyup="onKeyUp">
     <input type="text" placeholder="Search" v-model="searchText" class="search-input" />
     <div class="search-options">
