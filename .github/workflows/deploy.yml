@@ -27,14 +27,13 @@ jobs:
     - name: Checkout 🛎️
       uses: actions/checkout@v2.3.1
       
-    - name: Build and deploy
-      env: 
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build 🛠
       run: |
-        git config user.email github-action@users.noreply.github.com
-        git config user.name GitHub Action
-        git config user.password $TOKEN
-        node -v
         npm install
         npx vite build --base=/tgi-pages/
-        node --input-type=module utils/publish.js 
+        
+    - name: Deploy 🚀
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
