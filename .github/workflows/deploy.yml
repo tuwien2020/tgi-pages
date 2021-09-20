@@ -32,4 +32,4 @@ jobs:
         node -v
         npm install
         npx vite build --base=/tgi-pages/
-        node --experimental-modules utils/publish.js 
+        node --input-type=module utils/publish.js 
