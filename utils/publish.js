@@ -1,4 +1,4 @@
-import ghpages from "gh-pages";
+const ghpages = require("gh-pages");
 
 ghpages.publish("dist", { history: false, dotfiles: true }, (err) => {
   if (err) console.error(err);
