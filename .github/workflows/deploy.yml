@@ -31,4 +31,5 @@ jobs:
       run: |
         node -v
         npm install
-        npm run deploy
+        npx vite build --base=/tgi-pages/
+        node --experimental-modules utils/publish.js 
