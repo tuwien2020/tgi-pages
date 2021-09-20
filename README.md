@@ -1,7 +1,7 @@
 # tgi-pages
 
-<!--Krauti, Yousif, Moritz, Møxwell, eSportSuBZero-->
-
+<!--Krauti, Yousif, Moritz, Møxwell, eSportSuBZero, Daniel-->
+![deploy](https://github.com/tuwien2020/tgi-pages/actions/workflows/deploy.yml/badge.svg)
 - [View it online](https://tuwien2020.github.io/tgi-pages/#/)
 - [Contributing](./CONTRIBUTING.md)
 - [Report an issue](https://github.com/tuwien2020/tgi-pages/issues)
