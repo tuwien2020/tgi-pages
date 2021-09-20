@@ -8,9 +8,7 @@
     "deploy": "vite build --base=/tgi-pages/ && node utils/publish.js"
   },
   "dependencies": {
-    "@ant-design/icons-vue": "^6.0.1",
     "@monaco-editor/loader": "^1.1.1",
-    "ant-design-vue": "^2.2.6",
     "bread-n-butter": "^0.6.0",
     "bulma": "^0.9.3",
     "fuzzysort": "^1.1.4",
@@ -20,16 +18,17 @@
     "vis-data": "^7.1.2",
     "vis-network": "^9.1.0",
     "vue": "^3.2.9",
-    "vue-router": "^4.0.11"
+    "vue-router": "^4.0.11",
+    "vuetify": "^3.0.0-alpha.11"
   },
   "devDependencies": {
     "@types/katex": "^0.11.1",
     "@types/uuid": "^8.3.1",
     "@vitejs/plugin-vue": "^1.6.1",
     "@vue/compiler-sfc": "^3.2.9",
+    "@vuetify/vite-plugin": "*",
     "gh-pages": "^3.2.3",
     "rollup-plugin-copy-assets": "^2.0.3",
-    "vite": "^2.5.3",
-    "vite-plugin-components": "^0.13.3"
+    "vite": "^2.5.3"
   }
 }

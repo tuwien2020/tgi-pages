@@ -1,6 +1,6 @@
 import vue from "@vitejs/plugin-vue";
 import copy from "rollup-plugin-copy-assets";
-import ViteComponents, { AntDesignVueResolver } from "vite-plugin-components";
+import vuetify from "@vuetify/vite-plugin";
 const { resolve } = require("path");
 
 export default {
@@ -12,9 +12,7 @@ export default {
     copy({
       assets: ["node_modules/monaco-editor/min/vs"],
     }),
-    ViteComponents({
-      customComponentResolvers: [AntDesignVueResolver()],
-    }),
+    vuetify({ autoImport: true }),
   ],
   build: {
     rollupOptions: {

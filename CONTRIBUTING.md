@@ -38,7 +38,7 @@ We are also using
 - [Vite](https://github.com/vuejs/vite) - a speedy Vue.js framework
 - [Monaco](https://microsoft.github.io/monaco-editor/) - the editor from Visual Studio Code
 - [Bulma](https://bulma.io/) - a CSS framework
-- [Ant Design Vue](https://2x.antdv.com/components/overview/) - a components framework (still testing it out, use as sparingly as possible right now)
+- [Vuetify 3](https://next.vuetifyjs.com/en/components/app-bars/) - a components framework
 
 ### Code Structure
 

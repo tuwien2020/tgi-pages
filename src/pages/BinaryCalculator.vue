@@ -1,11 +1,15 @@
 <template>
-  <h1>Bin&auml;r Rechner</h1>
-  <math-input
-    v-model="userInput"
-    :mathTransformer="transform"
-    @mathJson="(value) => (mathJsonExpression = value)"
-    :formatting="{ customPrinter }"
-  ></math-input>
+  <br />
+  <label>
+    <h1>Bin&auml;r Rechner</h1>
+    <math-input
+      v-model="userInput"
+      :mathTransformer="transform"
+      @mathJson="(value) => (mathJsonExpression = value)"
+      :formatting="{ customPrinter }"
+      autofocus
+    ></math-input>
+  </label>
 
   <br />
   <span v-if="isSingleOpExpression && mathJsonExpression?.[0] === 'Divide'">
