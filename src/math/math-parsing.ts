@@ -178,7 +178,7 @@ const operatorOr: bnb.Parser<MathJson> = operatorAnd.chain((expression) => {
     .choice(
       operator({ operator: "Or", match: /or|\|\|?|∨/i }),
       operator({ operator: "Nor" as const, match: /nor|!\|\|?|↓/i }),
-      operator({ operator: "Xor" as const, match: /xor|\^|⊕/i })
+      operator({ operator: "Xor" as const, match: /xor|\^|⊕|!=/i }) // TODO: In a mathematics context, != should mean "not equal"
     )
     .and(operatorAnd)
     .repeat(0)
@@ -229,7 +229,7 @@ const expressionParser = operatorEqual;
 export function parseMath(value: string): MathJson {
   if (!value) return "";
 
-  const result = expressionParser.parse(value);
+  const result = expressionParser.parse(value.trim());
   if (result.type === "ParseOK") {
     return result.value;
   } else {
