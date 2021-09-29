@@ -42,3 +42,11 @@ a[target="_blank"]::after {
 .linePointer {
   background: #f8d5db;
 }
+
+:root {
+  --first-color: #648fff;
+  --second-color: #d35100;
+  --third-color: #785ef0;
+  --fourth-color: #cf8e00;
+  --fifth-color: #b31b65;
+}
