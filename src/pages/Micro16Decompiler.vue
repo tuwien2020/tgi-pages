@@ -21,6 +21,7 @@ import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
 import { ParsedInstruction, parse, getRegistry, interpret } from "./../assets/decompiler";
+import { defaultPalette } from './../assets/colors';
 
 export default defineComponent({
   components: {},
@@ -141,6 +142,10 @@ export default defineComponent({
             color: "e74c3c",
           },
         ];
+
+        tokens.map((token, i) => {
+          token.color = defaultPalette[i%defaultPalette.length].toHex();
+        })
 
         value.editor.defineTheme("micro16-binary", {
           base: "vs",

@@ -449,7 +449,7 @@ div {
   max-width: 10em;
 }
 .codebit {
-  color: green;
+  color: var(--first-color);
 }
 .errorbit {
   text-decoration: underline;
@@ -457,7 +457,7 @@ div {
   text-decoration-thickness: 3px;
 }
 .paritybit {
-  color: blue;
+  color: var(--second-color);;
 }
 .monospace {
   font-family: "Consolas", "Courier New", Courier, monospace;

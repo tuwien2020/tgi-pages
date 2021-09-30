@@ -92,6 +92,7 @@ if(U == 0) { V = 1; } // if U = 0 then V := 1;`
           enabled: false,
         },
         scrollBeyondLastLine: false,
+        theme: 'defaultTGIPages'
       });
       watchEffect(() => (thread1Code.value = thread1Monaco.code.value));
 
