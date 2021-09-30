@@ -88,3 +88,10 @@ Create a new entry in the `tools` array. The entry should look something like th
 ```
 
 After adding your page in the `tools` array, it will automatically be linked in the Overview page, searchable via the navbar and mapped to a route matching the link in the entry.
+
+## Accessibility
+
+### Color Choice
+
+If the UI doesn't need colors, keeping it black and white is the simplest and most straightforward option. If however, it does need colors, then please use the colors defined in `colors.ts`.
+They can also be used as CSS vars, such as `var(--first-color)`. The CSS vars are defined in `index.css`.
