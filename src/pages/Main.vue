@@ -16,7 +16,8 @@
       <div class="column is-one-third">
         <div class="card">
           <div class="card-content">
-            <a href="https://github.com/tuwien2020/tgi-pages" target="_blank">Github Repository </a>
+            <div><a href="https://github.com/tuwien2020/tgi-pages" target="_blank">Github Repository </a></div>
+            <div><a href="https://discord.gg/bmChQgsagS" target="_blank">(Inofficial) Developer Discord </a></div>
           </div>
         </div>
       </div>
