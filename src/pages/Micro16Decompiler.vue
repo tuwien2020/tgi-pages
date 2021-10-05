@@ -2,7 +2,7 @@
   <h1>Micro 16-Dekompilierer</h1>
   <p>Bytecode (getrennt durch einen Zeilenumbruch):</p>
   <p>Hinweis: Wenn man mit der Maus über einen Bereich hovered wird angezeigt, um welchen Teil der Anweisung es sich handelt. </p>
-  <button class="button" v-on:click="introJs.start()" type="button">Hier klicken für eine kurze Erklärungstour</button>
+  <intro text="Klicke hier für eine Erklärungstour"></intro>
   <!--<textarea
     rows="4"
     cols="50"
@@ -49,11 +49,11 @@ import { useUrlRef } from "../url-ref";
 import { ParsedInstruction, parse, getRegistry, interpretParsedExpression, InstructionParts } from "./../assets/decompiler";
 import { defaultPalette } from './../assets/colors';
 import CollapsibleTable from './../components/CollapsibleTable.vue';
-import { useIntroJs } from '../assets/intro';
+import Intro from './../components/Intro.vue';
 
 
 export default defineComponent({
-  components: {CollapsibleTable},
+  components: {CollapsibleTable, Intro},
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -76,8 +76,6 @@ export default defineComponent({
       parsedInstructions.value
         .filter(({instruction}) => instruction.adr >= 0 && instruction.adr <= 255)
     );
-
-    const introJs = useIntroJs();
     
 
     let tokens = [
@@ -296,7 +294,6 @@ export default defineComponent({
       "monaco-editor-micro16": monacoEditorMicro16,
       parsedInstructions: parsedInstructionsCompleted,
       tokens,
-      introJs
     };
   },
 });
