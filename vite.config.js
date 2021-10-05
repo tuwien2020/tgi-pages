@@ -10,7 +10,7 @@ export default {
   plugins: [
     vue(),
     copy({
-      assets: ["node_modules/monaco-editor/min/vs", "node_modules/intro.js/minified"],
+      assets: ["node_modules/monaco-editor/min/vs"],
     }),
     vuetify({ autoImport: true }),
   ],
