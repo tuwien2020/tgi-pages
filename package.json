@@ -1,6 +1,6 @@
 {
   "name": "tgi-pages",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "scripts": {
     "start": "vite",
     "dev": "vite",
@@ -13,6 +13,7 @@
     "bread-n-butter": "^0.6.0",
     "bulma": "^0.9.3",
     "fuzzysort": "^1.1.4",
+    "intro.js": "^4.2.2",
     "katex": "^0.13.18",
     "monaco-editor": "^0.28.1",
     "uuid": "^8.3.2",
