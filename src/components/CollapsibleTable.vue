@@ -1,12 +1,14 @@
 <template>
   <!-- Or I could just have used a datalist -->
-  <details>
-    <summary><slot name="title"></slot></summary>
-    <table v-bind:class="{'table-toggled': toggle, 'table': true}">
+  <details open>
+    <summary>
+      <slot name="title"></slot>
+    </summary>
+    <table>
       <thead> 
         <slot name="header"></slot> 
       </thead>
-      <tbody v-bind:class="{'table-toggled': toggle}">
+      <tbody>
         <slot name="body"></slot>
       </tbody>
     </table>
@@ -26,24 +28,14 @@ export default defineComponent({
     },
   },
   setup(props, context) {
-    const toggle = ref(false);
     return {
       ...props,
-      toggle
     };
   },
 });
 </script>
 
 <style scoped>
-.table tbody, .table * {
-  transition: 0.2s ease-out;
-}
-
-.table-toggled {
-  display: none;
-}
-
 details {
     border: 1px solid #aaa;
     border-radius: 4px;
