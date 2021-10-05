@@ -4,13 +4,14 @@
 
 <script lang="ts">
 import { defineComponent, ref} from "vue";
+// @ts-ignore (shut up, dear compiler-chan)
 import introJS from 'intro.js';
 
 export default defineComponent({
   props: {
     text: {
       type: String,
-      requried: false,
+      required: false,
       default: "Hier klicken für eine kurze Erklärungstour",
     },
   },
