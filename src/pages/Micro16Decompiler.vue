@@ -77,7 +77,6 @@ export default defineComponent({
         .filter(({instruction}) => instruction.adr >= 0 && instruction.adr <= 255)
     );
     
-
     let tokens = [
       {
         shortName: InstructionParts.aMux,
@@ -177,7 +176,6 @@ export default defineComponent({
       return token;
     })
     
-
     useMonaco().then((monaco) => {
       monaco.setMonacoOptions((value) => {
         if (value.languages.getLanguages().some((v) => v.id == "micro16-binary")) {
@@ -286,7 +284,6 @@ export default defineComponent({
 
       watchEffect(() => (bytecode.value = micro16Editor.code.value));
     });
-    
     
     return {
       bytecode,
