@@ -26,4 +26,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+button {
+  height: 24px;
+  font-size: 16px;
+  margin-bottom: 2px;
+  margin-top: 0px;
+}
 </style>
