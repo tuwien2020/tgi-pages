@@ -1,8 +1,8 @@
 <template>
   <h1>Micro 16-Dekompilierer</h1>
-
   <p>Bytecode (getrennt durch einen Zeilenumbruch):</p>
   <p>Hinweis: Wenn man mit der Maus über einen Bereich hovered wird angezeigt, um welchen Teil der Anweisung es sich handelt. </p>
+  <button class="button" v-on:click="introJs.start()" type="button">Hier klicken für eine kurze Erklärungstour</button>
   <!--<textarea
     rows="4"
     cols="50"
@@ -10,32 +10,34 @@
     class="is-family-monospace"
   ></textarea>-->
 
-  <div class="micro16-decompiler" ref="monaco-editor-micro16" style="height: 10em"></div>
+  <div class="micro16-decompiler" ref="monaco-editor-micro16" style="height: 10em" data-intro="Gib hier den Binärcode ein (es gehen auch mehrere durch Zeilenumbruch getrennte Anweisungen)"></div>
   <h3>Decompiled Instructions</h3>
-  <pre>{{ instruction }}</pre>
+  <pre data-intro="Hier stehen die dekompilierten Instruktionen">{{ instruction }}</pre>
   <hr>
-  <h3> Instruction Erkärung </h3>
-  <div v-for="instruction in parsedInstructions" :key="instruction.key">    
-    <collapsible-table>
-      <template v-slot:title>
-        <h4>Instruction {{instruction.key}}</h4>
-      </template>
-      <template v-slot:header>
-        <tr>
-          <th>Instructionteil</th>
-          <th>Wert</th>
-          <th>Bedeutung</th>
-        </tr>
-      </template>
-      <template v-slot:body>
-        <tr v-for="token in tokens" :key="token.shortName">
-          <td>{{ token.longName }}</td>
-          <td>{{ instruction.instruction[token.shortName].toString()}}</td>
-          <td>{{ token.description }}</td>
-        </tr>
-      </template>
-    </collapsible-table>
-    <hr>
+  <div class="content" data-intro="Hier stehen die dekompilierten Instruktionen mit detailierteren Infos">    
+    <h3> Instruction Erkärung </h3>
+    <div v-for="instruction in parsedInstructions" :key="instruction.key">
+      <collapsible-table>
+        <template v-slot:title>
+          <h4>Instruction {{instruction.key}}</h4>
+        </template>
+        <template v-slot:header>
+          <tr>
+            <th>Instructionteil</th>
+            <th>Wert</th>
+            <th>Bedeutung</th>
+          </tr>
+        </template>
+        <template v-slot:body>
+          <tr v-for="token in tokens" :key="token.shortName">
+            <td>{{ token.longName }}</td>
+            <td>{{ instruction.instruction[token.shortName].toString()}}</td>
+            <td>{{ token.description }}</td>
+          </tr>
+        </template>
+      </collapsible-table>
+      <hr>
+    </div>
   </div>
 </template>
 
@@ -46,7 +48,9 @@ import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
 import { ParsedInstruction, parse, getRegistry, interpretParsedExpression, InstructionParts } from "./../assets/decompiler";
 import { defaultPalette } from './../assets/colors';
-import CollapsibleTable from './../components/CollapsibleTable.vue'
+import CollapsibleTable from './../components/CollapsibleTable.vue';
+import { useIntroJs } from '../assets/intro';
+
 
 export default defineComponent({
   components: {CollapsibleTable},
@@ -56,7 +60,6 @@ export default defineComponent({
     const { urlRef } = useUrlRef(router, route);
     const monacoEditorMicro16 = ref<HTMLElement>();
     const bytecode = urlRef("bytecode", "10010010100100110001011010001011");
-    
     const parsedInstructions = computed(() =>
       bytecode.value
         .trimEnd()
@@ -73,6 +76,9 @@ export default defineComponent({
       parsedInstructions.value
         .filter(({instruction}) => instruction.adr >= 0 && instruction.adr <= 255)
     );
+
+    const introJs = useIntroJs();
+    
 
     let tokens = [
       {
@@ -289,7 +295,8 @@ export default defineComponent({
       instruction,
       "monaco-editor-micro16": monacoEditorMicro16,
       parsedInstructions: parsedInstructionsCompleted,
-      tokens
+      tokens,
+      introJs
     };
   },
 });
