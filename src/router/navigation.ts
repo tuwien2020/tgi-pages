@@ -7,6 +7,7 @@ import BinaryCalculator from "./../pages/BinaryCalculator.vue";
 import BinaryCoding from "./../pages/BinaryCoding.vue";
 import Pipeline from "./../pages/Pipeline.vue";
 import InterleavingGraph from "./../pages/InterleavingGraph.vue";
+import BaseConverter from "./../pages/BaseConverter.vue";
 import CacheCalc from "./../pages/CacheCalc.vue";
 import Stack from "./../pages/Stack.vue";
 import Micro16Decompiler from "./../pages/Micro16Decompiler.vue";
@@ -56,15 +57,15 @@ export enum Chapter {
   Pipelining = 16,
   Speichermanagement = 17,
   Multicore = 18,
-  Speichermodelle = 19
+  Speichermodelle = 19,
 }
 
 export const chapters: { [c in Chapter]: ChapterEntry } = {
-  [Chapter.Zahlendarstellung]:  {
+  [Chapter.Zahlendarstellung]: {
     number: 1,
     name: "Zahlendarstellung",
   },
-  [Chapter.Numerik]:  {
+  [Chapter.Numerik]: {
     number: 2,
     name: "Numerik",
   },
@@ -136,7 +137,7 @@ export const chapters: { [c in Chapter]: ChapterEntry } = {
     number: 19,
     name: "Speichermodelle",
   },
-}
+};
 
 const tools: PageEntry[] = [
   {
@@ -158,6 +159,13 @@ const tools: PageEntry[] = [
     link: "https://www.arndt-bruenner.de/mathe/scripts/Zahlensysteme.htm",
     category: chapters[Chapter.Zahlendarstellung],
     internal: false,
+  },
+  {
+    name: "Convert between number bases",
+    link: "base-converter",
+    internal: true,
+    category: chapters[Chapter.Zahlendarstellung],
+    page: BaseConverter,
   },
   {
     name: "IEEE Rechner",
