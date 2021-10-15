@@ -21,6 +21,8 @@
     <input type="text" v-model="valueA" /> + <input type="text" v-model="valueB" /> = {{ calculationResult }}
     <br />
     <input type="text" v-model="valueA" /> * <input type="text" v-model="valueB" /> = {{ multiplicationResult }}
+    <br />
+    <input type="text" v-model="valueA" /> / <input type="text" v-model="valueB" /> = {{ divisionResult }}
   </div>
 </template>
 
@@ -235,6 +237,57 @@ class IntegerWithBase {
   }
 
   /**
+   * Whole number division. If you want the fractional part, first shift the number to the left.
+   */
+  divide(other: IntegerWithBase): { result: IntegerWithBase; remainder: IntegerWithBase; divisionByZero: boolean } {
+    if (other.base != this.base) throw new Error("Cannot perform mixed-base arithmetic");
+
+    const sign = xor(this.isNegative, other.isNegative);
+
+    const comparison = compareNumberArray(this.value, other.value);
+    if (comparison < 0) {
+      return {
+        result: new IntegerWithBase(false, [0], this.base),
+        remainder: this.clone().setSign(sign),
+        divisionByZero: false,
+      };
+    }
+
+    if (other.isZero()) {
+      return {
+        result: new IntegerWithBase(false, [0], this.base),
+        remainder: new IntegerWithBase(false, [0], this.base),
+        divisionByZero: true,
+      };
+    }
+
+    // Do long division
+    const resultDigits: number[] = [];
+    let remainder = new IntegerWithBase(false, [0], 0);
+
+    for (let i = 0; i < this.value.length; i++) {
+      // Pull down the next value
+      const nextValue = this.value[i];
+      remainder = new IntegerWithBase(false, remainder.value.concat(nextValue), this.base);
+
+      // Compute the result at this place (how many times can we subtract)
+      let result = 0;
+      while (remainder.compareTo(other) >= 0) {
+        remainder = remainder.subtract(other);
+        result++;
+      }
+
+      resultDigits.push(result);
+    }
+
+    return {
+      result: new IntegerWithBase(sign, resultDigits, this.base),
+      remainder: remainder,
+      divisionByZero: false,
+    };
+  }
+
+  /**
    * Shifts a number to the left, same as multiplying by the base.
    * Makes the number larger.
    */
@@ -343,6 +396,16 @@ export default defineComponent({
       }
     });
 
+    const divisionResult = computed(() => {
+      try {
+        let a = new IntegerWithBase(valueA.value, baseForCalculations.value);
+        let b = new IntegerWithBase(valueB.value, baseForCalculations.value);
+        return a.divide(b);
+      } catch (e) {
+        return e + "";
+      }
+    });
+
     return {
       numberToConvert,
       fromBase,
@@ -353,6 +416,7 @@ export default defineComponent({
       valueB,
       calculationResult,
       multiplicationResult,
+      divisionResult,
     };
   },
 });
