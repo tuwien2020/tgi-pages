@@ -17,7 +17,10 @@
       Base:
       <input type="number" v-model="baseForCalculations" />
     </label>
+    <br />
     <input type="text" v-model="valueA" /> + <input type="text" v-model="valueB" /> = {{ calculationResult }}
+    <br />
+    <input type="text" v-model="valueA" /> * <input type="text" v-model="valueB" /> = {{ multiplicationResult }}
   </div>
 </template>
 
@@ -27,6 +30,12 @@ import { useRoute, useRouter } from "vue-router";
 
 function mod(a: number, b: number): number {
   return ((a % b) + b) % b;
+}
+
+function xor(a: boolean, b: boolean) {
+  // Alternatively, you could use
+  // return (a || b) && !(a && b)
+  return a ? !b : b;
 }
 
 /**
@@ -146,7 +155,7 @@ class IntegerWithBase {
     if (charCode >= "0".charCodeAt(0) && charCode <= "9".charCodeAt(0)) {
       result = charCode - "0".charCodeAt(0);
     } else if (charCode >= "a".charCodeAt(0) && charCode <= "z".charCodeAt(0)) {
-      result = charCode - "a".charCodeAt(0);
+      result = charCode - "a".charCodeAt(0) + 10;
     } else {
       throw new Error("Invalid character");
     }
@@ -196,6 +205,49 @@ class IntegerWithBase {
     return this.add(negatedOther);
   }
 
+  multiply(other: IntegerWithBase): IntegerWithBase {
+    if (other.base != this.base) throw new Error("Cannot perform mixed-base arithmetic");
+    if (other.isZero()) return new IntegerWithBase(false, [0], this.base);
+
+    // Visit other backwards, take the value
+    // multiply and shift by i++
+    // add to result
+
+    let result = new IntegerWithBase(false, [0], this.base);
+
+    let shift = 0;
+    for (let i = other.value.length - 1; i >= 0; i--) {
+      const valueB = other.value[i];
+      // TODO: "return" those values
+      const valueToAdd = new IntegerWithBase(
+        false,
+        this.value.map((v) => v * valueB),
+        this.base
+      ).shiftLeft(shift);
+      result = result.add(valueToAdd);
+      shift += 1;
+    }
+
+    // Set the correct sign
+    result = result.setSign(xor(this.isNegative, other.isNegative));
+
+    return result;
+  }
+
+  /**
+   * Shifts a number to the left, same as multiplying by the base.
+   * Makes the number larger.
+   */
+  shiftLeft(places: number): IntegerWithBase {
+    if (places == 0) return this.clone();
+    if (places > 0) {
+      const paddingArray = new Array(places).fill(0);
+      return new IntegerWithBase(this.isNegative, this.value.concat(paddingArray), this.base);
+    } else {
+      throw new Error("Places cannot be negative");
+    }
+  }
+
   clone() {
     return new IntegerWithBase(this.isNegative, this.value, this.base);
   }
@@ -226,10 +278,30 @@ class IntegerWithBase {
     return new IntegerWithBase(isNegative, this.value, this.base);
   }
 
-  toString() {
-    // TODO: Special formatting for binary and co
+  isZero(): boolean {
+    return this.value.every((v) => v === 0);
+  }
 
-    return `(${this.value.join("")})_${this.base}`;
+  compareTo(other: IntegerWithBase): number {
+    // a < b gets rewritten as a.compareTo(b) < 0
+    if (this.isNegative == other.isNegative) {
+      const comparison = compareNumberArray(this.value, other.value);
+      if (comparison == 0) {
+        return 0;
+      } else {
+        return this.isNegative ? -comparison : comparison;
+      }
+    } else {
+      return this.isNegative ? -1 : 1;
+    }
+  }
+
+  toString() {
+    const digits =
+      this.base <= 9 + 26
+        ? this.value.map((v) => (v <= 9 ? v + "" : String.fromCharCode("a".charCodeAt(0) + (v - 10)))).join("")
+        : "[" + this.value.join(",") + "]";
+    return `(${this.isNegative ? "-" : ""}${digits})_${this.base}`;
   }
 }
 
@@ -261,6 +333,16 @@ export default defineComponent({
       }
     });
 
+    const multiplicationResult = computed(() => {
+      try {
+        let a = new IntegerWithBase(valueA.value, baseForCalculations.value);
+        let b = new IntegerWithBase(valueB.value, baseForCalculations.value);
+        return a.multiply(b);
+      } catch (e) {
+        return e + "";
+      }
+    });
+
     return {
       numberToConvert,
       fromBase,
@@ -270,6 +352,7 @@ export default defineComponent({
       valueA,
       valueB,
       calculationResult,
+      multiplicationResult,
     };
   },
 });
