@@ -206,6 +206,7 @@ class IntegerWithBase {
       result = charCode - "0".charCodeAt(0);
     } else if (charCode >= "a".charCodeAt(0) && charCode <= "z".charCodeAt(0)) {
       result = charCode - "a".charCodeAt(0) + 10;
+      // "z" ends up being 35
     } else {
       throw new Error("Invalid character");
     }
@@ -413,7 +414,7 @@ class IntegerWithBase {
   }
 
   static formatValue(value: number[], base: number) {
-    return base <= 9 + 26
+    return base <= 10 + 26
       ? value.map((v) => (v <= 9 ? v + "" : String.fromCharCode("a".charCodeAt(0) + (v - 10)))).join("")
       : "[" + value.join(",") + "]";
   }
