@@ -415,7 +415,7 @@ class IntegerWithBase {
 
   static formatValue(value: number[], base: number) {
     return base <= 10 + 26
-      ? value.map((v) => (v <= 9 ? v + "" : String.fromCharCode("a".charCodeAt(0) + (v - 10)))).join("")
+      ? value.map((v) => (v <= 9 ? v + "" : String.fromCharCode("A".charCodeAt(0) + (v - 10)))).join("")
       : "[" + value.join(",") + "]";
   }
 
