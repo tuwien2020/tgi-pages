@@ -41,7 +41,7 @@ function xor(a: boolean, b: boolean) {
 }
 
 /**
- * Adds two binary arrays that have the same length.
+ * Adds two number arrays that have the same length.
  * Returns a larger array if there was an overflow
  */
 function addNumberArray(a: ReadonlyArray<number>, b: ReadonlyArray<number>, base: number) {
@@ -56,6 +56,30 @@ function addNumberArray(a: ReadonlyArray<number>, b: ReadonlyArray<number>, base
 
     result[i] = sum % base;
     carry = Math.floor(sum / base);
+  }
+
+  if (carry > 0) {
+    result.unshift(carry);
+  }
+
+  return result;
+}
+
+/**
+ * Multiplies a numbmer array with a single digit.
+ * Returns a larger array if there was an overflow.
+ */
+function multiplyNumberArray(a: ReadonlyArray<number>, value: number, base: number) {
+  if (value >= base) throw new Error("Only values that are smaller than the base are supported");
+
+  const result: number[] = new Array(a.length).fill(0);
+
+  let carry = 0;
+  for (let i = a.length - 1; i >= 0; i--) {
+    const product = a[i] * value + carry;
+
+    result[i] = product % base;
+    carry = Math.floor(product / base);
   }
 
   if (carry > 0) {
@@ -131,6 +155,9 @@ class IntegerWithBase {
   constructor(valueOrIsNegative: string | boolean, baseOrValue: number | number[], nothingOrBase?: number) {
     if (typeof valueOrIsNegative === "string" && typeof baseOrValue === "number") {
       this.base = baseOrValue;
+      if (this.base <= 0) {
+        throw new Error("Invalid base");
+      }
       this.isNegative = valueOrIsNegative.startsWith("-");
       this.value = valueOrIsNegative
         .replace(/^-/, "")
@@ -138,10 +165,14 @@ class IntegerWithBase {
         .map((v) => this.parseCharacter(v));
     } else if (typeof nothingOrBase === "number" && typeof valueOrIsNegative === "boolean" && Array.isArray(baseOrValue)) {
       this.base = nothingOrBase;
+      if (this.base <= 0) {
+        throw new Error("Invalid base");
+      }
       this.isNegative = valueOrIsNegative;
       this.value = baseOrValue.slice();
       for (let i = 0; i < this.value.length; i++) {
         if (this.value[i] < 0 || this.value[i] >= this.base) {
+          console.log([this.value, this.base]);
           throw new Error("Invalid value");
         }
       }
@@ -155,6 +186,7 @@ class IntegerWithBase {
   }
 
   static fromNumber(value: number, targetBase: number): IntegerWithBase {
+    if (targetBase < 2) throw new Error("Target base cannot be less than 2");
     let digits: number[] = [];
     let isNegative = value < 0;
     value = Math.abs(value);
@@ -237,11 +269,7 @@ class IntegerWithBase {
     for (let i = other.value.length - 1; i >= 0; i--) {
       const valueB = other.value[i];
       // TODO: "return" those values
-      const valueToAdd = new IntegerWithBase(
-        false,
-        this.value.map((v) => v * valueB),
-        this.base
-      ).shiftLeft(shift);
+      const valueToAdd = new IntegerWithBase(false, multiplyNumberArray(this.value, valueB, this.base), this.base).shiftLeft(shift);
       result = result.add(valueToAdd);
       shift += 1;
     }
@@ -279,7 +307,7 @@ class IntegerWithBase {
 
     // Do long division
     const resultDigits: number[] = [];
-    let remainder = new IntegerWithBase(false, [0], 0);
+    let remainder = new IntegerWithBase(false, [0], this.base);
 
     for (let i = 0; i < this.value.length; i++) {
       // Pull down the next value
@@ -380,11 +408,18 @@ class IntegerWithBase {
     }
   }
 
+  getValue() {
+    return this.value.slice();
+  }
+
+  static formatValue(value: number[], base: number) {
+    return base <= 9 + 26
+      ? value.map((v) => (v <= 9 ? v + "" : String.fromCharCode("a".charCodeAt(0) + (v - 10)))).join("")
+      : "[" + value.join(",") + "]";
+  }
+
   toString() {
-    const digits =
-      this.base <= 9 + 26
-        ? this.value.map((v) => (v <= 9 ? v + "" : String.fromCharCode("a".charCodeAt(0) + (v - 10)))).join("")
-        : "[" + this.value.join(",") + "]";
+    const digits = IntegerWithBase.formatValue(this.value, this.base);
     return `(${this.isNegative ? "-" : ""}${digits})_${this.base}`;
   }
 }
@@ -392,21 +427,60 @@ class IntegerWithBase {
 export default defineComponent({
   components: {},
   setup() {
+    // Note: Feel free to use Wolfram Alpha to validate the results
+    // https://www.wolframalpha.com/input/?i=%2834%29_7+to+base+2
+
     const numberToConvert = ref("");
     const fromBase = ref(10);
     const toBase = ref(2);
     const result = computed(() => {
+      if (!/[+-]?[0-9a-zA-Z]*(\.[0-9a-zA-Z]*)?/.test(numberToConvert.value)) {
+        return "Invalid number";
+      }
+
       try {
-        // TODO: Check if it's a valid number
-        // TODO: Support decimals
         let [beforeDecimal, afterDecimal] = numberToConvert.value.split(".");
-        // let isDecimal = numberToConvert.value.includes(".");
 
         // Might be negative
         let beforeDecimalInteger = new IntegerWithBase(beforeDecimal, fromBase.value).convertToBase(toBase.value);
-        //let afterDecimalInteger = new IntegerWithBase(afterDecimal, fromBase.value).convertToBase(toBase.value);
 
-        return beforeDecimalInteger;
+        const digits = IntegerWithBase.formatValue(beforeDecimalInteger.getValue(), beforeDecimalInteger.base);
+        let result = `${beforeDecimalInteger.isNegative ? "-" : ""}${digits}`;
+
+        if (afterDecimal) {
+          // Shift/multiply by N, which is the decimal places we want
+          // Do division by (source base)**(number of places)
+          // Now since we did a whole number division, the "." is at the end
+          // Finally, shift the "." to the left by N places
+
+          let extraPlaces = 20; // TODO: Be configureable?
+          let numberOfPlaces = afterDecimal.length + extraPlaces;
+          let afterDecimalInteger = new IntegerWithBase(afterDecimal, fromBase.value).convertToBase(toBase.value);
+
+          let fromBaseInteger = IntegerWithBase.fromNumber(fromBase.value, toBase.value);
+          let divideBy = fromBaseInteger;
+          for (let i = 1; i < afterDecimal.length; i++) {
+            divideBy = divideBy.multiply(fromBaseInteger);
+          }
+
+          let divisionResult = afterDecimalInteger.shiftLeft(numberOfPlaces).divide(divideBy);
+          if (divisionResult.divisionByZero) {
+            return "Target base is zero";
+          }
+
+          // Here, we have to "shift" the imaginary comma, which is at the end of the number
+          let afterDecimalValue = divisionResult.result.getValue();
+          if (afterDecimalValue.length > numberOfPlaces) {
+            throw new Error("This should never happen, the 'after decimal' result is wrong");
+          }
+
+          // We sometimes need to add a few zeroes at the beginning, like if we convert 0.0001 to another base
+          afterDecimalValue = new Array<number>(numberOfPlaces - afterDecimalValue.length).fill(0).concat(afterDecimalValue);
+
+          result += "." + IntegerWithBase.formatValue(afterDecimalValue, toBase.value) + "…";
+        }
+
+        return result;
       } catch (e) {
         return e + "";
       }
