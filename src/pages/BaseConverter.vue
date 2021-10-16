@@ -140,6 +140,11 @@ class IntegerWithBase {
       this.base = nothingOrBase;
       this.isNegative = valueOrIsNegative;
       this.value = baseOrValue.slice();
+      for (let i = 0; i < this.value.length; i++) {
+        if (this.value[i] < 0 || this.value[i] >= this.base) {
+          throw new Error("Invalid value");
+        }
+      }
     } else {
       throw new Error("Invalid args");
     }
@@ -147,6 +152,17 @@ class IntegerWithBase {
     if (this.value.length < 1) {
       this.value = [0];
     }
+  }
+
+  static fromNumber(value: number, targetBase: number): IntegerWithBase {
+    let digits: number[] = [];
+    let isNegative = value < 0;
+    value = Math.abs(value);
+    while (value > 0) {
+      digits.unshift(value % targetBase);
+      value = Math.floor(value / targetBase);
+    }
+    return new IntegerWithBase(isNegative, digits, targetBase);
   }
 
   private parseCharacter(c: string): number {
@@ -281,7 +297,7 @@ class IntegerWithBase {
     }
 
     return {
-      result: new IntegerWithBase(sign, resultDigits, this.base),
+      result: new IntegerWithBase(sign, resultDigits, this.base).trimLeadingZeros(),
       remainder: remainder,
       divisionByZero: false,
     };
@@ -299,6 +315,21 @@ class IntegerWithBase {
     } else {
       throw new Error("Places cannot be negative");
     }
+  }
+
+  convertToBase(toBase: number) {
+    // Using Horner's method as described here: https://math.stackexchange.com/a/111161
+    let result = new IntegerWithBase(false, [0], toBase);
+    let toBaseIntger = IntegerWithBase.fromNumber(this.base, toBase);
+    for (let i = 0; i < this.value.length; i++) {
+      // "Shift"
+      result = result.multiply(toBaseIntger);
+      // And add, notice how we're doing all the calculations in the target base
+      result = result.add(IntegerWithBase.fromNumber(this.value[i], toBase));
+    }
+
+    result = result.setSign(this.isNegative);
+    return result.trimLeadingZeros();
   }
 
   clone() {
@@ -366,8 +397,16 @@ export default defineComponent({
     const toBase = ref(2);
     const result = computed(() => {
       try {
-        let n = new IntegerWithBase(numberToConvert.value, fromBase.value);
-        return n;
+        // TODO: Check if it's a valid number
+        // TODO: Support decimals
+        let [beforeDecimal, afterDecimal] = numberToConvert.value.split(".");
+        // let isDecimal = numberToConvert.value.includes(".");
+
+        // Might be negative
+        let beforeDecimalInteger = new IntegerWithBase(beforeDecimal, fromBase.value).convertToBase(toBase.value);
+        //let afterDecimalInteger = new IntegerWithBase(afterDecimal, fromBase.value).convertToBase(toBase.value);
+
+        return beforeDecimalInteger;
       } catch (e) {
         return e + "";
       }
