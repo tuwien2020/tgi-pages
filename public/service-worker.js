@@ -1,7 +1,8 @@
 const CACHE = "pwabuilder-offline";
 const QUEUE_NAME = "bgSyncQueue";
 
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
+// TODO: Get rid of this "external URL" dependency
+importScripts("https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js");
 
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
@@ -10,15 +11,13 @@ self.addEventListener("message", (event) => {
 });
 
 const bgSyncPlugin = new workbox.backgroundSync.BackgroundSyncPlugin(QUEUE_NAME, {
-  maxRetentionTime: 24 * 60 // Retry for max of 24 Hours (specified in minutes)
+  maxRetentionTime: 24 * 60, // Retry for max of 24 Hours (specified in minutes)
 });
 
 workbox.routing.registerRoute(
-  new RegExp('/*'),
+  new RegExp("/*"),
   new workbox.strategies.StaleWhileRevalidate({
     cacheName: CACHE,
-    plugins: [
-      bgSyncPlugin
-    ]
+    plugins: [bgSyncPlugin],
   })
 );
