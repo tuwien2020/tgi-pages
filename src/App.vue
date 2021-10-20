@@ -11,6 +11,7 @@
   <div class="content">
     <router-view></router-view>
   </div>
+  <PWA />
 </template>
 
 <script lang="ts">
@@ -19,9 +20,10 @@ import { useRoute } from "vue-router";
 import { version } from "./../package.json";
 import SearchBar, { SearchOption } from "./components/SearchBar.vue";
 import { searchablePages } from "./router/navigation";
+import PWA from './pwa/PWA.vue';
 
 export default defineComponent({
-  components: { SearchBar },
+  components: { SearchBar, PWA },
   setup() {
     const route = useRoute();
 

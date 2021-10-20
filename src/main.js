@@ -15,6 +15,10 @@ if (import.meta.env.PROD) {
 
 const vuetify = createVuetify();
 
+if (typeof window !== 'undefined') {
+  import('./pwa/PWA.vue')
+}
+
 const app = createApp(App);
 app.use(router);
 app.use(vuetify);
