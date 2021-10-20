@@ -1,6 +1,6 @@
 {
   "name": "tgi-pages",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "scripts": {
     "start": "vite",
     "dev": "vite",
