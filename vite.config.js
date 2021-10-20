@@ -46,6 +46,10 @@ export default {
       workbox: {
         cleanupOutdatedCaches: false,
         sourcemap: true,
+        globPatterns: ["**/*.{js,css,html,ttf,woff2}"],
+      },
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,html,ttf,woff2}"],
       },
     }),
   ],
