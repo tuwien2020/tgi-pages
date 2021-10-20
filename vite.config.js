@@ -50,7 +50,6 @@ export default {
     }),
   ],
   build: {
-    manifest: true,
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
