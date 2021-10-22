@@ -6,7 +6,7 @@ Preferably, features are developed in another branch or fork. After the feature 
 
 ## Prerequisites
 
-- [Node 15 or greater](https://nodejs.org/en/)
+- [Node 15 or greater](https://nodejs.org/en/). Don't install Chocolatey.
 - A code editor (see below)
 
 ## Setup
