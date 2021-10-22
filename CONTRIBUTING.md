@@ -11,9 +11,10 @@ Preferably, features are developed in another branch or fork. After the feature 
 
 ## Setup
 
-1. Clone the repository
-2. `npm install`
-3. `npm run dev`
+1. Fork the repository
+2. Clone your fork
+3. `npm install`
+4. `npm run dev`
 
 ## Recommended Tooling
 
