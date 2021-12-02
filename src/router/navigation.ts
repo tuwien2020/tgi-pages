@@ -204,6 +204,12 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
+    name: "Mikro 16 VS Code Syntax Highlight Extension",
+    link: "https://github.com/KMikeeU/micro16-vscode",
+    category: chapters[Chapter.Micro16],
+    internal: false,
+  },
+  {
     name: "EAN 13 Barcode",
     link: "https://online-barcode-reader.inliteresearch.com/",
     category: chapters[Chapter.Codierung],
