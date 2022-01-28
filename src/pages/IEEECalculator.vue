@@ -1,5 +1,5 @@
 <template>
-  <h1>IEEE Calculator</h1>
+  <h1><u>IEEE Calculator</u></h1>
   <br />
   Format needs to be type of: <strong>F(base, mantissa, minimum exp, maximum exp, denormalized)  : </strong> <input type="text" v-model="ieeeFormat" /> <br>
   Total bit number: <input type="text" v-model="bitNumber" /> <br><br>
@@ -20,14 +20,29 @@
 
   Number B: <input type="text" v-model="numberB" /><br><br>
   <span style="white-space: pre-line"><strong>{{b_interpretation}}</strong></span>
-  <br /><br /><br /><br />
+  <br><br>
+
   
-  <!--
-  Addition:
-  <span>
-    {{ output_addition }}
+  <section>
+    <h4><u>Operation select</u></h4>
+    <table style = "width:30%;">
+      <tr>
+        <td><input type = "radio" v-model = "operation" value = "0"> Addition <br></td>
+        <td><input type = "radio" v-model = "operation" value = "1"> Substraction <br></td>
+        <td><input type = "radio" v-model = "operation" value = "2"> Multiplication <br></td>
+        <td><input type = "radio" v-model = "operation" value = "3"> Divison <br></td>
+      </tr>
+    </table>
+  </section><br>
+  
+  <h4><u>Result:</u></h4>
+  <br>
+  <span style="white-space: pre-line">
+    {{ output_calculation }}
   </span>
   <br><br><br>
+  <!--
+  
   Substraction:
   <span>
     {{ output_substaction }}
@@ -47,9 +62,11 @@
 </template>
 
 <script lang="ts">
+import { calc } from "src/assets/decompiler";
 import { ref, defineComponent, watchEffect, watch, computed, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
+import { BinaryNumber } from "../math/binary-number";
 
 export default defineComponent({
   components: {},
@@ -62,6 +79,8 @@ export default defineComponent({
     const bitNumber = urlRef("length", "");
     const numberA = urlRef("numberA", "");
     const numberB = urlRef("numberB", "");
+
+    const operation = urlRef("operation", "");
     
     let base: number;
     let mantissa: number;
@@ -81,10 +100,64 @@ export default defineComponent({
     let b_exponent: number;
     let b_mantissa: number;
 
+    function stringToBinaryNumber(value: string): BinaryNumber | null {
+    const binaryNumberRegex = /^([+-])?([0-1]+)([.,]([0-1]+))?$/;
+
+    const matchResults = (value ?? "").match(binaryNumberRegex);
+    if (matchResults === null) return null;
+
+    const [_, sign, numberValue, __, fractionalPart] = matchResults;
+
+    return new BinaryNumber(
+      sign === "-",
+      ((numberValue ?? "") + (fractionalPart ?? "")).split("").map((v) => (v === "0" ? false : true)),
+      fractionalPart?.length ?? 0
+    );
+  }
+
+
     function remove_space(){
       numberA.value = numberA.value.replace(" ","");
       numberB.value = numberB.value.replace(" ","");
     }
+
+    //TODO: Make sure a_interpreation and b_interpretation are run everytime a radiobutton gets pressed
+    function calculate_output(){
+      let message = "";
+      let result = 0;
+      if (numberA.value.length == 16 && numberB.value.length == 16){
+        if (operation.value == "0"){
+          message = "- Transform number A and B in scientific notation: \n\Number A: " + a_sign + " * "+a_mantissa + " * 2 ^"+a_exponent+"\n\
+          Number B: " + b_sign + " * "+b_mantissa+" * 2 ^"+b_exponent;
+
+          
+          if (a_exponent > b_exponent){
+            let difference = a_exponent - b_exponent;
+            message += ("\n\n- Adjust exponents to higher one:\nExponent of A higher by "+difference);
+            b_exponent += difference;
+            b_mantissa/= Math.pow(10, difference);
+            message += ("\nDivide mantissa of B by 10^"+difference+":\n"+b_mantissa)
+          }
+          if (b_exponent > a_exponent){
+            let difference = b_exponent - a_exponent;
+            message += ("\n\n- Adjust exponents to higher one:\nExponent of B higher by "+difference);
+            a_exponent += difference;
+            a_mantissa/= Math.pow(10, difference);
+            message += ("\nDivide mantissa of A by 10^"+difference+":\n"+a_mantissa)
+          }
+
+          message += "\n\n- Add mantissa together: "
+
+          console.log(numberA.value.length + "  " + numberB.value.length);
+        }
+        return message + " \n " ;result;
+      }
+      else{
+        return "Number A and B need to be " + bitNumber.value + " bits long."
+      }
+      
+    }
+
     const format_output = computed(()=>{
       base = parseInt(ieeeFormat.value.split(",")[0]);
       mantissa = parseInt(ieeeFormat.value.split(",")[1]);
@@ -140,7 +213,7 @@ export default defineComponent({
     });
 
     const b_interpretation = computed (() => {
-
+      
       remove_space();
       let b_exp = numberB.value.substring(1,1+exponent_length);
       let b_mant = parseInt(numberB.value.substring(1+exponent_length, 1+exponent_length+mantissa_length));
@@ -176,53 +249,21 @@ export default defineComponent({
     });
 
 
-    const output_addition = computed(()=>{
-      let nbA = +numberA.value;
-      let nbB = +numberB.value;
-
-      let result = nbA + nbB;
-
-      base = 1;
+    const output_calculation = computed(()=>{
+      let result = calculate_output();
       return result;
-    });
-
-    const output_substaction = computed(()=>{
-      let nbA = +numberA.value;
-      let nbB = +numberB.value;
-
-      let result = nbA + nbB;
-      return result;
-      
-    });
-    const output_multiplication = computed(()=>{
-      let nbA = +numberA.value;
-      let nbB = +numberB.value;
-
-      let result = nbA + nbB;
-      return result;
-      
-    });
-    const output_division = computed(()=>{
-      let nbA = +numberA.value;
-      let nbB = +numberB.value;
-
-      let result = nbA + nbB;
-      return result;
-      
     });
 
     return {
       ieeeFormat,
       bitNumber,
       format_output,
+      operation,
       a_interpretation,
       b_interpretation,
       numberA,
       numberB,
-      output_addition,
-      output_substaction,
-      output_multiplication,
-      output_division,
+      output_calculation
     };
   },
 });
