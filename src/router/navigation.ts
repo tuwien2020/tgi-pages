@@ -10,6 +10,7 @@ import InterleavingGraph from "./../pages/InterleavingGraph.vue";
 import CacheCalc from "./../pages/CacheCalc.vue";
 import Stack from "./../pages/Stack.vue";
 import Micro16Decompiler from "./../pages/Micro16Decompiler.vue";
+import IEEECalculator from "./../pages/IEEECalculator.vue";
 
 type PageEntry =
   | {
@@ -164,6 +165,13 @@ const tools: PageEntry[] = [
     link: "http://weitz.de/ieee/",
     category: chapters[Chapter.Numerik],
     internal: false,
+  },
+  {
+    name: "IEEE Calculator",
+    link: "ieee-calculator",
+    category: chapters[Chapter.Numerik],
+    internal: true,
+    page: IEEECalculator,
   },
   {
     name: "Wahrheitstabelle",
