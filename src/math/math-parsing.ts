@@ -213,7 +213,7 @@ const operatorEqual: bnb.Parser<MathJson> =
     .chain((expression) => {
       // An equals sign
       return (
-        operator({ operator: "Equal", match: /equal(s)?|==?|<==?>|≡/i })
+        operator({ operator: "Equal", match: /equal(s)?|==?|<==?>|≡|xnor|nxor/i })
           // Followed by another thing with a higher 'precedence'
           .and(operatorImplies)
           // This can be repeated as often as we like

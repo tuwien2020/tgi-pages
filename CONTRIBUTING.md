@@ -6,14 +6,15 @@ Preferably, features are developed in another branch or fork. After the feature 
 
 ## Prerequisites
 
-- [Node 15 or greater](https://nodejs.org/en/)
+- [Node 15 or greater](https://nodejs.org/en/). Don't install Chocolatey.
 - A code editor (see below)
 
 ## Setup
 
-1. Clone the repository
-2. `npm install`
-3. `npm run dev`
+1. Fork the repository
+2. Clone your fork
+3. `npm install`
+4. `npm run dev`
 
 ## Recommended Tooling
 
@@ -21,7 +22,7 @@ I recommend using [Visual Studio Code](https://code.visualstudio.com/) with
 
 - [Prettier Extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) to format your files
 - Settings &rarr; Format On Save &rarr; Enable (`"editor.formatOnSave": true,`)
-- [Vetur Extension](https://marketplace.visualstudio.com/items?itemName=octref.vetur) for Vue.js
+- [Volar Extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) for Vue.js
 - [(optional)npm Extension](https://marketplace.visualstudio.com/items?itemName=eg2.vscode-npm-script)
 - [(optional)TODO Highlight Extension](https://marketplace.visualstudio.com/items?itemName=wayou.vscode-todo-highlight)
 
