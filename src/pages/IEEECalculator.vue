@@ -176,7 +176,7 @@ export default defineComponent({
 
 
     const a_interpretation = computed (() => {
-
+        console.log(operation.value);
         remove_space();
         let a_exp = numberA.value.substring(1,1+exponent_length);
         let a_mant = parseInt(numberA.value.substring(1+exponent_length, 1+exponent_length+mantissa_length));
@@ -213,7 +213,7 @@ export default defineComponent({
     });
 
     const b_interpretation = computed (() => {
-      
+      console.log(operation.value);
       remove_space();
       let b_exp = numberB.value.substring(1,1+exponent_length);
       let b_mant = parseInt(numberB.value.substring(1+exponent_length, 1+exponent_length+mantissa_length));
