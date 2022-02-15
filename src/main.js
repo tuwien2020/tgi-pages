@@ -9,7 +9,7 @@ import "intro.js/minified/introjs.min.css";
 import { createVuetify } from "vuetify";
 import { createI18n } from "vue-i18n";
 import router from "./router";
-import { translations } from "./translations/translations";
+import { translations } from "./i18n/translations";
 
 if (import.meta.env.PROD) {
   console.log(`${name} - ${version}`);
@@ -17,8 +17,8 @@ if (import.meta.env.PROD) {
 
 const vuetify = createVuetify();
 
-if (typeof window !== 'undefined') {
-  import('./pwa/PWA.vue')
+if (typeof window !== "undefined") {
+  import("./pwa/PWA.vue");
 }
 
 const i18n = createI18n({
