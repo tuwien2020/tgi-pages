@@ -59,6 +59,7 @@
 <script lang="ts">
 import { defineComponent, computed, shallowRef, ComputedRef, unref, Ref, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useUrlRef } from "../url-ref";
 
 function mod(a: number, b: number): number {
   return ((a % b) + b) % b;
@@ -466,10 +467,13 @@ export default defineComponent({
   setup() {
     // Note: Feel free to use Wolfram Alpha to validate the results
     // https://www.wolframalpha.com/input/?i=%2834%29_7+to+base+2
+    const router = useRouter();
+    const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
 
-    const numberToConvert = ref("");
-    const fromBase = ref(10);
-    const toBase = ref(2);
+    const numberToConvert = urlRef("value", "");
+    const fromBase = urlRef("from-base", 10);
+    const toBase = urlRef("to-base", 2);
     const result = computed(() => {
       if (!/[+-]?[0-9a-zA-Z]*(\.[0-9a-zA-Z]*)?/.test(numberToConvert.value)) {
         return "Invalid number";
@@ -523,9 +527,9 @@ export default defineComponent({
       }
     });
 
-    const baseForCalculations = ref(10);
-    const valueA = ref("");
-    const valueB = ref("");
+    const baseForCalculations = urlRef("calc-base", 10);
+    const valueA = urlRef("calc-value-a", "");
+    const valueB = urlRef("calc-value-b", "");
     const additionResult = computed(() => {
       try {
         let a = new IntegerWithBase(valueA.value, baseForCalculations.value);
