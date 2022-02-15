@@ -7,6 +7,7 @@ import BinaryCalculator from "./../pages/BinaryCalculator.vue";
 import BinaryCoding from "./../pages/BinaryCoding.vue";
 import Pipeline from "./../pages/Pipeline.vue";
 import InterleavingGraph from "./../pages/InterleavingGraph.vue";
+import BaseConverter from "./../pages/BaseConverter.vue";
 import CacheCalc from "./../pages/CacheCalc.vue";
 import Stack from "./../pages/Stack.vue";
 import Micro16Decompiler from "./../pages/Micro16Decompiler.vue";
@@ -160,6 +161,13 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
+    name: "Convert between number bases",
+    link: "base-converter",
+    internal: true,
+    category: chapters[Chapter.Zahlendarstellung],
+    page: BaseConverter,
+  },
+  {
     name: "IEEE Rechner",
     link: "http://weitz.de/ieee/",
     category: chapters[Chapter.Numerik],
@@ -200,6 +208,12 @@ const tools: PageEntry[] = [
   {
     name: "Mikro 16 extended instruction set compiler",
     link: "https://tgi.rwutscher.com/",
+    category: chapters[Chapter.Micro16],
+    internal: false,
+  },
+  {
+    name: "Mikro 16 VS Code Syntax Highlight Extension",
+    link: "https://github.com/KMikeeU/micro16-vscode",
     category: chapters[Chapter.Micro16],
     internal: false,
   },

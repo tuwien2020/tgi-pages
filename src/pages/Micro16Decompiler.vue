@@ -1,8 +1,8 @@
 <template>
   <h1>Micro 16-Dekompilierer</h1>
-
   <p>Bytecode (getrennt durch einen Zeilenumbruch):</p>
   <p>Hinweis: Wenn man mit der Maus über einen Bereich hovered wird angezeigt, um welchen Teil der Anweisung es sich handelt. </p>
+  <intro text="Klicke hier für eine Erklärungstour"></intro>
   <!--<textarea
     rows="4"
     cols="50"
@@ -10,9 +10,35 @@
     class="is-family-monospace"
   ></textarea>-->
 
-  <div class="micro16-decompiler" ref="monaco-editor-micro16" style="height: 10em"></div>
-
-  <pre>{{ instruction }}</pre>
+  <div class="micro16-decompiler" ref="monaco-editor-micro16" style="height: 10em" data-intro="Gib hier den Binärcode ein (es gehen auch mehrere durch Zeilenumbruch getrennte Anweisungen)"></div>
+  <h3>Decompiled Instructions</h3>
+  <pre data-intro="Hier stehen die dekompilierten Instruktionen">{{ instruction }}</pre>
+  <hr>
+  <div class="content" data-intro="Hier stehen die dekompilierten Instruktionen mit detailierteren Infos">    
+    <h3> Instruction Erkärung </h3>
+    <div v-for="instruction in parsedInstructions" :key="instruction.key">
+      <collapsible-table>
+        <template v-slot:title>
+          <h4>Instruction {{instruction.key}}</h4>
+        </template>
+        <template v-slot:header>
+          <tr>
+            <th>Instructionteil</th>
+            <th>Wert</th>
+            <th>Bedeutung</th>
+          </tr>
+        </template>
+        <template v-slot:body>
+          <tr v-for="token in tokens" :key="token.shortName">
+            <td>{{ token.longName }}</td>
+            <td>{{ instruction.instruction[token.shortName].toString()}}</td>
+            <td>{{ token.description }}</td>
+          </tr>
+        </template>
+      </collapsible-table>
+      <hr>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -20,24 +46,136 @@ import { useMonaco } from "../monaco/use-monaco";
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUrlRef } from "../url-ref";
-import { ParsedInstruction, parse, getRegistry, interpret } from "./../assets/decompiler";
+import { ParsedInstruction, parse, getRegistry, interpretParsedExpression, InstructionParts } from "./../assets/decompiler";
+import { defaultPalette } from './../assets/colors';
+import CollapsibleTable from './../components/CollapsibleTable.vue';
+import Intro from './../components/Intro.vue';
+
 
 export default defineComponent({
-  components: {},
+  components: {CollapsibleTable, Intro},
   setup() {
     const router = useRouter();
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
     const monacoEditorMicro16 = ref<HTMLElement>();
-    const bytecode = urlRef("bytecode", "");
-    const instruction = computed(() =>
+    const bytecode = urlRef("bytecode", "10010010100100110001011010001011");
+    const parsedInstructions = computed(() =>
       bytecode.value
         .trimEnd()
         .split("\n")
-        .map((v) => interpret(v.replace(/\s/g, "")))
+        .map((v,i) => { return {instruction: parse(v.replace(/\s/g, "")), key: i}} ));
+
+    const instruction = computed(() =>
+      parsedInstructions.value
+        .map(({instruction}) => interpretParsedExpression(instruction))
         .join("\n")
     );
 
+    const parsedInstructionsCompleted = computed(() => 
+      parsedInstructions.value
+        .filter(({instruction}) => instruction.adr >= 0 && instruction.adr <= 255)
+    );
+    
+    let tokens = [
+      {
+        shortName: InstructionParts.aMux,
+        longName: "A-MUX",
+        description: "Entscheidet ob der Wert A aus dem A-Bus oder dem MBR verwendet wird",
+        length: 1,
+        color: "9b59b6",
+      },
+      {
+        shortName: InstructionParts.cond,
+        longName: "Cond",
+        description: "Entscheidet, ob und wann gesprungen wird (00: kein Sprung; 01: Sprung, wenn N=1; 10: Sprung, wenn Z=1; 3: unbedingter Sprung)",
+        length: 2,
+        color: "e74c3c",
+      },
+      {
+        shortName: InstructionParts.alu,
+        longName: "ALU",
+        description: "Entscheidet welche Operation die Alu ausführt (00: A [Pass]; 01: A + B; 10: A & B; 11: ~A)",
+        length: 2,
+        color: "000000",
+      },
+      {
+        shortName: InstructionParts.sh,
+        longName: "Shifter",
+        description: "Entscheidet ob und wie geshiftet wird (00: nicht shiften; 01: shift nach links; 10: shift nach rechhts; 11: ungültig) ",
+        length: 2,
+        color: "7f8c8d",
+      },
+      {
+        shortName: InstructionParts.mbr,
+        longName: "MBR",
+        description: "Entscheidet ob in den MBR geschrieben wird",
+        length: 1,
+        color: "9b59b6",
+      },
+      {
+        shortName: InstructionParts.mar,
+        longName: "MAR",
+        description: "Entscheidet ob B in den MAR geschrieben wird",
+        length: 1,
+        color: "209cee",
+      },
+      {
+        shortName: InstructionParts.rdWr,
+        longName: "RD/WR",
+        description: "Entscheidet ob RD oder WR falls MS true ist (true: rd, false: wr)",
+        length: 1,
+        color: "f39c12",
+      },
+      {
+        shortName: InstructionParts.ms,
+        longName: "Memory Select",
+        description: "Entscheidet ob ein Memory Zugriff passiert",
+        length: 1,
+        color: "f39c12",
+      },
+      {
+        shortName: InstructionParts.enS,
+        longName: "Enable S-Bus",
+        description: "Entscheidet ob in den S-Bus geschrieben wird",
+        length: 1,
+        color: "1A7440",
+      },
+      {
+        shortName: InstructionParts.sBus,
+        longName: "S-Bus",
+        description: "Falls enS true ist, steht hier die Addresse in die der S-Bus schreibt  (2-15) (0-2 sind readonly)",
+        length: 4,
+        color: "27ae60",
+      },
+      {
+        shortName: InstructionParts.bBus,
+        longName: "B-Bus",
+        description: "Die Addresse des B-Bus (0-15)",
+        length: 4,
+        color: "209cee",
+      },
+      {
+        shortName: InstructionParts.aBus,
+        longName: "A-Bus",
+        description: "Die Addresse des A-Bus (0-15)",
+        length: 4,
+        color: "9b59b6",
+      },
+      {
+        shortName: InstructionParts.adr,
+        longName: "Address",
+        description: "Falls die Condition in Cond zutrifft, entscheidet dieser Wert wohin gesprungen wird (0-255)",
+        length: 8,
+        color: "e74c3c",
+      },
+    ];
+
+    tokens = tokens.map((token, i) => {
+      token.color = defaultPalette[i%defaultPalette.length].toHex();
+      return token;
+    })
+    
     useMonaco().then((monaco) => {
       monaco.setMonacoOptions((value) => {
         if (value.languages.getLanguages().some((v) => v.id == "micro16-binary")) {
@@ -48,99 +186,7 @@ export default defineComponent({
           id: "micro16-binary",
         });
 
-        const tokens = [
-          {
-            shortName: "aMux",
-            longName: "A-MUX",
-            description: "",
-            length: 1,
-            color: "9b59b6",
-          },
-          {
-            shortName: "cond",
-            longName: "Cond",
-            description: "",
-            length: 2,
-            color: "e74c3c",
-          },
-          {
-            shortName: "alu",
-            longName: "ALU",
-            description: "",
-            length: 2,
-            color: "000000",
-          },
-          {
-            shortName: "sh",
-            longName: "Shifter",
-            description: "",
-            length: 2,
-            color: "7f8c8d",
-          },
-          {
-            shortName: "mbr",
-            longName: "MBR",
-            description: "",
-            length: 1,
-            color: "9b59b6",
-          },
-          {
-            shortName: "mar",
-            longName: "MAR",
-            description: "",
-            length: 1,
-            color: "209cee",
-          },
-          {
-            shortName: "rdWr",
-            longName: "RD/WR",
-            description: "",
-            length: 1,
-            color: "f39c12",
-          },
-          {
-            shortName: "ms",
-            longName: "Memory Select",
-            description: "",
-            length: 1,
-            color: "f39c12",
-          },
-          {
-            shortName: "enS",
-            longName: "Enable S-Bus",
-            description: "",
-            length: 1,
-            color: "1A7440",
-          },
-          {
-            shortName: "sBus",
-            longName: "S-Bus",
-            description: "",
-            length: 4,
-            color: "27ae60",
-          },
-          {
-            shortName: "bBus",
-            longName: "B-Bus",
-            description: "",
-            length: 4,
-            color: "209cee",
-          },
-          {
-            shortName: "aBus",
-            longName: "A-Bus",
-            description: "",
-            length: 4,
-            color: "9b59b6",
-          },
-          {
-            shortName: "adr",
-            longName: "Address",
-            description: "",
-            length: 8,
-            color: "e74c3c",
-          },
-        ];
+
 
         value.editor.defineTheme("micro16-binary", {
           base: "vs",
@@ -238,20 +284,36 @@ export default defineComponent({
 
       watchEffect(() => (bytecode.value = micro16Editor.code.value));
     });
-
+    
     return {
       bytecode,
       instruction,
       "monaco-editor-micro16": monacoEditorMicro16,
+      parsedInstructions: parsedInstructionsCompleted,
+      tokens,
     };
   },
 });
 </script>
 <style>
-/* Chrome can't handle this
-.micro16-decompiler .monaco-editor .view-line span {
-  padding-left: 2px;
-  padding-right: 2px;
+details {
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    padding: .5em .5em 0;
 }
-*/
+
+summary {
+    font-weight: bold;
+    margin: -.5em -.5em 0;
+    padding: .5em;
+}
+
+details[open] {
+    padding: .5em;
+}
+
+details[open] summary {
+    border-bottom: 1px solid #aaa;
+    margin-bottom: .5em;
+}
 </style>

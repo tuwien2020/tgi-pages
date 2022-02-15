@@ -6,14 +6,15 @@ Preferably, features are developed in another branch or fork. After the feature 
 
 ## Prerequisites
 
-- [Node 15 or greater](https://nodejs.org/en/)
+- [Node 15 or greater](https://nodejs.org/en/). Don't install Chocolatey.
 - A code editor (see below)
 
 ## Setup
 
-1. Clone the repository
-2. `npm install`
-3. `npm run dev`
+1. Fork the repository
+2. Clone your fork
+3. `npm install`
+4. `npm run dev`
 
 ## Recommended Tooling
 
@@ -21,7 +22,7 @@ I recommend using [Visual Studio Code](https://code.visualstudio.com/) with
 
 - [Prettier Extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) to format your files
 - Settings &rarr; Format On Save &rarr; Enable (`"editor.formatOnSave": true,`)
-- [Vetur Extension](https://marketplace.visualstudio.com/items?itemName=octref.vetur) for Vue.js
+- [Volar Extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) for Vue.js
 - [(optional)npm Extension](https://marketplace.visualstudio.com/items?itemName=eg2.vscode-npm-script)
 - [(optional)TODO Highlight Extension](https://marketplace.visualstudio.com/items?itemName=wayou.vscode-todo-highlight)
 
@@ -38,7 +39,7 @@ We are also using
 - [Vite](https://github.com/vuejs/vite) - a speedy Vue.js framework
 - [Monaco](https://microsoft.github.io/monaco-editor/) - the editor from Visual Studio Code
 - [Bulma](https://bulma.io/) - a CSS framework
-- [Ant Design Vue](https://2x.antdv.com/components/overview/) - a components framework (still testing it out, use as sparingly as possible right now)
+- [Vuetify 3](https://next.vuetifyjs.com/en/components/app-bars/) - a components framework
 
 ### Code Structure
 
@@ -88,3 +89,10 @@ Create a new entry in the `tools` array. The entry should look something like th
 ```
 
 After adding your page in the `tools` array, it will automatically be linked in the Overview page, searchable via the navbar and mapped to a route matching the link in the entry.
+
+## Accessibility
+
+### Color Choice
+
+If the UI doesn't need colors, keeping it black and white is the simplest and most straightforward option. If however, it does need colors, then please use the colors defined in `colors.ts`.
+They can also be used as CSS vars, such as `var(--first-color)`. The CSS vars are defined in `index.css`.

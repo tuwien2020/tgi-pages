@@ -1,0 +1,39 @@
+# This is a basic workflow that is manually triggered
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+  release:
+    types: [released]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Runs a single command using the runners shell
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v2.4.0
+      with:
+        # Set always-auth in 
+        # Version Spec of the version to use.  Examples: 12.x, 10.15.1, >=10.15.0
+        node-version: '>= 15.0.0'
+    
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2.3.1
+      
+    - name: Build 🛠
+      run: |
+        npm install
+        npx vite build --base=/tgi-pages/
+        
+    - name: Deploy 🚀
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist

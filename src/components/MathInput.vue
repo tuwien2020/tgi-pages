@@ -1,6 +1,6 @@
 <template>
   <div class="math-input">
-    <input type="text" v-model="mathInput" size="100" /> <br />
+    <input type="text" v-model="mathInput" size="100" v-bind="$attrs" /> <br />
     <math-output :value="mathJson" :formatting="formatting"></math-output>
   </div>
 </template>
@@ -32,6 +32,7 @@ export default defineComponent({
     "update:modelValue": (value: string) => true,
     mathJson: (value: MathJson) => true,
   },
+  inheritAttrs: false,
   setup(props, context) {
     const mathInput = ref("" + props.modelValue);
     const mathJson = shallowRef<MathJson>("");

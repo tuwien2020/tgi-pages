@@ -4,8 +4,9 @@ import "./index.css";
 import "katex/dist/katex.css";
 import { name, version } from "./../package.json";
 import "bulma/css/bulma.css";
-import "ant-design-vue/dist/antd.css";
-import Antd from "ant-design-vue";
+import "intro.js/minified/introjs.min.css";
+// import "vuetify/styles"; // TODO: Add the vuetify styles again
+import { createVuetify } from "vuetify";
 import { createI18n } from "vue-i18n";
 import router from "./router";
 import { translations } from "./translations/translations";
@@ -13,6 +14,13 @@ import { translations } from "./translations/translations";
 if (import.meta.env.PROD) {
   console.log(`${name} - ${version}`);
 }
+
+const vuetify = createVuetify();
+
+if (typeof window !== 'undefined') {
+  import('./pwa/PWA.vue')
+}
+
 const i18n = createI18n({
   legacy: false,
   locale: (navigator.language || "en").slice(0, 2),
@@ -23,5 +31,5 @@ const i18n = createI18n({
 const app = createApp(App);
 app.use(router);
 app.use(i18n);
-app.use(Antd);
+app.use(vuetify);
 app.mount("#app");

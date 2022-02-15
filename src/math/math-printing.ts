@@ -1,5 +1,5 @@
 import { MathJson, MathJsonOperator } from "./math-parsing";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid"; // TODO: Replace with https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
 
 export interface MathFormattingOptions {
   bracketIds?: boolean;

@@ -1,54 +1,108 @@
 <template>
   <h1>Hamming-Code</h1>
 
-  <p>Gebe hier einen Code ein:</p>
-  <input v-model="code" @keypress="onlyBinary($event)" type="text" />
+  <div>
+    <p>Gebe hier einen Code ein:</p>
+    <input v-model="code" pattern="[01]+" type="text" class="code-input" />
 
-  <label>
-    <input type="checkbox" v-model="dataOnly" />
-    nur Datenbits
-  </label>
-
-  <pre>Hamming-Code: <span v-for="(bit, index) in hammingCode.code.split('')" 
-    :key="index" v-bind:class="[index + 1 == hammingCode.errorBit ? 'errorbit' : '', 
-    isPowerOfTwo(index+1) ? 'paritybit' : 'codebit']">{{bit}}</span> (bereits korrigiert)</pre>
-
-  <pre>Datenbits: {{ hammingCode.data }}</pre>
-
-  <pre>
-Anzahl der Codebits: {{ hammingCode.numCodeBits }}
-Anzahl der Paritybits: {{ hammingCode.numParityBits }}
-Anzahl der Datenbits: {{ hammingCode.numDataBits }}
-</pre
-  >
-
-  <p>
-    Formeln für die Paritybits:
     <label>
-      <input type="checkbox" v-model="showCalulations" />
-      Berechnungen anzeigen
+      <input type="checkbox" v-model="dataOnly" />
+      nur Datenbits
     </label>
-  </p>
-  <pre>{{ hammingCode.getFormattedHammingCodeParityFormulas(false) }}</pre>
+    <br />
+    <span v-if="!isBitPattern(code)" class="error-message">Expected a bit pattern</span>
+  </div>
 
-  <p v-if="showCalulations">Berechnung der Paritybits:</p>
-  <pre v-if="showCalulations">{{ hammingCode.getFormattedHammingCodeParityFormulas(true) }}</pre>
+  <div v-if="isBitPattern(code)">
+    <p>
+      Hamming-Code: {{ hammingCode.hasCorrectableError() ? "(bereits korrigiert)" : "" }}
+      <br />
+      <span
+        v-for="(bit, index) in hammingCode.code.split('')"
+        :key="index"
+        v-bind:class="[index + 1 == hammingCode.errorBit ? 'errorbit' : '', isPowerOfTwo(index + 1) ? 'paritybit' : 'codebit', 'monospace']"
+        >{{ bit }}</span
+      >
 
-  <pre>{{ hammingCode.getErrorBitMessage() }}</pre>
+      <br />
+      {{ hammingCode.code.length > 0 ? "(" + hammingCode.getErrorBitMessage() + ")" : "" }}
+    </p>
 
+    <p>
+      Datenbits: <br />
+      <span class="monospace">{{ hammingCode.data }}</span>
+    </p>
+
+    <p>
+      Anzahl der Codebits: {{ hammingCode.numCodeBits }} <br />
+      Anzahl der Paritybits: {{ hammingCode.numParityBits }} <br />
+      Anzahl der Datenbits: {{ hammingCode.numDataBits }}
+    </p>
+  </div>
+  <div v-if="isBitPattern(code)">
+    <p>
+      Formeln für die Paritybits:
+      <br />
+      <label>
+        <input type="checkbox" v-model="showCalulations" />
+        Berechnungen anzeigen
+      </label>
+      <br />
+      <label>
+        <input type="checkbox" v-model="showTable" />
+        Tabelle anzeigen
+      </label>
+    </p>
+    <pre>{{ hammingCode.getFormattedHammingCodeParityFormulas(false) }}</pre>
+
+    <p v-if="showCalulations">Berechnung der Paritybits:</p>
+    <pre v-if="showCalulations">{{ hammingCode.getFormattedHammingCodeParityFormulas(true) }}</pre>
+  </div>
+  <div v-if="showTable">
+    <table class="parity-table">
+      <thead>
+        <tr>
+          <th>Prüfziffer</th>
+          <th v-for="index in hammingCode.code.length" :key="index">
+            {{ "c" + index }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(parityBit, index) in hammingCode.parityBits" :key="index">
+          <td>
+            {{ "p" + (index + 1) }}
+          </td>
+          <th v-for="index in hammingCode.code.length" :key="index">
+            {{ parityBit.involvedCodebits.includes(index) ? "&#9210;" : "" }}
+          </th>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   <h2>Berechnungen</h2>
 
-  <p>Wie viele Paritybits werden für einen Hamming-Code mit d Datenbits benötigt?</p>
-  <input placeholder="Daten Bit Anzahl" v-model="dataBitCalculation.dataBits" type="number" />
-  <pre>mindestens {{ dataBitCalculation.minParityBits }} Paritybits</pre>
-
-  <p>Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn dieser p Paritybits hat?</p>
-  <input placeholder="Parity Bit Anzahl" v-model="parityBitCalculation.parityBits" type="number" />
-  <pre>maximal {{ parityBitCalculation.maxCodeBits }} Code- und {{ parityBitCalculation.maxDataBits }} Datenbits  </pre>
-
-  <p>Wie viele Paritybits brauche ich für einen Hamming-Code mit c Codebits?</p>
-  <input placeholder="Code Bit Anzahl" v-model="codeBitCalculation.codeBits" type="number" />
-  <pre>mindestens {{ codeBitCalculation.parityBits }} Paritybits</pre>
+  <div>
+    <table>
+      <tbody>
+        <tr>
+          <td>Wie viele Paritybits werden für einen Hamming-Code mit <strong>d Datenbits</strong> benötigt?</td>
+          <td>mindestens {{ dataBitCalculation.minParityBits }} Paritybits</td>
+          <td>Anzahl der Datenbits:<br /><input v-model="dataBitCalculation.dataBits" type="number" class="calculation-input" min="0" /></td>
+        </tr>
+        <tr>
+          <td>Aus wie vielen Code- und Datenbits kann ein Hamming-Code bestehen, wenn dieser <strong>p Paritybits</strong> hat?</td>
+          <td>maximal {{ parityBitCalculation.maxCodeBits }} Code- und {{ parityBitCalculation.maxDataBits }} Datenbits</td>
+          <td>Anzahl der Paritybits:<br /><input v-model="parityBitCalculation.parityBits" class="calculation-input" type="number" min="0" /></td>
+        </tr>
+        <tr>
+          <td>Wie viele Paritybits brauche ich für einen Hamming-Code mit <strong>c Codebits</strong>?</td>
+          <td>mindestens {{ codeBitCalculation.parityBits }} Paritybits</td>
+          <td>Anzahl der Codebits:<br /><input v-model="codeBitCalculation.codeBits" class="calculation-input" type="number" min="0" /></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script lang="ts">
@@ -66,9 +120,6 @@ export default defineComponent({
     const code = urlRef("code", "");
     const dataOnly = urlRef("dataOnly", false);
 
-    // url cleanup
-    code.value = code.value.replace(/[^01]/g, "");
-
     let hammingCode = ref(new HammingCode(code.value, dataOnly.value));
 
     watch(code, (value) => {
@@ -80,8 +131,9 @@ export default defineComponent({
     });
 
     const showCalulations = ref(false);
+    const showTable = ref(false);
 
-    const dataBitCalculation = ref(new DataBitCalculation(0));
+    const dataBitCalculation = ref(new DataBitCalculation(BigInt(0)));
     const parityBitCalculation = ref(new ParityBitCalculation(0));
     const codeBitCalculation = ref(new CodeBitCalculation(0));
 
@@ -109,21 +161,16 @@ export default defineComponent({
       { deep: true }
     );
 
-    const onlyBinary = (event: KeyboardEvent) => {
-      if (event.key !== "0" && event.key !== "1") {
-        event.preventDefault();
-      }
-    };
-
     return {
       code,
       dataOnly,
       hammingCode,
       showCalulations,
+      showTable,
       dataBitCalculation,
       parityBitCalculation,
       codeBitCalculation,
-      onlyBinary,
+      isBitPattern,
       isPowerOfTwo,
     };
   },
@@ -145,7 +192,7 @@ class HammingCode {
   readonly errorBit: number = 0;
 
   constructor(data: string, onlyDatabits?: boolean) {
-    if (data == "") {
+    if (!isBitPattern(data)) {
       return;
     }
 
@@ -194,14 +241,14 @@ class HammingCode {
 
       const value = this.parityBits[i].value;
 
-      output += prefix + " = " + formula + (formula != "" ? " = " : "") + value + "\n";
+      output += prefix + " = " + (formula != "" ? formula + " = " : "") + value + "\n";
     }
     return output;
   }
 
   getErrorBitMessage(): string {
     if (this.errorBit == 0) {
-      return "Kein erkennbarer Fehler";
+      return "kein erkennbarer Fehler";
     } else if (this.errorBit > this.code.length) {
       return "Fehler nicht korrigierbar";
     } else if (this.errorBit > 0 && this.errorBit <= this.code.length) {
@@ -209,6 +256,10 @@ class HammingCode {
     } else {
       return "Something went wrong :(";
     }
+  }
+
+  hasCorrectableError(): boolean {
+    return this.errorBit > 0 && this.errorBit <= this.code.length;
   }
 
   private calculateParityBits(): Array<ParityBit> {
@@ -289,26 +340,21 @@ class HammingCode {
 }
 
 class DataBitCalculation {
-  dataBits: number = 0;
+  dataBits: BigInt;
 
-  minParityBits: number = 0;
+  minParityBits: BigInt = BigInt(0);
 
-  constructor(dataBits: number) {
+  constructor(dataBits: BigInt) {
     this.dataBits = dataBits;
     this.recalculateMinParityBits();
   }
 
   recalculateMinParityBits() {
-    let parityBits = 0;
-    let dataBitIndex = 0;
-    let codeBitIndex = 1;
+    let parityBits = BigInt(0);
+    let dataBitIndex = BigInt(0);
     while (dataBitIndex < this.dataBits) {
-      if (isPowerOfTwo(codeBitIndex)) {
-        parityBits++;
-      } else {
-        dataBitIndex++;
-      }
-      codeBitIndex++;
+      dataBitIndex += BigInt(2) ** parityBits - BigInt(1);
+      parityBits++;
     }
     this.minParityBits = parityBits;
   }
@@ -375,28 +421,48 @@ function replaceCharAt(value: string, index: number, replacement: string): strin
   if (replacement.length != 1) return value;
   return value.substring(0, index) + replacement + value.substring(index + replacement.length);
 }
+
+function isBitPattern(input: string) {
+  return /^([01]*)$/.test(input);
+}
 </script>
 
 <style scoped>
-input {
-  margin: 0em 0em 1em 0em;
+div {
+  overflow: auto;
+  margin-bottom: 1em;
 }
-
-label {
-  margin: 1em;
+.parity-table {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+  text-align: center;
+  overflow: hidden;
+  width: auto;
 }
-
+.code-input {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+  width: 100%;
+  max-width: 30em;
+  margin: 0em 1em 0em 0em;
+}
+.calculation-input {
+  width: 100%;
+  max-width: 10em;
+}
 .codebit {
-  color: green;
+  color: var(--first-color);
 }
-
 .errorbit {
   text-decoration: underline;
-  text-decoration-color: springgreen;
+  text-decoration-color: black;
   text-decoration-thickness: 3px;
 }
-
 .paritybit {
-  color: blue;
+  color: var(--second-color);;
+}
+.monospace {
+  font-family: "Consolas", "Courier New", Courier, monospace;
+}
+.error-message {
+  color: red;
 }
 </style>

@@ -2,10 +2,8 @@
   <div class="header-block">.</div>
   <nav class="navbar header" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <router-link to="/" class="home-link">
-        TGI Pages - {{ version }}
-        <search-bar :options="options" :links="true" />
-      </router-link>
+      <router-link to="/" class="home-link"> TGI Pages - {{ version }} </router-link>
+      <search-bar :options="options" :links="true" />
     </div>
     <div class="navbar-item"></div>
   </nav>
@@ -13,6 +11,7 @@
   <div class="content">
     <router-view></router-view>
   </div>
+  <PWA />
 </template>
 
 <script lang="ts">
@@ -22,9 +21,10 @@ import { useI18n } from "vue-i18n";
 import { version } from "./../package.json";
 import SearchBar, { SearchOption } from "./components/SearchBar.vue";
 import { searchablePages } from "./router/navigation";
+import PWA from './pwa/PWA.vue';
 
 export default defineComponent({
-  components: { SearchBar },
+  components: { SearchBar, PWA },
   setup() {
     const route = useRoute();
     const { t } = useI18n();

@@ -1,19 +1,21 @@
 <template>
   <h1>Wahrheitstabelle</h1>
+  <intro></intro>
   <p>Gebe hier einen Boole'schen Ausdruck ein:</p>
   <math-input
     v-model="logicalUserInput"
     :mathTransformer="transform"
     @mathJson="(value) => (logicalMathJson = value)"
     :formatting="{customPrinter}"
+    data-intro="Hier die Aussagenlogische Formel eingeben"
   ></math-input>
 
   <div>
-    <label><input type="checkbox" v-model="flipBits" /> Flip the bits </label>
-    <label><input type="checkbox" v-model="hideColumns" /> Hide intermediate columns </label>
+    <label><input type="checkbox" data-intro="Wenn diese Option aktiviert ist wird Ordnung der Bits geflipped (die letzte Variable z.B. 1010 statt 0101)" v-model="flipBits" /> Flip the bits </label>
+    <label><input type="checkbox" data-intro="Wenn diese Option aktiviert ist wird nur die Ergebnisspalte angezeigt" v-model="hideColumns" /> Hide intermediate columns </label>
   </div>
 
-  <table class="truth-table">
+  <table class="truth-table" data-intro="Hier steht die Ergebnistabelle">
     <thead>
       <tr>
         <!-- TODO: Allow hiding intermediate columns? -->
@@ -49,7 +51,7 @@
   <br />
   <br />
   <h4>Documentation</h4>
-  <table class="documentation-table">
+  <table class="documentation-table" data-intro="Diese Tabelle zeigt alle möglichen Operatoren an. Alle 3 Notationen (Latex, Text, Symbol) sind austauschbar verwendbar" data-position="top">
     <thead>
       <tr>
         <th>Operator</th>
@@ -118,6 +120,7 @@ import { useBooleanExpressions } from "../math/boolean-expression";
 import { useUrlRef } from "../url-ref";
 import MathInput from "./../components/MathInput.vue";
 import MathOutput from "./../components/MathOutput.vue";
+import Intro from "./../components/Intro.vue";
 
 function useBooleanMath() {
   const useBoolean = useBooleanExpressions();
@@ -171,7 +174,7 @@ function useBooleanMath() {
 }
 
 export default defineComponent({
-  components: { MathInput, MathOutput },
+  components: { MathInput, MathOutput, Intro },
   setup() {
     const router = useRouter();
     const route = useRoute();
