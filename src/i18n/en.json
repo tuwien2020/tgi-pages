@@ -6,8 +6,19 @@
     "informationTheory": "Information Theory",
     "booleanAlgebra": "Boolean Algebra",
     "kvAndBdd": "KV Maps & BDD",
+    "digitalCircuits": "Digital Circuits",
     "finiteStateMachines": "Finite State Machines",
-    "sequentialLogic": "Sequential Logic"
+    "sequentialLogic": "Sequential Logic",
+    "memory": "Memory",
+    "sequentialCircuitIntro": "Sequential Circuits: Intro",
+    "sequentialCircuitImplementation": "Sequential Circuits: Implementation",
+    "sequentialCircuitMachines": "Sequential Circuits: Moore vs Mealy",
+    "micro16": "Micro16",
+    "instructionSet": "Instruction Set",
+    "pipelining": "Pipelining",
+    "memoryManagement": "Memory Management",
+    "multicore": "Multi-Core",
+    "memoryModels": "Memory Models"
   },
   "page": {
     "stackSimulator": "Stack Simulator",

@@ -99,43 +99,43 @@ export const chapters: { [c in Chapter]: ChapterEntry } = {
   },
   [Chapter.Speicher]: {
     number: 10,
-    name: "Speicher",
+    name: "category.memory",
   },
   [Chapter.Schaltwerke]: {
     number: 11,
-    name: "Schaltwerke",
+    name: "category.sequentialCircuitIntro",
   },
   [Chapter.SchaltwerkeRealisierung]: {
     number: 12,
-    name: "Schaltwerke Realisierung",
+    name: "category.sequentialCircuitImplementation",
   },
   [Chapter.SchaltwerkeMooreMealy]: {
     number: 13,
-    name: "Schaltwerke: Moore vs Mealy",
+    name: "category.sequentialCircuitMachines",
   },
   [Chapter.Micro16]: {
     number: 14,
-    name: "Micro16",
+    name: "category.micro16",
   },
   [Chapter.Befehlssatz]: {
     number: 15,
-    name: "Befehlssatz",
+    name: "category.instructionSet",
   },
   [Chapter.Pipelining]: {
     number: 16,
-    name: "Pipelining",
+    name: "category.pipelining",
   },
   [Chapter.Speichermanagement]: {
     number: 17,
-    name: "Speichermanagement",
+    name: "category.memoryManagement",
   },
   [Chapter.Multicore]: {
     number: 18,
-    name: "Multicore",
+    name: "category.multicore",
   },
   [Chapter.Speichermodelle]: {
     number: 19,
-    name: "Speichermodelle",
+    name: "category.memoryModels",
   },
 };
 

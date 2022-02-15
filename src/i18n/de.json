@@ -8,7 +8,17 @@
     "kvAndBdd": "KV & BDD",
     "digitalCircuits": "Digitalschaltungen",
     "finiteStateMachines": "Automaten",
-    "sequentialLogic": "Sequenzielle Logik"
+    "sequentialLogic": "Sequenzielle Logik",
+    "memory": "Speicher",
+    "sequentialCircuitIntro": "Schaltwerke: Einführung",
+    "sequentialCircuitImplementation": "Schaltwerke: Realisierung",
+    "sequentialCircuitMachines": "Schaltwerke: Moore vs Mealy",
+    "micro16": "Micro16",
+    "instructionSet": "Befehlssatz",
+    "pipelining": "Pipelining",
+    "memoryManagement": "Speichermanagement",
+    "multicore": "Multicore",
+    "memoryModels": "Speichermodelle"
   },
   "page": {
     "stackSimulator": "Stack Simulator",
