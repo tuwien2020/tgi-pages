@@ -18,7 +18,7 @@ Preferably, features are developed in another branch or fork. After the feature 
 
 ## Recommended Tooling
 
-I recommend using [Visual Studio Code](https://code.visualstudio.com/) with
+I recommend using [Visual Studio Code](https://code.visualstudio.com/) with the following. Do note that the extensions will get automatically recommended, so just hit install and enjoy.
 
 - [Prettier Extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) to format your files
 - Settings &rarr; Format On Save &rarr; Enable (`"editor.formatOnSave": true,`)
