@@ -79,23 +79,23 @@ export const chapters: { [c in Chapter]: ChapterEntry } = {
   },
   [Chapter.BoolescheAlgebra]: {
     number: 5,
-    name: "Boole'sche Algebra",
+    name: "category.booleanAlgebra",
   },
   [Chapter.KVBDD]: {
     number: 6,
-    name: "KV & BDD",
+    name: "category.kvAndBdd",
   },
   [Chapter.Digitalschaltungen]: {
     number: 7,
-    name: "Digitalschaltungen",
+    name: "category.digitalCircuits",
   },
   [Chapter.Automaten]: {
     number: 8,
-    name: "Automaten",
+    name: "category.finiteStateMachines",
   },
   [Chapter.SequenzielleLogik]: {
     number: 9,
-    name: "Sequenzielle Logik",
+    name: "category.sequentialLogic",
   },
   [Chapter.Speicher]: {
     number: 10,

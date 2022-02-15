@@ -3,7 +3,12 @@
     "numberFormats": "Zahlendarstellung",
     "numerical": "Numerik",
     "encodingDecoding": "Codierung",
-    "informationTheory": "Informationstheorie"
+    "informationTheory": "Informationstheorie",
+    "booleanAlgebra": "Boole'sche Algebra",
+    "kvAndBdd": "KV & BDD",
+    "digitalCircuits": "Digitalschaltungen",
+    "finiteStateMachines": "Automaten",
+    "sequentialLogic": "Sequenzielle Logik"
   },
   "page": {
     "stackSimulator": "Stack Simulator",

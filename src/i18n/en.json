@@ -3,7 +3,11 @@
     "numberFormats": "Number Formats",
     "numerical": "Numerical",
     "encodingDecoding": "Encoding/Decoding",
-    "informationTheory": "Information Theory"
+    "informationTheory": "Information Theory",
+    "booleanAlgebra": "Boolean Algebra",
+    "kvAndBdd": "KV Maps & BDD",
+    "finiteStateMachines": "Finite State Machines",
+    "sequentialLogic": "Sequential Logic"
   },
   "page": {
     "stackSimulator": "Stack Simulator",
