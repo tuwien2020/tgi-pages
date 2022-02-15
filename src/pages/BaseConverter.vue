@@ -1,28 +1,58 @@
 <template>
   <div>
     <h1>Base-Converter</h1>
-    <!-- TODO: Proper user input (not scuffed)-->
-    <label>
-      Zahl
-      <input type="text" v-model="numberToConvert" />
-      Von Basis
-      <input type="number" v-model="fromBase" />
-      Zu Basis
-      <input type="number" v-model="toBase" />
-      {{ result }}
-    </label>
+    <table class="input-table">
+      <tbody>
+        <tr>
+          <td class="right-align">
+            <label> Von Basis <input type="number" v-model="fromBase" class="basis-field" min="1" step="1" /></label>
+          </td>
+          <td>
+            <label> Zahl <input type="text" v-model="numberToConvert" placeholder="42.0" /> </label>
+          </td>
+        </tr>
+        <tr>
+          <td class="right-align">
+            <label>Zu Basis <input type="number" v-model="toBase" class="basis-field" min="1" step="1" /></label>
+          </td>
+          <td>= {{ result }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-    <h1>Calculate in base N</h1>
+    <h1>Calculate in base {{ baseForCalculations }}</h1>
     <label>
-      Base:
-      <input type="number" v-model="baseForCalculations" />
+      Basis
+      <input type="number" v-model="baseForCalculations" class="basis-field" />
     </label>
-    <br />
-    <input type="text" v-model="valueA" /> + <input type="text" v-model="valueB" /> = {{ calculationResult }}
-    <br />
-    <input type="text" v-model="valueA" /> * <input type="text" v-model="valueB" /> = {{ multiplicationResult }}
-    <br />
-    <input type="text" v-model="valueA" /> / <input type="text" v-model="valueB" /> = {{ divisionResult }}
+    <table class="input-table">
+      <tbody>
+        <tr>
+          <td><input type="text" v-model="valueA" /></td>
+          <td>+</td>
+          <td><input type="text" v-model="valueB" /></td>
+          <td>= {{ additionResult }}</td>
+        </tr>
+        <tr>
+          <td><input type="text" v-model="valueA" /></td>
+          <td>-</td>
+          <td><input type="text" v-model="valueB" /></td>
+          <td>= {{ subtractionResult }}</td>
+        </tr>
+        <tr>
+          <td><input type="text" v-model="valueA" /></td>
+          <td>*</td>
+          <td><input type="text" v-model="valueB" /></td>
+          <td>= {{ multiplicationResult }}</td>
+        </tr>
+        <tr>
+          <td><input type="text" v-model="valueA" /></td>
+          <td>/</td>
+          <td><input type="text" v-model="valueB" /></td>
+          <td>= {{ divisionResult }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -217,6 +247,19 @@ class IntegerWithBase {
     return result;
   }
 
+  private static trimLeadingZeros(value: number[]) {
+    let skipZeros = 0;
+    for (let i = 0; i < value.length; i++) {
+      const bit = value[skipZeros];
+      if (bit === 0) {
+        skipZeros++;
+      } else {
+        break;
+      }
+    }
+    return value.slice(skipZeros);
+  }
+
   add(other: IntegerWithBase): IntegerWithBase {
     if (other.base != this.base) throw new Error("Cannot perform mixed-base arithmetic");
 
@@ -375,16 +418,7 @@ class IntegerWithBase {
   }
 
   trimLeadingZeros() {
-    let skipZeros = 0;
-    for (let i = 0; i < this.value.length; i++) {
-      const bit = this.value[skipZeros];
-      if (bit === 0) {
-        skipZeros++;
-      } else {
-        break;
-      }
-    }
-    return new IntegerWithBase(this.isNegative, this.value.slice(skipZeros), this.base);
+    return new IntegerWithBase(this.isNegative, IntegerWithBase.trimLeadingZeros(this.value), this.base);
   }
 
   setSign(isNegative: boolean): IntegerWithBase {
@@ -414,14 +448,16 @@ class IntegerWithBase {
   }
 
   static formatValue(value: number[], base: number) {
+    value = IntegerWithBase.trimLeadingZeros(value);
     return base <= 10 + 26
       ? value.map((v) => (v <= 9 ? v + "" : String.fromCharCode("A".charCodeAt(0) + (v - 10)))).join("")
       : "[" + value.join(",") + "]";
   }
 
-  toString() {
+  toString(withBase: boolean = true) {
     const digits = IntegerWithBase.formatValue(this.value, this.base);
-    return `(${this.isNegative ? "-" : ""}${digits})_${this.base}`;
+    const numberText = `${this.isNegative ? "-" : ""}${digits}`;
+    return withBase ? `(${numberText})_${this.base}` : numberText;
   }
 }
 
@@ -490,11 +526,21 @@ export default defineComponent({
     const baseForCalculations = ref(10);
     const valueA = ref("");
     const valueB = ref("");
-    const calculationResult = computed(() => {
+    const additionResult = computed(() => {
       try {
         let a = new IntegerWithBase(valueA.value, baseForCalculations.value);
         let b = new IntegerWithBase(valueB.value, baseForCalculations.value);
-        return a.add(b);
+        return a.add(b).toString(false);
+      } catch (e) {
+        return e + "";
+      }
+    });
+
+    const subtractionResult = computed(() => {
+      try {
+        let a = new IntegerWithBase(valueA.value, baseForCalculations.value);
+        let b = new IntegerWithBase(valueB.value, baseForCalculations.value);
+        return a.subtract(b).toString(false);
       } catch (e) {
         return e + "";
       }
@@ -504,7 +550,7 @@ export default defineComponent({
       try {
         let a = new IntegerWithBase(valueA.value, baseForCalculations.value);
         let b = new IntegerWithBase(valueB.value, baseForCalculations.value);
-        return a.multiply(b);
+        return a.multiply(b).toString(false);
       } catch (e) {
         return e + "";
       }
@@ -514,7 +560,12 @@ export default defineComponent({
       try {
         let a = new IntegerWithBase(valueA.value, baseForCalculations.value);
         let b = new IntegerWithBase(valueB.value, baseForCalculations.value);
-        return a.divide(b);
+        let result = a.divide(b);
+        if (result.divisionByZero) {
+          return "Division durch 0";
+        } else {
+          return `${result.result.toString(false)} und ${result.remainder.toString(false)} Rest`;
+        }
       } catch (e) {
         return e + "";
       }
@@ -528,10 +579,22 @@ export default defineComponent({
       baseForCalculations,
       valueA,
       valueB,
-      calculationResult,
+      additionResult,
+      subtractionResult,
       multiplicationResult,
       divisionResult,
     };
   },
 });
 </script>
+<style scoped>
+.input-table {
+  width: auto;
+}
+.basis-field {
+  width: 5em;
+}
+.right-align {
+  text-align: right;
+}
+</style>
