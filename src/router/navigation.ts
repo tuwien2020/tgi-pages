@@ -141,18 +141,25 @@ export const chapters: { [c in Chapter]: ChapterEntry } = {
 
 const tools: PageEntry[] = [
   {
-    name: "Binär Codierung",
+    name: "page.binaryCoding",
     link: "binary-coding",
     category: chapters[Chapter.Codierung],
     internal: true,
     page: BinaryCoding,
   },
   {
-    name: "Binär Rechner",
+    name: "page.binaryCalculator",
     link: "binary-calculator",
     category: chapters[Chapter.Zahlendarstellung],
     internal: true,
     page: BinaryCalculator,
+  },
+  {
+    name: "page.baseConverter",
+    link: "base-converter",
+    internal: true,
+    category: chapters[Chapter.Zahlendarstellung],
+    page: BaseConverter,
   },
   {
     name: "Binär umrechnen (Bei direkten Umrechnungen kann es Rundungsfehler geben)",
@@ -161,20 +168,13 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Convert between number bases",
-    link: "base-converter",
-    internal: true,
-    category: chapters[Chapter.Zahlendarstellung],
-    page: BaseConverter,
-  },
-  {
-    name: "IEEE Rechner",
+    name: "page.ieeeFloatCalculator",
     link: "http://weitz.de/ieee/",
     category: chapters[Chapter.Numerik],
     internal: false,
   },
   {
-    name: "Wahrheitstabelle",
+    name: "page.truthTable",
     link: "truth-table",
     category: chapters[Chapter.BoolescheAlgebra],
     internal: true,
@@ -199,7 +199,7 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Mikro 16 Decompiler",
+    name: "page.micro16Decompiler",
     link: "micro16-decompiler",
     category: chapters[Chapter.Micro16],
     internal: true,
@@ -230,14 +230,14 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Hamming Code",
+    name: "page.hammingCode",
     link: "hamming-code",
     category: chapters[Chapter.Codierung],
     internal: true,
     page: HammingCode,
   },
   {
-    name: "Hamming Distanz",
+    name: "page.hammingDistance",
     link: "hamming-distance",
     category: chapters[Chapter.Codierung],
     internal: true,
@@ -256,7 +256,7 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Morse Code",
+    name: "page.morseCode",
     link: "https://morsedecoder.com/de/",
     category: chapters[Chapter.Codierung],
     internal: false,
@@ -269,7 +269,7 @@ const tools: PageEntry[] = [
   },
   {
     name: "log2 - Wolfram Alpha",
-    link: "https://www.wolframalpha.com/",
+    link: "https://www.wolframalpha.com/input?i=log_2%2827%29",
     category: chapters[Chapter.Informationstheorie],
     internal: false,
   },

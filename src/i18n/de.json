@@ -21,6 +21,15 @@
     "memoryModels": "Speichermodelle"
   },
   "page": {
+    "binaryCoding": "Binär Codierung",
+    "binaryCalculator": "Binär Rechner",
+    "baseConverter": "Zahlensysteme Umrechnen",
+    "ieeeFloatCalculator": "IEEE 754 Gleitkommazahl Rechner",
+    "truthTable": "Wahrheitstabelle",
+    "micro16Decompiler": "Micro16 Decompiler",
+    "hammingCode": "Hamming Code",
+    "hammingDistance": "Hamming Distanz",
+    "morseCode": "Morse Code",
     "stackSimulator": "Stack Simulator",
     "pipelineSimulator": "Pipeline Simulator (nicht empfohlen)",
     "interleavingGraph": "Interleaving Graph"
