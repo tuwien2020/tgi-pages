@@ -142,21 +142,21 @@ export const chapters: { [c in Chapter]: ChapterEntry } = {
 
 const tools: PageEntry[] = [
   {
-    name: "page.binaryCoding",
+    name: "page.binaryCoding.title",
     link: "binary-coding",
     category: chapters[Chapter.Codierung],
     internal: true,
     page: BinaryCoding,
   },
   {
-    name: "page.binaryCalculator",
+    name: "page.binaryCalculator.title",
     link: "binary-calculator",
     category: chapters[Chapter.Zahlendarstellung],
     internal: true,
     page: BinaryCalculator,
   },
   {
-    name: "page.baseConverter",
+    name: "page.baseConverter.title",
     link: "base-converter",
     internal: true,
     category: chapters[Chapter.Zahlendarstellung],
@@ -169,13 +169,13 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "page.ieeeFloatCalculator",
+    name: "page.ieeeFloatCalculator.title",
     link: "http://weitz.de/ieee/",
     category: chapters[Chapter.Numerik],
     internal: false,
   },
   {
-    name: "page.truthTable",
+    name: "page.truthTable.title",
     link: "truth-table",
     category: chapters[Chapter.BoolescheAlgebra],
     internal: true,
@@ -200,7 +200,7 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "page.micro16Decompiler",
+    name: "page.micro16Decompiler.title",
     link: "micro16-decompiler",
     category: chapters[Chapter.Micro16],
     internal: true,
@@ -231,14 +231,14 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "page.hammingCode",
+    name: "page.hammingCode.title",
     link: "hamming-code",
     category: chapters[Chapter.Codierung],
     internal: true,
     page: HammingCode,
   },
   {
-    name: "page.hammingDistance",
+    name: "page.hammingDistance.title",
     link: "hamming-distance",
     category: chapters[Chapter.Codierung],
     internal: true,
@@ -257,7 +257,7 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "page.morseCode",
+    name: "page.morseCode.title",
     link: "https://morsedecoder.com/de/",
     category: chapters[Chapter.Codierung],
     internal: false,
@@ -317,21 +317,21 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "page.stackSimulator",
+    name: "page.stackSimulator.title",
     link: "stack",
     category: chapters[Chapter.Befehlssatz],
     internal: true,
     page: Stack,
   },
   {
-    name: "page.pipelineSimulator",
+    name: "page.pipelineSimulator.title",
     link: "pipeline",
     category: chapters[Chapter.Pipelining],
     internal: true,
     page: Pipeline,
   },
   {
-    name: "page.interleavingGraph",
+    name: "page.interleavingGraph.title",
     link: "interleaving-graph",
     category: chapters[Chapter.Speichermodelle],
     internal: true,

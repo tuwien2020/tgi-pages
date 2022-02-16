@@ -21,17 +21,50 @@
     "memoryModels": "Speichermodelle"
   },
   "page": {
-    "binaryCoding": "Binär Codierung",
-    "binaryCalculator": "Binär Rechner",
-    "baseConverter": "Zahlensysteme Umrechnen",
-    "ieeeFloatCalculator": "IEEE 754 Gleitkommazahl Rechner",
-    "truthTable": "Wahrheitstabelle",
-    "micro16Decompiler": "Micro16 Decompiler",
-    "hammingCode": "Hamming Code",
-    "hammingDistance": "Hamming Distanz",
-    "morseCode": "Morse Code",
-    "stackSimulator": "Stack Simulator",
-    "pipelineSimulator": "Pipeline Simulator (nicht empfohlen)",
-    "interleavingGraph": "Interleaving Graph"
+    "binaryCoding": {
+      "title": "Binär Codierung"
+    },
+    "binaryCalculator": {
+      "title": "Binär Rechner"
+    },
+    "baseConverter": {
+      "title": "Zahlensysteme Umrechnen",
+      "baseConverter": "Zahlensysteme Umrechnen",
+      "baseCalculator": "Rechnen in Basis",
+      "fromBase": "Von Basis",
+      "toBase": "Zu Basis",
+      "number": "Zahl",
+      "base": "Basis",
+      "invalidNumber": "Ungültige Zahl",
+      "divisionByZero": "Division durch Null",
+      "resultAndRemainder": "{result} und {remainder} Rest"
+    },
+    "ieeeFloatCalculator": {
+      "title": "IEEE 754 Gleitkommazahl Rechner"
+    },
+    "truthTable": {
+      "title": "Wahrheitstabelle"
+    },
+    "micro16Decompiler": {
+      "title": "Micro16 Decompiler"
+    },
+    "hammingCode": {
+      "title": "Hamming Code"
+    },
+    "hammingDistance": {
+      "title": "Hamming Distanz"
+    },
+    "morseCode": {
+      "title": "Morse Code"
+    },
+    "stackSimulator": {
+      "title": "Stack Simulator"
+    },
+    "pipelineSimulator": {
+      "title": "Pipeline Simulator (nicht empfohlen)"
+    },
+    "interleavingGraph": {
+      "title": "Interleaving Graph"
+    }
   }
 }

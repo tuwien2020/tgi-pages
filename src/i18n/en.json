@@ -21,17 +21,50 @@
     "memoryModels": "Memory Models"
   },
   "page": {
-    "binaryCoding": "Binary Encoding and Decoding",
-    "binaryCalculator": "Binary Calculator",
-    "baseConverter": "Number Base Calculator",
-    "ieeeFloatCalculator": "IEEE 754 Float Calculator",
-    "truthTable": "Truth Table",
-    "micro16Decompiler": "Micro16 Decompiler",
-    "hammingCode": "Hamming Code",
-    "hammingDistance": "Hamming Distance",
-    "morseCode": "Morse Code",
-    "stackSimulator": "Stack Simulator",
-    "pipelineSimulator": "Pipeline Simulator (not recommended)",
-    "interleavingGraph": "Interleaving Graph"
+    "binaryCoding": {
+      "title": "Binary Encoding and Decoding"
+    },
+    "binaryCalculator": {
+      "title": "Binary Calculator"
+    },
+    "baseConverter": {
+      "title": "Number Base Calculator",
+      "baseConverter": "Base-Converter",
+      "baseCalculator": "Calculate in base",
+      "fromBase": "From base",
+      "toBase": "To base",
+      "number": "Number",
+      "base": "Base",
+      "invalidNumber": "Invalid number",
+      "divisionByZero": "Division by zero",
+      "resultAndRemainder": "{result} and {remainder} remainder"
+    },
+    "ieeeFloatCalculator": {
+      "title": "IEEE 754 Float Calculator"
+    },
+    "truthTable": {
+      "title": "Truth Table"
+    },
+    "micro16Decompiler": {
+      "title": "Micro16 Decompiler"
+    },
+    "hammingCode": {
+      "title": "Hamming Code"
+    },
+    "hammingDistance": {
+      "title": "Hamming Distance"
+    },
+    "morseCode": {
+      "title": "Morse Code"
+    },
+    "stackSimulator": {
+      "title": "Stack Simulator"
+    },
+    "pipelineSimulator": {
+      "title": "Pipeline Simulator (not recommended)"
+    },
+    "interleavingGraph": {
+      "title": "Interleaving Graph"
+    }
   }
 }
