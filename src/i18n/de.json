@@ -25,7 +25,8 @@
       "title": "Binär Codierung"
     },
     "binaryCalculator": {
-      "title": "Binär Rechner"
+      "title": "Binär Rechner",
+      "decimalPlaces": "Dezimalstellen"
     },
     "baseConverter": {
       "title": "Zahlensysteme Umrechnen",

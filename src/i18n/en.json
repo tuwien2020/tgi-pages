@@ -25,7 +25,8 @@
       "title": "Binary Encoding and Decoding"
     },
     "binaryCalculator": {
-      "title": "Binary Calculator"
+      "title": "Binary Calculator",
+      "decimalPlaces": "Decimal places"
     },
     "baseConverter": {
       "title": "Number Base Calculator",
