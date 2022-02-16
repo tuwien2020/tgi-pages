@@ -21,7 +21,7 @@ import { useI18n } from "vue-i18n";
 import { version } from "./../package.json";
 import SearchBar, { SearchOption } from "./components/SearchBar.vue";
 import { searchablePages } from "./router/navigation";
-import PWA from './pwa/PWA.vue';
+import PWA from "./pwa/PWA.vue";
 
 export default defineComponent({
   components: { SearchBar, PWA },
@@ -30,12 +30,14 @@ export default defineComponent({
     const { t } = useI18n();
 
     watch(route, ({ name }) => {
-      window.document.title = name as string;
+      window.document.title = t((name as string) + "");
     });
 
-    const options: SearchOption[] = searchablePages.map((p) => {
-      return { name: p.name, link: p.link, internal: p.internal };
-    });
+    const options = computed(() =>
+      searchablePages.map((p) => {
+        return { name: t(p.name), link: p.link, internal: p.internal } as SearchOption;
+      })
+    );
 
     return {
       t,

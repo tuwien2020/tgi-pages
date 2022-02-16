@@ -11,7 +11,6 @@ import BaseConverter from "./../pages/BaseConverter.vue";
 import CacheCalc from "./../pages/CacheCalc.vue";
 import Stack from "./../pages/Stack.vue";
 import Micro16Decompiler from "./../pages/Micro16Decompiler.vue";
-import { i18n } from "../i18n/i18n";
 
 type PageEntry =
   | {
@@ -347,11 +346,7 @@ export const pagesByCategory = groupBy<ChapterEntry, PageEntry>(
   (a, b) => a.number - b.number
 );
 export const searchablePages: PageSearchResult[] = indexedPages.map((p) => {
-  return { name: i18n.global.t(p.name), link: p.link, internal: p.internal };
+  return { name: p.name, link: p.link, internal: p.internal };
 });
-
-export const searchTools = (searchText: string): PageSearchResult[] => {
-  return searchablePages.filter((t) => t.name.match(searchText));
-};
 
 export default tools;
