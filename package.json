@@ -2,8 +2,8 @@
   "name": "tgi-pages",
   "version": "0.6.0",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
+    "start": "vite --open",
+    "dev": "vite --open",
     "build": "vite build",
     "deploy": "vite build --base=/tgi-pages/ && node utils/publish.js",
     "preview": "vite build && vite preview"
