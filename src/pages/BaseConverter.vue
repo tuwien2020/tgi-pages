@@ -186,7 +186,7 @@ class IntegerWithBase {
   constructor(isNegative: boolean, value: number[], base: number);
   constructor(valueOrIsNegative: string | boolean, baseOrValue: number | number[], nothingOrBase?: number) {
     if (typeof valueOrIsNegative === "string" && typeof baseOrValue === "number") {
-      this.base = baseOrValue;
+      this.base = Math.floor(baseOrValue);
       if (this.base <= 0) {
         throw new Error("Invalid base");
       }
@@ -196,7 +196,7 @@ class IntegerWithBase {
         .split("")
         .map((v) => this.parseCharacter(v));
     } else if (typeof nothingOrBase === "number" && typeof valueOrIsNegative === "boolean" && Array.isArray(baseOrValue)) {
-      this.base = nothingOrBase;
+      this.base = Math.floor(nothingOrBase);
       if (this.base <= 0) {
         throw new Error("Invalid base");
       }
