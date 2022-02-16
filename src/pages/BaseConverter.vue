@@ -1,28 +1,28 @@
 <template>
   <div>
-    <h1>t("page.baseConverter.baseConverter")</h1>
+    <h1>{{ t("page.baseConverter.baseConverter") }}</h1>
     <table class="input-table">
       <tbody>
         <tr>
           <td class="right-align">
-            <label> t("page.baseConverter.fromBase") <input type="number" v-model="fromBase" class="basis-field" min="1" step="1" /></label>
+            <label> {{ t("page.baseConverter.fromBase") }} <input type="number" v-model="fromBase" class="basis-field" min="1" step="1" /></label>
           </td>
           <td>
-            <label> t("page.baseConverter.number") <input type="text" v-model="numberToConvert" placeholder="42.0" /> </label>
+            <label> {{ t("page.baseConverter.number") }} <input type="text" v-model="numberToConvert" placeholder="42.0" /> </label>
           </td>
         </tr>
         <tr>
           <td class="right-align">
-            <label> t("page.baseConverter.toBase") <input type="number" v-model="toBase" class="basis-field" min="1" step="1" /></label>
+            <label> {{ t("page.baseConverter.toBase") }} <input type="number" v-model="toBase" class="basis-field" min="1" step="1" /></label>
           </td>
           <td>= {{ result }}</td>
         </tr>
       </tbody>
     </table>
 
-    <h1>t("page.baseConverter.baseCalculator") {{ baseForCalculations }}</h1>
+    <h1>{{ t("page.baseConverter.baseCalculator") }} {{ baseForCalculations }}</h1>
     <label>
-      t("page.baseConverter.base")
+      {{ t("page.baseConverter.base") }}
       <input type="number" v-model="baseForCalculations" class="basis-field" />
     </label>
     <table class="input-table">
