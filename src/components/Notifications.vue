@@ -4,6 +4,7 @@
     <div class="notification" v-for="(message, index) in notifications" :key="index">
       <button class="delete" @click="remove(index)"></button>
       {{ message.message }} - {{ message.details }}
+      <!-- TODO: Link to github issues and also tell the user to open their browser console & take a screenshot. -->
     </div>
   </Teleport>
 </template>
