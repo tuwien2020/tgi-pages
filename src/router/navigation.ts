@@ -176,6 +176,12 @@ const tools: PageEntry[] = [
     page: IEEECalculator,
   },
   {
+    name: "IEEE Rechner (Weitz)",
+    link: "http://weitz.de/ieee/",
+    category: chapters[Chapter.Numerik],
+    internal: false,
+  },
+  {
     name: "Wahrheitstabelle",
     link: "truth-table",
     category: chapters[Chapter.BoolescheAlgebra],
