@@ -11,6 +11,7 @@ import BaseConverter from "./../pages/BaseConverter.vue";
 import CacheCalc from "./../pages/CacheCalc.vue";
 import Stack from "./../pages/Stack.vue";
 import Micro16Decompiler from "./../pages/Micro16Decompiler.vue";
+import IEEECalculator from "./../pages/IEEECalculator.vue";
 
 type PageEntry =
   | {
@@ -169,9 +170,10 @@ const tools: PageEntry[] = [
   },
   {
     name: "IEEE Rechner",
-    link: "http://weitz.de/ieee/",
+    link: "ieee-calculator",
     category: chapters[Chapter.Numerik],
-    internal: false,
+    internal: true,
+    page: IEEECalculator,
   },
   {
     name: "Wahrheitstabelle",

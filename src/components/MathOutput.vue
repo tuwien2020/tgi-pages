@@ -4,10 +4,10 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, watchEffect, watch, computed, onMounted, nextTick } from "vue";
+import { ref, defineComponent, watchEffect, watch, computed, onMounted, nextTick, PropType } from "vue";
 import { MathJson } from "./../math/math-parsing";
 import Katex from "katex";
-import { useMathPrinting } from "./../math/math-printing";
+import { MathFormattingOptions, useMathPrinting } from "./../math/math-printing";
 
 export default defineComponent({
   props: {
