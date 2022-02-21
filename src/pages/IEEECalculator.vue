@@ -76,12 +76,16 @@ export default defineComponent({
       );
     });
 
-    function setIeeeFormat(value: IEEEFloatFormat) {
-      base.value = value.base;
-      mantissaSize.value = value.mantissaSize;
-      eMin.value = value.eMin;
-      eMax.value = value.eMax;
-      denormValue.value = value.allowDenormalized;
+    function setIeeeFormat(value: IEEEFloatFormat | null) {
+      if (value) {
+        base.value = value.base;
+        mantissaSize.value = value.mantissaSize;
+        eMin.value = value.eMin;
+        eMax.value = value.eMax;
+        denormValue.value = value.allowDenormalized;
+      } else {
+        // TODO: handle null elegantly
+      }
     }
 
     return {

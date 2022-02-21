@@ -2,7 +2,7 @@
   <div class="format-input">
     <b>𝔽(</b>
     <small>
-      <label>base: <input type="number" v-model="base" size="2" v-bind="$attrs" required /></label>,
+      <label>base: <input type="number" v-model="base" size="2" v-bind="$attrs" required disabled /></label>,
       <label>mantissaSize: <input type="number" v-model="mantissaSize" size="5" v-bind="$attrs" required /></label>,
       <label>eMin: <input type="number" v-model="eMin" size="5" v-bind="$attrs" required /></label>,
       <label>eMax: <input type="number" v-model="eMax" size="5" v-bind="$attrs" required /></label>,
@@ -10,10 +10,31 @@
     </small>
     <b>)</b>
   </div>
+  <div>
+    <table class="format-preview" :style="{ width: 2 * (1 + exponentBits + mantissaBits) + 'em' }">
+      <tbody>
+        <tr class="format-bits">
+          <td class="sign-bit"></td>
+          <td class="exponent-bit" v-for="(n, i) in exponentBits" :key="i"></td>
+          <td class="mantissa-bit" v-for="(n, i) in mantissaBits" :key="i"></td>
+        </tr>
+        <tr>
+          <td>sign</td>
+          <td :colspan="exponentBits">exponent</td>
+          <td :colspan="mantissaBits">mantissa</td>
+        </tr>
+        <tr>
+          <td>1 bit</td>
+          <td :colspan="exponentBits">{{ exponentBits }} bit</td>
+          <td :colspan="mantissaBits">{{ mantissaBits }} bit</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, shallowRef, watch } from "vue";
+import { computed, defineComponent, ref, shallowRef, watch } from "vue";
 
 export type IEEEFloatFormat = {
   /**
@@ -101,19 +122,23 @@ export default defineComponent({
       }
     );
 
+    const exponentBits = computed(() => 4); // TODO: How many bits does the exponent get?
+    const mantissaBits = computed(() => 11); // TODO: How many bits does the exponent get?
+
     return {
       base: base,
       mantissaSize: mantissaSize,
       eMin: eMin,
       eMax: eMax,
       denorm,
+      exponentBits,
+      mantissaBits,
     };
   },
 });
 </script>
--
 
-<style>
+<style scoped>
 .format-input {
   display: inline-block;
 }
@@ -135,5 +160,34 @@ export default defineComponent({
 .format-input input:invalid {
   /* Yes it looks ugly, someone else should take care of this */
   border: 2px dashed red;
+}
+
+.format-preview {
+  margin-top: 8px;
+  table-layout: fixed;
+  border-spacing: 10px 0px;
+  border-collapse: separate;
+  white-space: nowrap;
+  overflow: hidden;
+  /*text-overflow: clip;*/
+}
+.format-preview .format-bits {
+  height: 1em;
+}
+
+.sign-bit {
+  background: var(--second-color);
+}
+.exponent-bit {
+  background: var(--first-color);
+}
+.mantissa-bit {
+  background: var(--third-color);
+}
+
+.format-preview td {
+  padding: 0px;
+  border: 0px;
+  text-align: center;
 }
 </style>
