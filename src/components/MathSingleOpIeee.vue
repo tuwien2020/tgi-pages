@@ -82,13 +82,18 @@ function useMathWithStepsPrinting() {
     // empaphizeExponent greys out everything except the exponent
     // empaphizeRounding greys out everything except the mantissa and the rounding bits
     const formatMantissaOnlyLatexNumber = (op: string, value: BinaryNumber) => `& \\texttt{${op}} & \\mathtt{${bitArray(value.value)}}`;
-    const formatLatexNumber = (op: string, value: IEEENumber, empaphizeExponent: boolean = false, empaphizeRounding: boolean = false) =>
+    const formatLatexNumber = (
+      op: string,
+      value: IEEENumber,
+      empaphizeExponent: boolean = false,
+      empaphizeRounding: boolean = false,
+      showRounding: boolean = true
+    ) =>
       `& \\texttt{${op}} & ${empaphizeExponent || empaphizeRounding ? "\\color{lightgrey}" : ""}\\mathtt{${value.isNegative ? "1" : "0"}\\,}` +
       `${empaphizeExponent ? "\\color{defaultcolor}" : ""}\\mathtt{${bitArray(value.exponent)}\\,}\\color{lightgrey}` +
       `\\mathtt{${bitArray(value.implicit)}}` +
-      `& ${empaphizeExponent || empaphizeRounding ? "" : "\\color{defaultcolor}"} & \\mathtt{\\,} & \\mathtt{${bitArray(value.value)}\\, ${
-        (value.guardBit ? "1" : "0") + (value.roundBit ? "1" : "0") + (value.stickyBit ? "1" : "0")
-      }}`;
+      `& ${empaphizeExponent || empaphizeRounding ? "" : "\\color{defaultcolor}"} & \\mathtt{\\,${bitArray(value.value)}}` +
+      `${showRounding ? `\\mathtt{\\, ${(value.guardBit ? "1" : "0") + (value.roundBit ? "1" : "0") + (value.stickyBit ? "1" : "0")}}` : ""}`;
 
     if (operator === "Add" || operator === "Subtract") {
       let result = operator == "Add" ? valueA.add(valueB, mantissaSize) : valueA.subtract(valueB, mantissaSize);
@@ -154,7 +159,13 @@ function useMathWithStepsPrinting() {
       outputs[6] = `\\begin{alignedat}{6}\n${outputs[6]}\n\\end{alignedat}`;
       let output = outputs.join("\\\\");
 
-      output += `\\\\ => \\begin{alignedat}{6}\n${formatLatexNumber("", result.normalizeMantissa(mantissaSize))}\n\\end{alignedat}`;
+      output += `\\\\ => \\begin{alignedat}{6}\n${formatLatexNumber(
+        "",
+        result.normalizeMantissa(mantissaSize),
+        false,
+        false,
+        false
+      )}\n\\end{alignedat}`;
 
       console.log(output);
 
@@ -211,7 +222,13 @@ function useMathWithStepsPrinting() {
       outputs[4] = `\\begin{alignedat}{6}\n${outputs[4]}\n\\end{alignedat}`;
       outputs[6] = `\\begin{alignedat}{6}\n${outputs[6]}\n\\end{alignedat}`;
       let output = outputs.join("\\\\");
-      output += `\\\\ => \\begin{alignedat}{6}\n${formatLatexNumber("", result.normalizeMantissa(mantissaSize))}\n\\end{alignedat}`;
+      output += `\\\\ => \\begin{alignedat}{6}\n${formatLatexNumber(
+        "",
+        result.normalizeMantissa(mantissaSize),
+        false,
+        false,
+        false
+      )}\n\\end{alignedat}`;
 
       return output;
     }

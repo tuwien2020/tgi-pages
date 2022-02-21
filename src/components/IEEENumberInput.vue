@@ -2,9 +2,9 @@
   <div class="math-input">
     <div class="binary-operator">
       <input type="button" value="16 Bit" v-bind="$attrs" v-on:click="binaryOperator = 16" />
-      <input type="button" value="32 Bit" v-bind="$attrs" v-on:click="binaryOperator = 32" />
+      <!--input type="button" value="32 Bit" v-bind="$attrs" v-on:click="binaryOperator = 32" />
       <input type="button" value="64 Bit" v-bind="$attrs" v-on:click="binaryOperator = 64" />
-      <input type="button" value="128 Bit" v-bind="$attrs" v-on:click="binaryOperator = 128" />
+      <input type="button" value="128 Bit" v-bind="$attrs" v-on:click="binaryOperator = 128" /-->
     </div>
     <input type="text" v-model="mathInput" size="100" v-bind="$attrs" />
     <br />

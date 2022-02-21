@@ -492,14 +492,20 @@ export class IEEENumber {
     const n2: BinaryNumber = new BinaryNumber(false, number2.exponent, 0);
     const exponent = this.getNormalizedExponent(number1, number2);
 
-    const diff1 = exponent.subtract(n1);
-    const diff2 = exponent.subtract(n2);
+    // diff1 = exponent - n1
+    // diff2 = exponent - n2
+    let diff1 = exponent.subtract(n1), diff2 = exponent.subtract(n2);
 
     let numbers = [number1, number2];
+    
     if (diff1.isZero() && !diff2.isZero()) {
-      const moveBy = diff2.getDecimalValue();
-
-      let values = new Array<boolean>(moveBy as number - 1).fill(false).concat(!number2.isNormalized).concat(number2.value);
+      // diff1 == 0 && diff2 != 0 => exponent of n2 is off (too small)
+      let values = number2.value;
+      // exponent [0..00] === [0..01]
+      if (!n2.isZero()) {
+        const moveBy = diff2.getDecimalValue();
+        values = new Array<boolean>(Math.max(moveBy as number - 1, 0)).fill(false).concat(!number2.isNormalized).concat(number2.value);
+      }
       numbers[1] = new IEEENumber(number2.isNegative, exponent.value as boolean[], 
         values.slice(0, number2.value.length),
         [false],
@@ -508,8 +514,13 @@ export class IEEENumber {
         values.slice(number2.value.length, number2.value.length + 3)[2]);
       numbers[1].isNormalized = true;
     } else if (diff2.isZero() && !diff1.isZero()) {
-      const moveBy = diff1.getDecimalValue();
-      let values = new Array<boolean>(moveBy as number - 1).fill(false).concat(!number1.isNormalized).concat(number1.value);
+      // diff2 == 0 && diff1 != 0 => exponent of n1 is off (too small)
+      let values = number1.value;
+      // exponent [0..00] === [0..01]
+      if (!n1.isZero()) {
+        const moveBy = diff1.getDecimalValue();
+        values = new Array<boolean>(Math.max(moveBy as number - 1, 0)).fill(false).concat(!number1.isNormalized).concat(number1.value);
+      }
       numbers[0] = new IEEENumber(number1.isNegative, exponent.value as boolean[], 
         values.slice(0, number1.value.length),
         [false],
@@ -517,7 +528,7 @@ export class IEEENumber {
         values.slice(number1.value.length, number1.value.length + 3)[1],
         values.slice(number1.value.length, number1.value.length + 3)[2]);
       numbers[0].isNormalized = true;
-    }
+    }   
 
     // console.log(numbers, numbers.sort((a, b) => (a.compareToAbs(b))));
     return numbers.sort((a, b) => (a.compareToAbs(b)));
@@ -615,14 +626,16 @@ export class IEEENumber {
       let diff = 0;
       mantissa = res;
       exponent = this.exponent;
-      console.log(this.implicit, mantissa, exponent);
       
       if (!this.implicit[0]) {
         for (let v of res) {
-          if (v === false && !exponent.every(v => v === false)) {
-            exponent = new BinaryNumber(false, exponent, 0).subtract(BinaryNumber.fromDecimal(1)).value;
+          let e: BinaryNumber = new BinaryNumber(false, exponent, 0);
+          if (v === false && e.compareTo(BinaryNumber.fromDecimal(1)) >= 0) {
+            exponent = e.subtract(BinaryNumber.fromDecimal(1)).value;
             implicit = [!exponent.every(v => v === false)];
-            mantissa = mantissa.slice(1);
+            if (implicit[0]) {
+              mantissa = mantissa.slice(1);
+            }
             diff++;
           }
           else break;
@@ -636,7 +649,12 @@ export class IEEENumber {
   }
 
   multiply(other: IEEENumber, eValue: number, mantissaSize: number): IEEENumber {
-    const exponent = BinaryNumber.fromOffsetBinary(this.exponent, []).add(BinaryNumber.fromOffsetBinary(other.exponent, [])).subtract(BinaryNumber.fromDecimal(eValue)).value;
+    let newExponent = BinaryNumber.fromOffsetBinary(this.exponent, []).add(BinaryNumber.fromOffsetBinary(other.exponent, [])).subtract(BinaryNumber.fromDecimal(eValue));
+    if (newExponent.isNegative) {
+      // exponent too small -> result is zero
+      return IEEENumber.zero(newExponent.value.length, mantissaSize);
+    }
+    const exponent = newExponent.value;
     let mantissa = BinaryNumber.fromIEEENumber(this).multiply(BinaryNumber.fromIEEENumber(other)).value;
 
     if (2 * BinaryNumber.fromIEEENumber(this).value.length === mantissa.length) {
@@ -650,7 +668,6 @@ export class IEEENumber {
     const m = mantissa.slice(Math.max(-mantissa.length, -2 - mantissaSize), -3);
     const grs = mantissa.slice(-3);
     const i = mantissa.slice(0, Math.max(-mantissa.length, -2 - mantissaSize));
-    console.log(mantissa);
     
     return new IEEENumber(this.isNegative !== other.isNegative, exponent as boolean[], m, i || [false], grs[0], grs[1], grs[2], exponent.every(v => v === false) || i.length > 0);
   }

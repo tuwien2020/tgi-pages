@@ -63,7 +63,7 @@ export default defineComponent({
     const mantissaSize = shallowRef<Number>(11);
     const eMin = shallowRef<Number>(-14);
     const eMax = shallowRef<Number>(15);
-    const denormValue = shallowRef<String>("false");
+    const denormValue = shallowRef<String>("true");
     const validFunction = shallowRef<Boolean>(true);
 
     const binaryOperator = shallowRef<Number>(16);
