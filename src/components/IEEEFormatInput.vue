@@ -1,20 +1,21 @@
 <template>
-  <div class="function-input">
+  <div class="format-input">
     <b>𝔽(</b>
     <small>
-      base:<input type="number" v-model="base" size="2" v-bind="$attrs" disabled />, mantissaSize:<input
+      base:<input type="number" v-model="base" size="2" v-bind="$attrs" disabled /> , mantissaSize:
+      <input type="number" v-model="mantissaSize" size="5" v-bind="$attrs" disabled />, eMin:<input
         type="number"
-        v-model="mantissaSize"
+        v-model="eMin"
         size="5"
         v-bind="$attrs"
         disabled
-      />, eMin:<input type="number" v-model="eMin" size="5" v-bind="$attrs" disabled />, eMax:<input
-        type="number"
-        v-model="eMax"
+      />, eMax: <input type="number" v-model="eMax" size="5" v-bind="$attrs" disabled />, denorm:<input
+        type="text"
+        v-model="denorm"
         size="5"
         v-bind="$attrs"
         disabled
-      />, denorm:<input type="text" v-model="denorm" size="5" v-bind="$attrs" disabled />
+      />
     </small>
     <b>)</b>
   </div>
@@ -95,21 +96,21 @@ export default defineComponent({
 -
 
 <style>
-.function-input {
+.format-input {
   display: inline-block;
 }
-.function-input input {
+.format-input input {
   font-family: "Consolas", "Courier New", Courier, monospace;
 }
 
-.function-input input::-webkit-outer-spin-button,
-.function-input input::-webkit-inner-spin-button {
+.format-input input::-webkit-outer-spin-button,
+.format-input input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
 /* Firefox */
-.function-input input[type="number"] {
+.format-input input[type="number"] {
   -moz-appearance: textfield;
 }
 

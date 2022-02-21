@@ -44,7 +44,7 @@ import { useUrlRef } from "../url-ref";
 import { useBinaryExpressions } from "./../math/binary-expression";
 import { MathJson, MathJsonOperator } from "./../math/math-parsing";
 import MathInput from "./../components/MathInput.vue";
-import ieeeFunctionInput from "./../components/IEEEFunctionInput.vue";
+import ieeeFunctionInput from "../components/IEEEFormatInput.vue";
 import MathSingleOp from "./../components/MathSingleOp.vue";
 import { BinaryNumber, IEEENumber } from "../math/binary-number";
 import ieeeNumberInput from "./../components/IEEENumberInput.vue";
