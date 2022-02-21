@@ -24,14 +24,14 @@
   </ieee-number-input>
 
   <br />
-  <span v-if="!isSingleOpExpression" class="error">Cannot compute more than one operation for now!</span>
+  <span v-if="!singleOpExpression" class="error">Cannot compute more than one operation for now!</span>
   <math-single-op-ieee
-    v-if="isSingleOpExpression"
-    :operator="mathJsonExpression?.[0]"
-    :valueA="mathJsonExpression?.[1]"
-    :valueB="mathJsonExpression?.[2]"
-    :mantissaSize="mantissaSize.value"
-    :eValue="eMin.value"
+    v-if="singleOpExpression"
+    :operator="(singleOpExpression[0] as any)"
+    :valueA="(singleOpExpression[1] as any)"
+    :valueB="(singleOpExpression[2] as any)"
+    :mantissaSize="mantissaSize"
+    :eValue="eMin"
   />
 </template>
 
@@ -63,17 +63,18 @@ export default defineComponent({
     const eMax = ref(15);
     const denormValue = ref(true);
 
-    const binaryOperator = shallowRef<Number>(16);
+    const binaryOperator = ref(16);
 
     const mathJsonExpression = shallowRef<MathJson>();
     const divisionDecimals = ref(7);
-    const isSingleOpExpression = computed(() => {
-      return (
-        Array.isArray(mathJsonExpression.value) &&
+
+    const singleOpExpression = computed(() => {
+      return Array.isArray(mathJsonExpression.value) &&
         mathJsonExpression.value.length === 3 &&
         mathJsonExpression.value[1] instanceof IEEENumber &&
         mathJsonExpression.value[2] instanceof IEEENumber
-      );
+        ? mathJsonExpression.value
+        : null;
     });
 
     function setIeeeFormat(value: IEEEFloatFormat | null) {
@@ -99,7 +100,7 @@ export default defineComponent({
       transform: useBinary.transformIEEE,
       customPrinter: useBinary.customPrinter,
       mathJsonExpression,
-      isSingleOpExpression,
+      singleOpExpression,
       divisionDecimals,
       setIeeeFormat,
     };
