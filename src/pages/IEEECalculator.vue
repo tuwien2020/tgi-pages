@@ -7,9 +7,8 @@
       v-bind:mantissaSize="mantissaSize"
       v-bind:eMin="eMin"
       v-bind:eMax="eMax"
-      @validFunction="(value) => (validFunction = value)"
+      @ieeeFormat="setIeeeFormat"
       :denormValue="denormValue"
-      autofocus
     ></ieee-function-input>
     Rounding: <i>round to nearest - round to even</i>
   </label>
@@ -21,7 +20,6 @@
     @mathJson="(value) => (mathJsonExpression = value)"
     :formatting="{ customPrinter }"
     :binaryOperator="binaryOperator"
-    autofocus
   >
   </ieee-number-input>
 
@@ -44,7 +42,7 @@ import { useUrlRef } from "../url-ref";
 import { useBinaryExpressions } from "./../math/binary-expression";
 import { MathJson, MathJsonOperator } from "./../math/math-parsing";
 import MathInput from "./../components/MathInput.vue";
-import ieeeFunctionInput from "../components/IEEEFormatInput.vue";
+import ieeeFunctionInput, { IEEEFloatFormat } from "../components/IEEEFormatInput.vue";
 import MathSingleOp from "./../components/MathSingleOp.vue";
 import { BinaryNumber, IEEENumber } from "../math/binary-number";
 import ieeeNumberInput from "./../components/IEEENumberInput.vue";
@@ -59,12 +57,11 @@ export default defineComponent({
     const userInput = urlRef("input", "1010100010001000+10111100100010011");
     const useBinary = useBinaryExpressions();
 
-    const base = shallowRef<Number>(2);
-    const mantissaSize = shallowRef<Number>(11);
-    const eMin = shallowRef<Number>(-14);
-    const eMax = shallowRef<Number>(15);
-    const denormValue = shallowRef<String>("true");
-    const validFunction = shallowRef<Boolean>(true);
+    const base = ref(2);
+    const mantissaSize = ref(11);
+    const eMin = ref(-14);
+    const eMax = ref(15);
+    const denormValue = ref(true);
 
     const binaryOperator = shallowRef<Number>(16);
 
@@ -79,6 +76,14 @@ export default defineComponent({
       );
     });
 
+    function setIeeeFormat(value: IEEEFloatFormat) {
+      base.value = value.base;
+      mantissaSize.value = value.mantissaSize;
+      eMin.value = value.eMin;
+      eMax.value = value.eMax;
+      denormValue.value = value.allowDenormalized;
+    }
+
     return {
       userInput,
       mantissaSize,
@@ -86,13 +91,13 @@ export default defineComponent({
       eMin,
       eMax,
       denormValue,
-      validFunction,
       binaryOperator,
       transform: useBinary.transformIEEE,
       customPrinter: useBinary.customPrinter,
       mathJsonExpression,
       isSingleOpExpression,
       divisionDecimals,
+      setIeeeFormat,
     };
   },
 });

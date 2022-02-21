@@ -2,20 +2,11 @@
   <div class="format-input">
     <b>𝔽(</b>
     <small>
-      base:<input type="number" v-model="base" size="2" v-bind="$attrs" disabled /> , mantissaSize:
-      <input type="number" v-model="mantissaSize" size="5" v-bind="$attrs" disabled />, eMin:<input
-        type="number"
-        v-model="eMin"
-        size="5"
-        v-bind="$attrs"
-        disabled
-      />, eMax: <input type="number" v-model="eMax" size="5" v-bind="$attrs" disabled />, denorm:<input
-        type="text"
-        v-model="denorm"
-        size="5"
-        v-bind="$attrs"
-        disabled
-      />
+      <label>base: <input type="number" v-model="base" size="2" v-bind="$attrs" required /></label>,
+      <label>mantissaSize: <input type="number" v-model="mantissaSize" size="5" v-bind="$attrs" required /></label>,
+      <label>eMin: <input type="number" v-model="eMin" size="5" v-bind="$attrs" required /></label>,
+      <label>eMax: <input type="number" v-model="eMax" size="5" v-bind="$attrs" required /></label>,
+      <label>denorm: <input type="checkbox" v-model="denorm" v-bind="$attrs" required /> {{ denorm }}</label>
     </small>
     <b>)</b>
   </div>
@@ -23,6 +14,34 @@
 
 <script lang="ts">
 import { defineComponent, ref, shallowRef, watch } from "vue";
+
+export type IEEEFloatFormat = {
+  /**
+   * Which base to use (binary, decimal, ...)
+   */
+  base: number;
+
+  /**
+   * Minimum exponent
+   */
+  eMin: number;
+
+  /**
+   * Maximum exponent
+   */
+  eMax: number;
+
+  /**
+   * Size of the mantissa in bits
+   * (Does this include the implicit bit?)
+   */
+  mantissaSize: number;
+
+  /**
+   * If denormalized numbers should also be handled
+   */
+  allowDenormalized: boolean;
+};
 
 export default defineComponent({
   props: {
@@ -43,12 +62,12 @@ export default defineComponent({
       required: true,
     },
     denormValue: {
-      type: String,
+      type: Boolean,
       required: true,
     },
   },
   emits: {
-    validFunction: (value: Boolean) => true,
+    ieeeFormat: (value: IEEEFloatFormat | null) => true,
   },
   inheritAttrs: false,
   setup(props, context) {
@@ -57,30 +76,30 @@ export default defineComponent({
     const eMin = ref(props.eMin);
     const eMax = ref(props.eMax);
     const denorm = ref(props.denormValue);
-    let validFunction = true;
 
     watch(
       [base, mantissaSize, eMin, eMax, denorm],
-      (value: Array<Object>) => {
-        const baseCorrect = value[0] !== "";
-        const mantissaCorrect = value[1] !== "" && +value[1] > 0;
-        const eCorrect = value[2] !== "" && value[3] !== "" && +value[3] > +value[2];
-        const denormCorrect = ("" + value[4]).toLowerCase() === "false" || ("" + value[4]).toLowerCase() === "true";
-        validFunction = baseCorrect && mantissaCorrect && eCorrect && denormCorrect;
-        context.emit("validFunction", validFunction);
+      (value) => {
+        // TODO: Use https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation#the_constraint_validation_api
+        const baseCorrect = +value[0] > 1;
+        const mantissaCorrect = +value[1] > 0;
+        const eCorrect = (value[2] as any) !== "" && (value[3] as any) !== "" && +value[3] > +value[2];
+        if (baseCorrect && mantissaCorrect && eCorrect) {
+          context.emit("ieeeFormat", {
+            base: base.value,
+            mantissaSize: mantissaSize.value,
+            eMin: eMin.value,
+            eMax: eMax.value,
+            allowDenormalized: denorm.value,
+          });
+        } else {
+          context.emit("ieeeFormat", null);
+        }
       },
       {
         immediate: true,
       }
     );
-    /*watch(denorm, (value) => {
-        validFunction = ;
-        context.emit("validFunction", validFunction);
-    },
-    {
-        immediate: true
-    }
-    );*/
 
     return {
       base: base,
@@ -88,7 +107,6 @@ export default defineComponent({
       eMin: eMin,
       eMax: eMax,
       denorm,
-      validFunction,
     };
   },
 });
@@ -114,7 +132,8 @@ export default defineComponent({
   -moz-appearance: textfield;
 }
 
-.error {
-  color: red;
+.format-input input:invalid {
+  /* Yes it looks ugly, someone else should take care of this */
+  border: 2px dashed red;
 }
 </style>
