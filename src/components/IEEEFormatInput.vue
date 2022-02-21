@@ -113,8 +113,4 @@ export default defineComponent({
 .format-input input[type="number"] {
   -moz-appearance: textfield;
 }
-
-.error {
-  color: red;
-}
 </style>
