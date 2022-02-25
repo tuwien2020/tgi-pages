@@ -3,14 +3,25 @@
   <label>
     <h1>IEEE 754 Rechner</h1>
     <ieee-function-input
-      v-bind:base="base"
-      v-bind:mantissaSize="mantissaSize"
-      v-bind:eMin="eMin"
-      v-bind:eMax="eMax"
+      :base="base"
+      :mantissaSize="mantissaSize"
+      :eMin="eMin"
+      :eMax="eMax"
       @ieeeFormat="setIeeeFormat"
+      ref="formatInput"
       :denormValue="denormValue"
     ></ieee-function-input>
     Rounding: <i>round to nearest - round to even</i>
+    <div class="binary-operator">
+      <input type="button" value="16 Bit" @click="setIeeeFormat({ base: 2, eMin: -14, eMax: 15, mantissaSize: 11, allowDenormalized: true })" />
+      <input type="button" value="32 Bit" @click="setIeeeFormat({ base: 2, eMin: -126, eMax: 127, mantissaSize: 24, allowDenormalized: true })" />
+      <input type="button" value="64 Bit" @click="setIeeeFormat({ base: 2, eMin: -1022, eMax: 1023, mantissaSize: 53, allowDenormalized: true })" />
+      <input
+        type="button"
+        value="128 Bit"
+        @click="setIeeeFormat({ base: 2, eMin: -16382, eMax: 16383, mantissaSize: 64, allowDenormalized: true })"
+      />
+    </div>
   </label>
 
   <br />
@@ -19,7 +30,9 @@
     :mathTransformer="transform"
     @mathJson="(value) => (mathJsonExpression = value)"
     :formatting="{ customPrinter }"
-    :binaryOperator="binaryOperator"
+    :mantissaSize="mantissaSize"
+    :eMin="eMin"
+    :eMax="eMax"
   >
   </ieee-number-input>
 
@@ -44,7 +57,7 @@ import { MathJson, MathJsonOperator } from "./../math/math-parsing";
 import MathInput from "./../components/MathInput.vue";
 import ieeeFunctionInput, { IEEEFloatFormat } from "../components/IEEEFormatInput.vue";
 import MathSingleOp from "./../components/MathSingleOp.vue";
-import { BinaryNumber, IEEENumber } from "../math/binary-number";
+import { IEEENumber } from "../math/binary-number";
 import ieeeNumberInput from "./../components/IEEENumberInput.vue";
 import MathSingleOpIeee from "./../components/MathSingleOpIeee.vue";
 
@@ -62,8 +75,6 @@ export default defineComponent({
     const eMin = ref(-14);
     const eMax = ref(15);
     const denormValue = ref(true);
-
-    const binaryOperator = ref(16);
 
     const mathJsonExpression = shallowRef<MathJson>();
     const divisionDecimals = ref(7);
@@ -89,6 +100,8 @@ export default defineComponent({
       }
     }
 
+    setIeeeFormat({ base: 3, eMin: -15, eMax: 14, mantissaSize: 12, allowDenormalized: false });
+
     return {
       userInput,
       mantissaSize,
@@ -96,7 +109,6 @@ export default defineComponent({
       eMin,
       eMax,
       denormValue,
-      binaryOperator,
       transform: useBinary.transformIEEE,
       customPrinter: useBinary.customPrinter,
       mathJsonExpression,

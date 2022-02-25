@@ -1,11 +1,5 @@
 <template>
   <div class="math-input">
-    <div class="binary-operator">
-      <input type="button" value="16 Bit" v-bind="$attrs" v-on:click="binaryOperator = 16" />
-      <!--input type="button" value="32 Bit" v-bind="$attrs" v-on:click="binaryOperator = 32" />
-      <input type="button" value="64 Bit" v-bind="$attrs" v-on:click="binaryOperator = 64" />
-      <input type="button" value="128 Bit" v-bind="$attrs" v-on:click="binaryOperator = 128" /-->
-    </div>
     <input type="text" v-model="mathInput" size="100" v-bind="$attrs" />
     <br />
     <math-output :value="mathJson" :formatting="formatting"></math-output>
@@ -28,16 +22,24 @@ export default defineComponent({
       required: true,
     },
     mathTransformer: {
-      type: Function as PropType<(value: MathJson, binaryOperator: number) => MathJson<any>>,
+      type: Function as PropType<(value: MathJson, eMin: number, eMax: number, mantissaSize: number) => MathJson<any>>,
       required: true,
     },
     formatting: {
       type: Object,
       required: false,
     },
-    binaryOperator: {
+    mantissaSize: {
       type: Number,
-      required: false,
+      required: true,
+    },
+    eMin: {
+      type: Number,
+      required: true,
+    },
+    eMax: {
+      type: Number,
+      required: true,
     },
   },
   emits: {
@@ -48,55 +50,79 @@ export default defineComponent({
   setup(props, context) {
     const mathInput = ref("" + props.modelValue);
     const mathJson = shallowRef<MathJson>("");
-    const binaryOperator = ref(props.binaryOperator);
+    let mantissaSize = ref(props.mantissaSize);
+    let eMin = ref(props.eMin);
+    let eMax = ref(props.eMax);
     let lastParsedValue: MathJson<MathJsonNumber>;
     let numbers: BinaryNumber[] = [];
+
+    const transformValue = () => {
+      let transformed: MathJson<any> = props.mathTransformer(
+        lastParsedValue,
+        eMin.value as number,
+        eMax.value as number,
+        mantissaSize.value as number
+      );
+      if (transformed[0] && transformed[0] !== "Error") {
+        for (let o of transformed) {
+          if (o instanceof BinaryNumber) {
+            // if (o.value.length != binaryOperator.value) {
+            //   transformed = ["Error", "parse error when comparing the binary operator to the inputs"];
+            //   break;
+            // }
+          }
+        }
+      }
+      context.emit("mathJson", transformed);
+      mathJson.value = transformed;
+    };
+
+    watch(
+      () => props.mantissaSize,
+      (value) => {
+        mantissaSize.value = value;
+        transformValue();
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    watch(
+      () => props.eMin,
+      (value) => {
+        eMin.value = value;
+        transformValue();
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    watch(
+      () => props.eMax,
+      (value) => {
+        eMax.value = value;
+        transformValue();
+      },
+      {
+        immediate: true,
+      }
+    );
 
     watch(
       () => props.modelValue,
       (value) => {
         mathInput.value = value;
         lastParsedValue = parseMath(value);
-        let transformed: MathJson<any> = props.mathTransformer(lastParsedValue, binaryOperator.value as number);
-        if (transformed[0] && transformed[0] !== "Error") {
-          for (let o of transformed) {
-            if (o instanceof BinaryNumber) {
-              if (o.value.length != binaryOperator.value) {
-                transformed = ["Error", "parse error when comparing the binary operator to the inputs"];
-                break;
-              }
-            }
-          }
-        }
-        context.emit("mathJson", transformed);
-        mathJson.value = transformed;
+
+        transformValue();
       },
       {
         immediate: true,
       }
     );
 
-    watch(
-      binaryOperator,
-      (value) => {
-        let transformed: MathJson<any> = props.mathTransformer(lastParsedValue, binaryOperator.value as number);
-        if (transformed[0] && transformed[0] !== "Error") {
-          for (let o of transformed) {
-            if (o instanceof BinaryNumber) {
-              if (o.value.length != binaryOperator.value) {
-                transformed = ["Error", "parse error when comparing the binary operator to the inputs"];
-                break;
-              }
-            }
-          }
-        }
-        context.emit("mathJson", transformed);
-        mathJson.value = transformed;
-      },
-      {
-        immediate: true,
-      }
-    );
     watch(mathInput, (value) => {
       context.emit("update:modelValue", value);
     });
@@ -105,7 +131,9 @@ export default defineComponent({
       mathInput,
       mathJson,
       numbers,
-      binaryOperator,
+      mantissaSize,
+      eMin,
+      eMax,
       formatting: props.formatting,
     };
   },

@@ -4,8 +4,8 @@
     <small>
       <label>base: <input type="number" v-model="base" size="2" v-bind="$attrs" required disabled /></label>,
       <label>mantissaSize: <input type="number" v-model="mantissaSize" size="5" v-bind="$attrs" required /></label>,
-      <label>eMin: <input type="number" v-model="eMin" size="5" v-bind="$attrs" required /></label>,
-      <label>eMax: <input type="number" v-model="eMax" size="5" v-bind="$attrs" required /></label>,
+      <label>eMin: <input type="number" v-model="eMin" size="5" v-bind="$attrs" v-on:blur="calcMax" required /></label>,
+      <label>eMax: <input type="number" v-model="eMax" size="5" v-bind="$attrs" v-on:blur="calcMax" required /></label>,
       <label>denorm: <input type="checkbox" v-model="denorm" v-bind="$attrs" required /> {{ denorm }}</label>
     </small>
     <b>)</b>
@@ -53,8 +53,7 @@ export type IEEEFloatFormat = {
   eMax: number;
 
   /**
-   * Size of the mantissa in bits
-   * (Does this include the implicit bit?)
+   * Size of the mantissa in bits (including the implicit bit)
    */
   mantissaSize: number;
 
@@ -90,6 +89,11 @@ export default defineComponent({
   emits: {
     ieeeFormat: (value: IEEEFloatFormat | null) => true,
   },
+  methods: {
+    updateValues: function (values: IEEEFloatFormat | null) {
+      console.log(values);
+    },
+  },
   inheritAttrs: false,
   setup(props, context) {
     const base = ref(props.base);
@@ -97,6 +101,20 @@ export default defineComponent({
     const eMin = ref(props.eMin);
     const eMax = ref(props.eMax);
     const denorm = ref(props.denormValue);
+
+    const baseComp = computed(() => props.base);
+    const mantissaComp = computed(() => props.mantissaSize);
+    const eMinComp = computed(() => props.eMin);
+    const eMaxComp = computed(() => props.eMax);
+    const denormComp = computed(() => props.denormValue);
+
+    let calcMax = function () {
+      const n = Math.pow(2, Math.ceil(Math.log2(Math.abs(eMin.value) + eMax.value + (eMin.value > 0 || eMax.value < 0 ? 0 : 1) + 2)));
+      if (n <= 0) {
+        return;
+      }
+      eMax.value = eMin.value + n - 2 - (eMin.value > 0 || eMax.value < 0 ? 0 : 1);
+    };
 
     watch(
       [base, mantissaSize, eMin, eMax, denorm],
@@ -122,8 +140,23 @@ export default defineComponent({
       }
     );
 
-    const exponentBits = computed(() => 4); // TODO: How many bits does the exponent get?
-    const mantissaBits = computed(() => 11); // TODO: How many bits does the exponent get?
+    // watch for changing the values via button click (don't ask me why this is needed - it is..)
+    watch(
+      [baseComp, mantissaComp, eMinComp, eMaxComp, denormComp],
+      (value) => {
+        base.value = value[0];
+        mantissaSize.value = value[1];
+        eMin.value = value[2];
+        eMax.value = value[3];
+        denorm.value = value[4];
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    const exponentBits = computed(() => Math.ceil(Math.log2(Math.abs(eMin.value) + eMax.value + (eMin.value > 0 || eMax.value < 0 ? 0 : 1) + 2)));
+    const mantissaBits = computed(() => mantissaSize.value - 1);
 
     return {
       base: base,
@@ -133,6 +166,7 @@ export default defineComponent({
       denorm,
       exponentBits,
       mantissaBits,
+      calcMax,
     };
   },
 });

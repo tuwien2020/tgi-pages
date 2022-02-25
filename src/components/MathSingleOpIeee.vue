@@ -167,7 +167,7 @@ function useMathWithStepsPrinting() {
         false
       )}\n\\end{alignedat}`;
 
-      console.log(output);
+      // console.log(output);
 
       return output;
     } else if (operator === "Multiply") {
