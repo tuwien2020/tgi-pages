@@ -4,8 +4,8 @@
     <small>
       <label>base: <input type="number" v-model="base" size="2" v-bind="$attrs" required disabled /></label>,
       <label>mantissaSize: <input type="number" v-model="mantissaSize" size="5" v-bind="$attrs" required /></label>,
-      <label>eMin: <input type="number" v-model="eMin" size="5" v-bind="$attrs" v-on:blur="calcMax" required /></label>,
-      <label>eMax: <input type="number" v-model="eMax" size="5" v-bind="$attrs" v-on:blur="calcMax" required /></label>,
+      <label>eMin: <input type="number" v-model="eMin" size="5" v-bind="$attrs" required /></label>,
+      <label>eMax: <input type="number" v-model="eMax" size="5" v-bind="$attrs" required /></label>,
       <label>denorm: <input type="checkbox" v-model="denorm" v-bind="$attrs" required /> {{ denorm }}</label>
     </small>
     <b>)</b>
@@ -89,6 +89,12 @@ export default defineComponent({
   emits: {
     ieeeFormat: (value: IEEEFloatFormat | null) => true,
   },
+  created() {
+    document.addEventListener("focusout", this.focusChanged);
+  },
+  beforeDestroy() {
+    document.removeEventListener("focusout", this.focusChanged);
+  },
   methods: {
     updateValues: function (values: IEEEFloatFormat | null) {
       console.log(values);
@@ -114,6 +120,16 @@ export default defineComponent({
         return;
       }
       eMax.value = eMin.value + n - 2 - (eMin.value > 0 || eMax.value < 0 ? 0 : 1);
+    };
+
+    let focusChanged = function (evt: FocusEvent) {
+      if (evt.relatedTarget) {
+        if (!["eMax: ", "eMin: "].includes(evt.relatedTarget.parentNode.textContent)) {
+          calcMax();
+        }
+      } else {
+        calcMax();
+      }
     };
 
     watch(
@@ -167,6 +183,7 @@ export default defineComponent({
       exponentBits,
       mantissaBits,
       calcMax,
+      focusChanged,
     };
   },
 });

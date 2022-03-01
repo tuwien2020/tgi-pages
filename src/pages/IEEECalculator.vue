@@ -67,7 +67,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const { urlRef } = useUrlRef(router, route);
-    const userInput = urlRef("input", "1010100010001000+10111100100010011");
+    const userInput = urlRef("input", "1010100010001000+1011110010001001");
     const useBinary = useBinaryExpressions();
 
     const base = ref(2);
@@ -100,7 +100,8 @@ export default defineComponent({
       }
     }
 
-    setIeeeFormat({ base: 3, eMin: -15, eMax: 14, mantissaSize: 12, allowDenormalized: false });
+    // Test if buttons are working
+    // setIeeeFormat({ base: 3, eMin: -15, eMax: 14, mantissaSize: 12, allowDenormalized: false });
 
     return {
       userInput,
