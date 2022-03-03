@@ -444,6 +444,14 @@ export class IEEENumber {
     return new IEEENumber(false, new Array(exponentSize).fill(false), new Array(mantissaSize).fill(false), [false], false, false, false, true);
   }
 
+  public static infinity(sign: boolean, exponentSize: number, mantissaSize: number): IEEENumber {
+    return new IEEENumber(sign, new Array(exponentSize).fill(true), new Array(mantissaSize - 1).fill(false), [true], false, false, false, false);
+  }
+
+  public static nan(exponentSize: number, mantissaSize: number): IEEENumber {
+    return new IEEENumber(true, new Array(exponentSize).fill(true), new Array(mantissaSize - 1).fill(true), [true], false, false, false, false);
+  }
+
   constructor(
     sign: boolean,
     exponent: boolean[],
@@ -462,6 +470,13 @@ export class IEEENumber {
     this.roundBit = roundBit;
     this.stickyBit = stickyBit;
     this.isNormalized = normalized;
+
+    // NaN
+    if (this.exponent.every((v) => v === true) && !this.value.every((v) => v === false)) {
+      // everything filled with true
+      this.value = new Array(this.value.length).fill(true);
+      this.isNegative = true;
+    }
   }
 
   static fromBinaryNumber(n: BinaryNumber, exponent: boolean[], size: number): IEEENumber {
@@ -517,10 +532,12 @@ export class IEEENumber {
       // diff1 == 0 && diff2 != 0 => exponent of n2 is off (too small)
       let values = number2.value;
       // exponent [0..00] === [0..01]
-      if (!n2.isZero()) {
-        const moveBy = diff2.getDecimalValue();
-        values = new Array<boolean>(Math.max((moveBy as number) - 1, 0)).fill(false).concat(!number2.isNormalized).concat(number2.value);
-      }
+
+      console.log(diff2.getDecimalValue());
+
+      const moveBy = (diff2.getDecimalValue() as number) - (n2.isZero() ? 1 : 0);
+      values = new Array<boolean>(Math.max((moveBy as number) - 1, 0)).fill(false).concat(!number2.isNormalized).concat(number2.value);
+
       numbers[1] = new IEEENumber(
         number2.isNegative,
         exponent.value as boolean[],
@@ -535,10 +552,9 @@ export class IEEENumber {
       // diff2 == 0 && diff1 != 0 => exponent of n1 is off (too small)
       let values = number1.value;
       // exponent [0..00] === [0..01]
-      if (!n1.isZero()) {
-        const moveBy = diff1.getDecimalValue();
-        values = new Array<boolean>(Math.max((moveBy as number) - 1, 0)).fill(false).concat(!number1.isNormalized).concat(number1.value);
-      }
+      const moveBy = (diff1.getDecimalValue() as number) - (n1.isZero() ? 1 : 0);
+      values = new Array<boolean>(Math.max((moveBy as number) - 1, 0)).fill(false).concat(!number1.isNormalized).concat(number1.value);
+
       numbers[0] = new IEEENumber(
         number1.isNegative,
         exponent.value as boolean[],
@@ -583,6 +599,10 @@ export class IEEENumber {
   }
 
   isInfinity(): boolean {
+    return this.exponent.every((v) => v === true) && this.value.every((v) => v === false);
+  }
+
+  isNaN(): boolean {
     return this.exponent.every((v) => v === true) && this.value.every((v) => v === true);
   }
 
@@ -623,14 +643,19 @@ export class IEEENumber {
   }
 
   round(mantissaSize: number): IEEENumber {
+    if (this.isNaN()) {
+      return this;
+    }
     let n: IEEENumber;
     let t: IEEENumber = this.noRounding();
 
+    // TODO: Add more rounding methods
+    // disclaimer: weitz seems highly inconsistent when it comes to rounding xD
     if (this.guardBit === false) {
       n = t;
     } else if (this.guardBit === true && (this.stickyBit || this.roundBit)) {
       n = t.increaseMantissaByOne(mantissaSize);
-    } else if (this.value[-1] === false) {
+    } else if (this.value[this.value.length - 1] === this.isNegative) {
       n = t;
     } else {
       n = t.increaseMantissaByOne(mantissaSize);
@@ -640,7 +665,7 @@ export class IEEENumber {
   }
 
   increaseMantissaByOne(mantissaSize: number): IEEENumber {
-    const mantissa = BinaryNumber.fromIEEEMantissa(this).add(BinaryNumber.fromDecimal(1).setSign(this.isNegative)).value;
+    const mantissa = BinaryNumber.fromIEEEMantissa(this, false).add(BinaryNumber.fromDecimal(1).setSign(this.isNegative)).value;
     const mantFrom = -mantissaSize + 1;
 
     return new IEEENumber(
@@ -656,6 +681,9 @@ export class IEEENumber {
   }
 
   normalizeMantissa(mantissaSize: number): IEEENumber {
+    if (this.isNaN()) {
+      return this;
+    }
     let res = this.value.concat([this.guardBit, this.roundBit, this.stickyBit]);
 
     let exponent, mantissa, implicit;
@@ -676,6 +704,7 @@ export class IEEENumber {
       let diff = 0;
       mantissa = res;
       exponent = this.exponent;
+      res = this.implicit.concat(res);
 
       if (!this.implicit[0]) {
         for (let v of res) {
@@ -694,6 +723,10 @@ export class IEEENumber {
       mantissa = mantissa.concat(new Array(Math.max(mantissaSize - (mantissa.length - 2), 0)).fill(false));
     }
 
+    if (exponent.every((v) => v === true)) {
+      return IEEENumber.infinity(this.isNegative, exponent.length, mantissaSize);
+    }
+
     return new IEEENumber(
       this.isNegative,
       exponent as boolean[],
@@ -709,7 +742,18 @@ export class IEEENumber {
   multiply(other: IEEENumber, eValue: number, mantissaSize: number): IEEENumber {
     let newExponent = BinaryNumber.fromOffsetBinary(this.exponent, [])
       .add(BinaryNumber.fromOffsetBinary(other.exponent, []))
-      .subtract(BinaryNumber.fromDecimal(eValue));
+      .subtract(BinaryNumber.fromDecimal(Math.abs(eValue) + 1));
+
+    console.log(newExponent, eValue);
+
+    if (newExponent.value.length > this.exponent.length) {
+      if (newExponent.value[0]) {
+        return IEEENumber.infinity(this.isNegative, this.exponent.length, mantissaSize);
+      } else {
+        newExponent = new BinaryNumber(false, newExponent.value.slice(1), 0);
+      }
+    }
+
     if (newExponent.isNegative) {
       // exponent too small -> result is zero
       return IEEENumber.zero(newExponent.value.length, mantissaSize);
@@ -729,6 +773,10 @@ export class IEEENumber {
     const grs = mantissa.slice(-3);
     const i = mantissa.slice(0, Math.max(-mantissa.length, -2 - mantissaSize));
 
+    if (exponent.every((v) => v === true) && i) {
+      return IEEENumber.infinity(this.isNegative, this.exponent.length, mantissaSize);
+    }
+
     return new IEEENumber(
       this.isNegative !== other.isNegative,
       exponent as boolean[],
@@ -747,6 +795,11 @@ export class IEEENumber {
   }
 
   add(other: IEEENumber, mantissaSize: number): IEEENumber {
+    if (this.isNaN()) {
+      return IEEENumber.nan(this.exponent.length, mantissaSize);
+    } else if (other.isNaN()) {
+      return IEEENumber.nan(other.exponent.length, mantissaSize);
+    }
     const numbers = this.normalizeExpression(other);
     let result, isNegative;
 
@@ -764,6 +817,8 @@ export class IEEENumber {
     const m = mantissa.slice(Math.max(-mantissa.length, -2 - mantissaSize), -3);
     const grs = mantissa.slice(-3);
     const i = mantissa.slice(0, Math.max(-mantissa.length, -2 - mantissaSize));
+
+    console.log(exponent, m, grs, i);
 
     return new IEEENumber(
       isNegative,

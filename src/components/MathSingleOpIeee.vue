@@ -201,7 +201,7 @@ function useMathWithStepsPrinting() {
         new IEEENumber(
           result.isNegative,
           result.exponent,
-          result.value.slice(1),
+          result.value,
           result.implicit,
           result.guardBit,
           result.roundBit,
@@ -217,6 +217,7 @@ function useMathWithStepsPrinting() {
       outputs[6] += formatLatexNumber("", result, false, true);
       outputs[6] += "\\color{defaultcolor}\\texttt{ => }";
       outputs[6] += formatLatexNumber("", result.normalizeMantissa(mantissaSize).round(mantissaSize), false, true);
+      result = result.normalizeMantissa(mantissaSize).round(mantissaSize);
 
       outputs[1] = `\\begin{alignedat}{4}\n${outputs[1]}\n\\end{alignedat}`;
       outputs[4] = `\\begin{alignedat}{6}\n${outputs[4]}\n\\end{alignedat}`;
