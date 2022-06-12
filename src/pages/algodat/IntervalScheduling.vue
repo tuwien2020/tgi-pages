@@ -32,9 +32,9 @@ const numberOfIntervals = urlRef("numberOfIntervals", 5);
 const sortingMethod = urlRef("sortingMethod", "");
 
 interface Interval {
-  id: number;
-  startTime: number;
-  endTime: number;
+  readonly id: number;
+  readonly startTime: number;
+  readonly endTime: number;
   color: string;
 }
 
@@ -107,14 +107,28 @@ function updateSorting() {
     }
 
     if (sortingMethod === "earliestEndTime") {
-      intervals.sort((job1, job2) => compareAscending(job1.endTime, job2.endTime));
+      intervals.sort((a, b) => compareAscending(a.endTime, b.endTime));
     } else if (sortingMethod === "earliestStartTime") {
-      intervals.sort((job1, job2) => compareAscending(job1.startTime, job2.startTime));
+      intervals.sort((a, b) => compareAscending(a.startTime, b.startTime));
     } else if (sortingMethod === "smallestInterval") {
-      intervals.sort((job1, job2) => compareAscending(job1.endTime - job1.startTime, job2.endTime - job2.startTime));
+      intervals.sort((a, b) => compareAscending(a.endTime - a.startTime, b.endTime - b.startTime));
     } else if (sortingMethod === "leastConflicts") {
-      Notify.warn("Not implemented", "Least conflicts sorting is not implemented");
-      // TODO: Implement
+      // Probably not as efficient as it could be.
+      const overlapCount: number[] = new Array(intervals.length).fill(0);
+
+      // Sort intervals by their start time and then count the overlaps.
+      const intervalsCopy = intervals.slice();
+      intervalsCopy.sort((a, b) => compareAscending(a.startTime, b.startTime));
+      intervalsCopy.forEach((interval, index) => {
+        index += 1;
+        while (index < intervalsCopy.length && interval.endTime > intervalsCopy[index].startTime) {
+          overlapCount[interval.id] += 1;
+          overlapCount[intervalsCopy[index].id] += 1;
+          index += 1;
+        }
+      });
+
+      intervals.sort((a, b) => compareAscending(overlapCount[a.id], overlapCount[b.id]));
     } else {
       assertUnreachable(sortingMethod);
     }
