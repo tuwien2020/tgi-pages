@@ -143,7 +143,7 @@ function updateSorting() {
   <div>
     <label>
       Sorting method
-      <select v-model="sortingMethod" :disabled="isGreedyRunning">
+      <select v-model="sortingMethod" :disabled="isGreedyRunning || intervals.length == 0">
         <option value="">{{ t(pageName + "unsorted") }}</option>
         <option v-for="(value, key) in intervalSortingMethods" :key="key" :value="key">
           {{ t(pageName + key) }} ({{ value.isCorrect ? t(pageName + "correct") : t(pageName + "incorrect") }})
@@ -154,9 +154,10 @@ function updateSorting() {
   <br />
   <button @click="startGreedy()" :disabled="isGreedyRunning">Start Greedy</button>
   <br />
-  <div class="graph">
+  <br />
+  <div v-if="intervals.length == 0">Generate intervals please</div>
+  <div class="graph" v-else>
     <!--TODO: https://vuejs.org/guide/built-ins/transition-group.html -->
-    <div v-if="intervals.length == 0" style="background-color: white">Generate intervals please</div>
     <div
       v-for="interval of intervals"
       :key="interval.id"
