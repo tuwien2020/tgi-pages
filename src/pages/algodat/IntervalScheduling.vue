@@ -2,7 +2,7 @@
 import { useUrlRef } from "../../url-ref";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { reactive, watch } from "vue";
+import { reactive, ref, watch } from "vue";
 import { assertUnreachable } from "../../assert";
 import * as Notify from "../../notify";
 
@@ -39,6 +39,8 @@ interface Interval {
 }
 
 const intervals = reactive([] as Interval[]);
+const intervalElements = ref([] as HTMLElement[]);
+const isGreedyRunning = ref(false);
 
 function generateIntervals(count: number) {
   intervals.length = 0;
@@ -57,10 +59,36 @@ function generateIntervals(count: number) {
   sortingMethod.value = "";
   updateSorting();
 }
-function startGreedy() {}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function startGreedy() {
+  isGreedyRunning.value = true;
+
+  //performs the greedy algorithm
+  const solution: Interval[] = [];
+  let time = 0;
+  for (let i = 0; i < intervals.length; i++) {
+    if (time <= intervals[i].startTime) {
+      solution.push(intervals[i]);
+      intervals[i].color = "var(--first-color)";
+      intervalElements.value[intervals[i].id]?.scrollIntoView({ block: "center", behavior: "smooth" });
+      time = intervals[i].endTime;
+    }
+    await sleep(10);
+  }
+
+  Notify.log("Done", `It was possible to finish ${solution.length} jobs!`);
+  isGreedyRunning.value = false;
+}
 
 watch(sortingMethod, (value) => {
   updateSorting();
+  intervals.forEach((interval) => {
+    interval.color = "white";
+  });
 });
 
 function updateSorting() {
@@ -107,15 +135,15 @@ function updateSorting() {
   <div>
     <label>
       Number of intervals
-      <input type="number" v-model="numberOfIntervals" min="0" step="1" />
+      <input type="number" v-model="numberOfIntervals" min="0" step="1" :disabled="isGreedyRunning" />
     </label>
-    <button @click="generateIntervals(numberOfIntervals)">Generate</button>
+    <button @click="generateIntervals(numberOfIntervals)" :disabled="isGreedyRunning">Generate</button>
   </div>
   <br />
   <div>
     <label>
       Sorting method
-      <select v-model="sortingMethod">
+      <select v-model="sortingMethod" :disabled="isGreedyRunning">
         <option value="">{{ t(pageName + "unsorted") }}</option>
         <option v-for="(value, key) in intervalSortingMethods" :key="key" :value="key">
           {{ t(pageName + key) }} ({{ value.isCorrect ? t(pageName + "correct") : t(pageName + "incorrect") }})
@@ -124,7 +152,7 @@ function updateSorting() {
     </label>
   </div>
   <br />
-  <button @click="startGreedy()">Start Greedy</button>
+  <button @click="startGreedy()" :disabled="isGreedyRunning">Start Greedy</button>
   <br />
   <div class="graph">
     <!--TODO: https://vuejs.org/guide/built-ins/transition-group.html -->
@@ -132,6 +160,7 @@ function updateSorting() {
     <div
       v-for="interval of intervals"
       :key="interval.id"
+      ref="intervalElements"
       class="interval"
       :style="{
         'background-color': interval.color,
@@ -139,7 +168,7 @@ function updateSorting() {
         width: interval.endTime - interval.startTime + '%',
       }"
     >
-      {{ t(pageName + "interval") }} {{ interval.id }}
+      <span v-once>{{ t(pageName + "interval") }}</span> {{ interval.id }}
     </div>
     <div class="graph-line-horizontal"></div>
     Time
