@@ -11,6 +11,7 @@ import BaseConverter from "./../pages/BaseConverter.vue";
 import CacheCalc from "./../pages/CacheCalc.vue";
 import Stack from "./../pages/Stack.vue";
 import Micro16Decompiler from "./../pages/Micro16Decompiler.vue";
+import IntervalScheduling from "./../pages/algodat/IntervalScheduling.vue";
 
 type PageEntry =
   | {
@@ -18,7 +19,7 @@ type PageEntry =
       link: string;
       category: ChapterEntry;
       internal: true;
-      page: DefineComponent;
+      page: any;
     }
   | {
       name: string;
@@ -58,6 +59,7 @@ export enum Chapter {
   Speichermanagement = 17,
   Multicore = 18,
   Speichermodelle = 19,
+  Algodat = 20,
 }
 
 export const chapters: { [c in Chapter]: ChapterEntry } = {
@@ -136,6 +138,10 @@ export const chapters: { [c in Chapter]: ChapterEntry } = {
   [Chapter.Speichermodelle]: {
     number: 19,
     name: "category.memoryModels",
+  },
+  [Chapter.Algodat]: {
+    number: 20,
+    name: "category.algodat",
   },
 };
 
@@ -286,13 +292,7 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Digitalschaltungen Simulator",
-    link: "https://simulator.io/board",
-    category: chapters[Chapter.Schaltwerke],
-    internal: false,
-  },
-  {
-    name: "Digitalschaltungen Simulator (alternativ)",
+    name: "page.logicCircuitSimulator.title",
     link: "https://logigator.com/editor/",
     category: chapters[Chapter.Schaltwerke],
     internal: false,
@@ -335,6 +335,13 @@ const tools: PageEntry[] = [
     category: chapters[Chapter.Speichermodelle],
     internal: true,
     page: InterleavingGraph,
+  },
+  {
+    name: "page.intervalScheduling.title",
+    link: "interval-scheduling",
+    category: chapters[Chapter.Algodat],
+    internal: true,
+    page: IntervalScheduling,
   },
 ];
 
