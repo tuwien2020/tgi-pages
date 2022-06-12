@@ -15,7 +15,7 @@
   <PWA />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ref, defineComponent, watchEffect, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -26,38 +26,26 @@ import * as Notify from "./notify";
 import { searchablePages } from "./router/navigation";
 import PWA from "./pwa/PWA.vue";
 
-export default defineComponent({
-  components: { SearchBar, Notifications, PWA },
-  setup() {
-    const route = useRoute();
-    const { t } = useI18n();
-    const notificationMessage = ref("");
+const route = useRoute();
+const { t } = useI18n();
+const notificationMessage = ref("");
 
-    window.addEventListener("error", (ev) => {
-      Notify.error("Unhandled error", ev.error);
-    });
-    window.addEventListener("unhandledrejection", (ev) => {
-      Notify.error("Unhandled error (promise)", ev.reason);
-    });
-
-    watch(route, ({ name }) => {
-      window.document.title = t((name as string) + "");
-    });
-
-    const options = computed(() =>
-      searchablePages.map((p) => {
-        return { name: t(p.name), link: p.link, internal: p.internal } as SearchOption;
-      })
-    );
-
-    return {
-      t,
-      version,
-      options,
-      notificationMessage,
-    };
-  },
+window.addEventListener("error", (ev) => {
+  Notify.error("Unhandled error", ev.error);
 });
+window.addEventListener("unhandledrejection", (ev) => {
+  Notify.error("Unhandled error (promise)", ev.reason);
+});
+
+watch(route, ({ name }) => {
+  window.document.title = t((name as string) + "");
+});
+
+const options = computed(() =>
+  searchablePages.map((p) => {
+    return { name: t(p.name), link: p.link, internal: p.internal } as SearchOption;
+  })
+);
 </script>
 
 <style scoped>

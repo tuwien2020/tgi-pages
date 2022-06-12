@@ -1,29 +1,32 @@
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import copy from "rollup-plugin-copy-assets";
-import vuetify from "@vuetify/vite-plugin";
+import copy from "rollup-plugin-copy";
+//import vuetify from "vite-plugin-vuetify";
 import { VitePWA } from "vite-plugin-pwa";
 const { resolve } = require("path");
 
-export default {
+// https://vitejs.dev/config/
+export default defineConfig({
   optimizeDeps: {
     exclude: ["monaco-editor"],
   },
   plugins: [
     vue(),
     copy({
-      assets: ["node_modules/monaco-editor/min/vs"],
+      targets: [{ src: "node_modules/monaco-editor/min/vs/**/*", dest: "dist/node_modules/monaco-editor/min/vs" }],
     }),
-    vuetify({ autoImport: true }),
+    //vuetify({ autoImport: true }),
     VitePWA({
       includeAssets: ["favicon.svg", "favicon.ico", "robots.txt", "apple-touch-icon.png"],
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
       manifest: {
         name: "TGI Pages",
         short_name: "tgi-pages",
         description: "Helpful tools for the TGI Course at the TU Vienna",
         theme_color: "#80CBC4",
-        strategies: "injectManifest",
-        srcDir: "src",
-        filename: "sw.ts",
+
         icons: [
           {
             src: "pwa-192x192.png",
@@ -37,10 +40,6 @@ export default {
             purpose: "any maskable",
           },
         ],
-        workbox: {
-          cleanupOutdatedCaches: false,
-          sourcemap: true,
-        },
       },
       registerType: "autoUpdate",
       workbox: {
@@ -53,16 +52,8 @@ export default {
       },
     }),
   ],
-  build: {
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, "index.html"),
-      },
-    },
-    sourcemap: process.env.SOURCE_MAP === "true",
-  },
 
   /*build: {
     target: "esnext",
   },*/
-};
+});

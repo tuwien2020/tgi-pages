@@ -6,7 +6,7 @@ Preferably, features are developed in another branch or fork. After the feature 
 
 ## Prerequisites
 
-- [Node 15 or greater](https://nodejs.org/en/). Don't install Chocolatey.
+- [Node 16 or greater](https://nodejs.org/en/). Don't install Chocolatey.
 - A code editor (see below)
 
 ## Setup
@@ -22,9 +22,17 @@ I recommend using [Visual Studio Code](https://code.visualstudio.com/) with
 
 - [Prettier Extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) to format your files
 - Settings &rarr; Format On Save &rarr; Enable (`"editor.formatOnSave": true,`)
-- [Volar Extension](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) for Vue.js
+  - Makes sure that autosave is either off or set to something that works properly
+- [Volar Extension](https://marketplace.visualstudio.com/items?itemName=Vue.volar) for Vue.js
+- [Typescript Vue Plugin](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) for Vue.js. Take-over mode is *not* recommended, so just get this plugin.
+- [(optional)Error Lens](https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens) to get inline error messages
 - [(optional)npm Extension](https://marketplace.visualstudio.com/items?itemName=eg2.vscode-npm-script)
 - [(optional)TODO Highlight Extension](https://marketplace.visualstudio.com/items?itemName=wayou.vscode-todo-highlight)
+- [(optional)i18n Ally](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally) for translating and internationalizing code
+
+I also totally recommend using a decent browser such as Firefox or a Chromium browser with
+
+- [Vue Devtools](https://devtools.vuejs.org/) to get top-notch debugging support
 
 ## Used Libraries
 
