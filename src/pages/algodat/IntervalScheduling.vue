@@ -2,7 +2,10 @@
 import { useUrlRef } from "../../url-ref";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { reactive } from "vue";
+import { reactive, watch } from "vue";
+import { assertUnreachable } from "../../assert";
+import * as Notify from "../../notify";
+
 const { t } = useI18n();
 
 const pageName = "page.intervalScheduling.";
@@ -50,8 +53,53 @@ function generateIntervals(count: number) {
       id: i,
     });
   }
+
+  sortingMethod.value = "";
+  updateSorting();
 }
 function startGreedy() {}
+
+watch(sortingMethod, (value) => {
+  updateSorting();
+});
+
+function updateSorting() {
+  function compareAscending(a: number, b: number) {
+    return a - b;
+  }
+
+  function resetSorting() {
+    intervals.sort((job1, job2) => compareAscending(job1.id, job2.id));
+  }
+
+  function sortJobs(sortingMethod: keyof typeof intervalSortingMethods) {
+    if (!(sortingMethod in intervalSortingMethods)) {
+      console.error("Invalid sorting method: " + sortingMethod);
+      return;
+    }
+
+    if (sortingMethod === "earliestEndTime") {
+      intervals.sort((job1, job2) => compareAscending(job1.endTime, job2.endTime));
+    } else if (sortingMethod === "earliestStartTime") {
+      intervals.sort((job1, job2) => compareAscending(job1.startTime, job2.startTime));
+    } else if (sortingMethod === "smallestInterval") {
+      intervals.sort((job1, job2) => compareAscending(job1.endTime - job1.startTime, job2.endTime - job2.startTime));
+    } else if (sortingMethod === "leastConflicts") {
+      Notify.warn("Not implemented", "Least conflicts sorting is not implemented");
+      // TODO: Implement
+    } else {
+      assertUnreachable(sortingMethod);
+    }
+  }
+
+  const sorting = sortingMethod.value;
+
+  if (sorting in intervalSortingMethods) {
+    sortJobs(sorting as keyof typeof intervalSortingMethods);
+  } else {
+    resetSorting();
+  }
+}
 </script>
 
 <template>
@@ -80,6 +128,7 @@ function startGreedy() {}
   <br />
   <div class="graph">
     <!--TODO: https://vuejs.org/guide/built-ins/transition-group.html -->
+    <div v-if="intervals.length == 0" style="background-color: white">Generate intervals please</div>
     <div
       v-for="interval of intervals"
       :key="interval.id"
