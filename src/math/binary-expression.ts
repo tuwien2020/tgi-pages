@@ -1,4 +1,4 @@
-import { BinaryNumber } from "./binary-number";
+import { BinaryNumber, IEEENumber } from "./binary-number";
 import { MathJson, MathJsonMathOperator } from "./math-parsing";
 
 interface BinaryNumberPrintingOptions {
@@ -24,6 +24,44 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
     extractGettersRecursive(ast);
 
     return getters;
+  }
+
+  function transformIEEE(ast: MathJson, eMin: number, eMax: number, mantissaSize: number): MathJson<IEEENumber> {
+    if (Array.isArray(ast)) {
+      const [functionName, ...args] = ast;
+      if (functionName === "Plus") {
+        // Plus should be ignored
+        if (args.length != 1) {
+          return ["Error", `Invalid MathJson ${ast}`];
+        } else {
+          return transformIEEE(args[0], eMin, eMax, mantissaSize);
+        }
+      } else if (functionName === "Negate") {
+        // Negate should put a minus sign in front of the number
+        if (args.length != 1) {
+          return ["Error", `Invalid MathJson ${ast}`];
+        } else {
+          const value = transformIEEE(args[0], eMin, eMax, mantissaSize);
+          if (value instanceof IEEENumber) {
+            return value.setSign(!value.isNegative);
+          } else {
+            return value;
+          }
+        }
+      } else if (mathJsonOperatorMap.has(functionName as MathJsonMathOperator)) {
+        return [functionName, ...args.map((v) => transformIEEE(v, eMin, eMax, mantissaSize))];
+      } else if (functionName === "Error") {
+        return [functionName, ...args.map((v) => "" + v)];
+      } else {
+        return ["Error", `Unknown function ${functionName}`];
+      }
+    } else if (typeof ast === "string") {
+      return ["Error", `Variables not supported ${ast}`];
+    } else if (ast?.type === "number") {
+      return stringToIEEENumber(ast.value, eMin, eMax, mantissaSize) ?? ["Error", `Expected a binary number in the given IEEE-format: ${ast.value}`];
+    } else {
+      return ["Error", `Expected binary number: ${JSON.stringify(ast)}`];
+    }
   }
 
   function transform(ast: MathJson): MathJson<BinaryNumber> {
@@ -64,12 +102,36 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
     }
   }
 
-  function customPrinter(value: MathJson<BinaryNumber>): string | null {
+  function customPrinter(value: MathJson<BinaryNumber> | MathJson<IEEENumber>): string | null {
     if (value instanceof BinaryNumber) {
       return binaryNumberToLatex(value, opts);
+    } else if (value instanceof IEEENumber) {
+      return IEEENumberToLatex(value, opts);
     } else {
       return null;
     }
+  }
+
+  function stringToIEEENumber(value: string, eMin: number, eMax: number, mantissaSize: number) : IEEENumber | null {
+    const binaryNumberRegex = `^([0-1])([0-1]{${Math.ceil(Math.log2(Math.abs(eMin) + eMax + (eMin > 0 || eMax < 0 ? 0 : 1) + 2))}})`+
+    `([0-1]{${mantissaSize - 1}})([0-1])?([0-1])?([0-1])?$`;
+    
+
+    const r = new RegExp(binaryNumberRegex);
+    const matchResults = (value ?? "").match(r);
+    if (matchResults === null) return null;
+
+    const [_, sign, exponent, mantissa, guardBit, roundBit, stickyBit] = matchResults;
+
+    return new IEEENumber(
+      sign === "1",
+      exponent.split("").map((v) => (v === "0" ? false : true)),
+      mantissa.split("").map((v) => (v === "0" ? false : true)),
+      [!exponent.split("").every(v => v === "0")],
+      guardBit === "1",
+      roundBit === "1",
+      stickyBit === "1",
+      exponent.split("").every((v) => (v === "0")));
   }
 
   function stringToBinaryNumber(value: string): BinaryNumber | null {
@@ -85,6 +147,39 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
       ((numberValue ?? "") + (fractionalPart ?? "")).split("").map((v) => (v === "0" ? false : true)),
       fractionalPart?.length ?? 0
     );
+  }
+
+  function IEEENumberToLatex(value: IEEENumber, options?: BinaryNumberPrintingOptions) {
+    const bitArray = (value: readonly boolean[] | undefined): string => {return (value ?? []).map((v) => (v ? "1" : "0")).join("")};
+    let printOptions = {
+      showSign: "minus",
+      zeroWidthDecimal: false,
+      groupZeros: false,
+      ...options,
+    };
+
+    // TODO: Currently unused, we could deprecate/remove the showSign option
+    const sign = printOptions.showSign === "never" ? "" : value.isNegative ? "-" : printOptions.showSign === "always" ? "+" : "";
+
+    if (value.isZero()) {
+      return "\\mathtt{0}";
+    } else if (value.isInfinity()) {
+      return `${sign}\\mathtt{\\infty}`;
+    }
+
+    let places = value.value
+      .map((v) => (v ? "1" : "0"))
+      .join("");
+    
+    let text = `\\mathtt{${(value.isNegative ? "1" : "0")}\\,${bitArray(value.exponent)}\\,}\\color{grey}\\mathtt{${bitArray(value.implicit)}}\\color{black}\\mathtt{\\,}`;
+
+    if (printOptions.groupZeros) {
+      places = splitIntoChunks(places, 4, true).join("\\,");
+    }
+    
+    let output = text + `\\mathtt{${places}\\,${bitArray([value.guardBit, value.roundBit, value.stickyBit])}}`;
+
+    return output;
   }
 
   function binaryNumberToLatex(value: BinaryNumber, options?: BinaryNumberPrintingOptions) {
@@ -112,7 +207,7 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
       beforeDecimal = splitIntoChunks(beforeDecimal, 4, true).join("\\,");
       afterDecimal = splitIntoChunks(afterDecimal, 4, false).join("\\,");
     }
-
+    
     let output = `\\texttt{\\mathllap{${sign}}}` + `\\mathtt{${beforeDecimal}}`;
 
     if (afterDecimal !== undefined && afterDecimal.length > 0) {
@@ -145,7 +240,9 @@ export function useBinaryExpressions(opts?: BinaryNumberPrintingOptions) {
   return {
     extractGetters,
     transform,
+    transformIEEE,
     customPrinter,
     binaryNumberToLatex,
+    IEEENumberToLatex,
   };
 }
