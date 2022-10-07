@@ -45,8 +45,7 @@ export enum Chapter {
   Codierung = 3,
   Informationstheorie = 4,
   BoolescheAlgebra = 5,
-  KVBDD = 6,
-  Digitalschaltungen = 7,
+  BDD = 6,
   Automaten = 8,
   SequenzielleLogik = 9,
   Speicher = 10,
@@ -83,13 +82,9 @@ export const chapters: { [c in Chapter]: ChapterEntry } = {
     number: 5,
     name: "category.booleanAlgebra",
   },
-  [Chapter.KVBDD]: {
+  [Chapter.BDD]: {
     number: 6,
-    name: "category.kvAndBdd",
-  },
-  [Chapter.Digitalschaltungen]: {
-    number: 7,
-    name: "category.digitalCircuits",
+    name: "category.Bdd",
   },
   [Chapter.Automaten]: {
     number: 8,
@@ -195,13 +190,13 @@ const tools: PageEntry[] = [
   {
     name: "KV Diagramm",
     link: "https://www.mathematik.uni-marburg.de/~thormae/lectures/ti1/code/karnaughmap/",
-    category: chapters[Chapter.KVBDD],
+    category: chapters[Chapter.BDD],
     internal: false,
   },
   {
     name: "KV Diagramm & BDD",
     link: "https://kmio.de/logikrechner.html",
-    category: chapters[Chapter.KVBDD],
+    category: chapters[Chapter.BDD],
     internal: false,
   },
   {
@@ -295,12 +290,6 @@ const tools: PageEntry[] = [
     name: "page.logicCircuitSimulator.title",
     link: "https://logigator.com/editor/",
     category: chapters[Chapter.Schaltwerke],
-    internal: false,
-  },
-  {
-    name: "Schaltkreise",
-    link: "http://falstad.com/circuit/circuitjs.html",
-    category: chapters[Chapter.Digitalschaltungen],
     internal: false,
   },
   {

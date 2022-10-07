@@ -5,6 +5,7 @@
   "scripts": {
     "start": "vite",
     "dev": "vite --open",
+    "type-check": "vue-tsc --noEmit",
     "build": "vue-tsc --noEmit && vite build",
     "deploy": "vite build --base=/tgi-pages/ && node utils/publish.js",
     "preview": "vite build && vite preview"
