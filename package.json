@@ -14,27 +14,27 @@
     "bread-n-butter": "^0.6.0",
     "bulma": "^0.9.4",
     "fuzzysort": "^2.0.1",
-    "intro.js": "^5.1.0",
-    "katex": "^0.16.0",
-    "monaco-editor": "^0.33.0",
-    "uuid": "^8.3.2",
+    "intro.js": "^6.0.0",
+    "katex": "^0.16.2",
+    "monaco-editor": "^0.34.0",
+    "uuid": "^9.0.0",
     "vis-data": "^7.1.4",
     "vis-network": "^9.1.2",
-    "vue": "^3.2.37",
-    "vue-i18n": "^9.1.10",
-    "vue-router": "^4.0.16",
-    "vuetify": "^v3.0.0-beta.3"
+    "vue": "^3.2.40",
+    "vue-i18n": "^9.2.2",
+    "vue-router": "^4.1.5",
+    "vuetify": "^3.0.0-beta.13"
   },
   "devDependencies": {
     "@types/katex": "^0.14.0",
     "@types/uuid": "^8.3.4",
-    "@vitejs/plugin-vue": "^2.3.3",
+    "@vitejs/plugin-vue": "^3.1.2",
     "gh-pages": "^4.0.0",
     "rollup-plugin-copy": "^3.4.0",
-    "typescript": "^4.7.3",
-    "vite": "^2.9.12",
-    "vite-plugin-pwa": "^0.12.0",
-    "vite-plugin-vuetify": "^1.0.0-alpha.11",
-    "vue-tsc": "^0.37.3"
+    "typescript": "^4.8.4",
+    "vite": "^3.1.6",
+    "vite-plugin-pwa": "^0.13.1",
+    "vite-plugin-vuetify": "^1.0.0-alpha.17",
+    "vue-tsc": "^0.40.13"
   }
 }

@@ -22,14 +22,14 @@ I recommend using [Visual Studio Code](https://code.visualstudio.com/) with
 
 - [Prettier Extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) to format your files
 - Settings &rarr; Format On Save &rarr; Enable (`"editor.formatOnSave": true,`)
-  - Makes sure that autosave is either off or set to something that works properly
-- [Volar Extension](https://marketplace.visualstudio.com/items?itemName=Vue.volar) for Vue.js
-- [Typescript Vue Plugin](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) for Vue.js. Take-over mode is *not* recommended, so just get this plugin.
-- [(optional)Error Lens](https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens) to get inline error messages
-- [(optional)npm Extension](https://marketplace.visualstudio.com/items?itemName=eg2.vscode-npm-script)
+  - If you are using autosave: Settings &rarr; Autosave &rarr; On Focus Change (`"files.autoSave": "onFocusChange",`)
+- [Vue Language Features (Volar) Extension](https://marketplace.visualstudio.com/items?itemName=Vue.volar) for Vue.js
+- [TypeScript Vue Plugin (Volar) Extension](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) for Vue.js. Take-over mode is *not* recommended, so just get this plugin.
+- [(optional)Error Lens](https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens) to see all the errors inline with the code
 - [(optional)TODO Highlight Extension](https://marketplace.visualstudio.com/items?itemName=wayou.vscode-todo-highlight)
 - [(optional)i18n Ally](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally) for translating and internationalizing code
 
+As for settings, I personally am a fan of those "inlay hints".
 I also totally recommend using a decent browser such as Firefox or a Chromium browser with
 
 - [Vue Devtools](https://devtools.vuejs.org/) to get top-notch debugging support
