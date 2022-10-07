@@ -1,0 +1,85 @@
+{
+  "category": {
+    "numberFormats": "Zahlendarstellung",
+    "numerical": "Numerik",
+    "encodingDecoding": "Codierung",
+    "informationTheory": "Informationstheorie",
+    "booleanAlgebra": "Boole'sche Algebra",
+    "Bdd": "BDD",
+    "finiteStateMachines": "Automaten",
+    "sequentialLogic": "Sequenzielle Logik",
+    "memory": "Speicher",
+    "sequentialCircuitIntro": "Schaltwerke: Einführung",
+    "sequentialCircuitImplementation": "Schaltwerke: Realisierung",
+    "sequentialCircuitMachines": "Schaltwerke: Moore vs Mealy",
+    "micro16": "Micro16",
+    "instructionSet": "Befehlssatz",
+    "pipelining": "Pipelining",
+    "memoryManagement": "Speichermanagement",
+    "multicore": "Multicore",
+    "memoryModels": "Speichermodelle",
+    "algodat": "Algorithmen und Datenstrukturen"
+  },
+  "page": {
+    "binaryCoding": {
+      "title": "Binär Codierung"
+    },
+    "binaryCalculator": {
+      "title": "Binär Rechner",
+      "decimalPlaces": "Dezimalstellen"
+    },
+    "baseConverter": {
+      "title": "Zahlensysteme Umrechnen",
+      "baseConverter": "Zahlensysteme Umrechnen",
+      "baseCalculator": "Rechnen in Basis",
+      "fromBase": "Von Basis",
+      "toBase": "Zu Basis",
+      "number": "Zahl",
+      "base": "Basis",
+      "invalidNumber": "Ungültige Zahl",
+      "divisionByZero": "Division durch Null",
+      "resultAndRemainder": "{result} und {remainder} Rest"
+    },
+    "ieeeFloatCalculator": {
+      "title": "IEEE 754 Gleitkommazahl Rechner"
+    },
+    "truthTable": {
+      "title": "Wahrheitstabelle"
+    },
+    "micro16Decompiler": {
+      "title": "Micro16 Decompiler"
+    },
+    "hammingCode": {
+      "title": "Hamming Code"
+    },
+    "hammingDistance": {
+      "title": "Hamming Distanz"
+    },
+    "morseCode": {
+      "title": "Morse Code"
+    },
+    "logicCircuitSimulator": {
+      "title": "Digitalschaltungen Simulator"
+    },
+    "stackSimulator": {
+      "title": "Stack Simulator"
+    },
+    "pipelineSimulator": {
+      "title": "Pipeline Simulator (nicht empfohlen)"
+    },
+    "interleavingGraph": {
+      "title": "Interleaving Graph"
+    },
+    "intervalScheduling": {
+      "title": "Interval Scheduling",
+      "unsorted": "Unsortiert",
+      "earliestEndTime": "Früheste Endzeit",
+      "earliestStartTime": "Früheste Startzeit",
+      "smallestInterval": "Kleinstes Intervall",
+      "leastConflicts": "Kleinste Anzahl der Konflikte",
+      "correct": "Richtig",
+      "incorrect": "Falsch",
+      "interval": "Intervall"
+    }
+  }
+}

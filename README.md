@@ -11,19 +11,11 @@
 
 ## Developer Info
 
-0. Make sure that you have [Node 15 or greater](https://nodejs.org/en/)
-1. Clone the repository
-2. `npm install`
-3. `npm run dev`
-4. Start coding or testing
-5. More info in the [CONTRIBUTING.md](./CONTRIBUTING.md)
+Want to contribute? We'd love to have you on board, no matter your skill level!
 
-### Tooling
+Simply head over to [CONTRIBUTING.md](./CONTRIBUTING.md)
 
-- NodeJS
-- VSCode
-
-### TGI
+### TGI Notes
 
 TGI Teststoff
 

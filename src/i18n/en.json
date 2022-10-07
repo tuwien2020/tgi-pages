@@ -1,0 +1,85 @@
+{
+  "category": {
+    "numberFormats": "Number Formats",
+    "numerical": "Numerical",
+    "encodingDecoding": "Encoding/Decoding",
+    "informationTheory": "Information Theory",
+    "booleanAlgebra": "Boolean Algebra",
+    "Bdd": "BDDs",
+    "finiteStateMachines": "Finite State Machines",
+    "sequentialLogic": "Sequential Logic",
+    "memory": "Memory",
+    "sequentialCircuitIntro": "Sequential Circuits: Intro",
+    "sequentialCircuitImplementation": "Sequential Circuits: Implementation",
+    "sequentialCircuitMachines": "Sequential Circuits: Moore vs Mealy",
+    "micro16": "Micro16",
+    "instructionSet": "Instruction Set",
+    "pipelining": "Pipelining",
+    "memoryManagement": "Memory Management",
+    "multicore": "Multi-Core",
+    "memoryModels": "Memory Models",
+    "algodat": "Algorithms and Datastructures"
+  },
+  "page": {
+    "binaryCoding": {
+      "title": "Binary Encoding and Decoding"
+    },
+    "binaryCalculator": {
+      "title": "Binary Calculator",
+      "decimalPlaces": "Decimal places"
+    },
+    "baseConverter": {
+      "title": "Number Base Calculator",
+      "baseConverter": "Base-Converter",
+      "baseCalculator": "Calculate in base",
+      "fromBase": "From base",
+      "toBase": "To base",
+      "number": "Number",
+      "base": "Base",
+      "invalidNumber": "Invalid number",
+      "divisionByZero": "Division by zero",
+      "resultAndRemainder": "{result} and {remainder} remainder"
+    },
+    "ieeeFloatCalculator": {
+      "title": "IEEE 754 Float Calculator"
+    },
+    "truthTable": {
+      "title": "Truth Table"
+    },
+    "micro16Decompiler": {
+      "title": "Micro16 Decompiler"
+    },
+    "hammingCode": {
+      "title": "Hamming Code"
+    },
+    "hammingDistance": {
+      "title": "Hamming Distance"
+    },
+    "morseCode": {
+      "title": "Morse Code"
+    },
+    "logicCircuitSimulator": {
+      "title": "Logic Circuits Simulator"
+    },
+    "stackSimulator": {
+      "title": "Stack Simulator"
+    },
+    "pipelineSimulator": {
+      "title": "Pipeline Simulator (not recommended)"
+    },
+    "interleavingGraph": {
+      "title": "Interleaving Graph"
+    },
+    "intervalScheduling": {
+      "title": "Interval Scheduling",
+      "unsorted": "Unsorted",
+      "earliestEndTime": "Earliest End Time",
+      "earliestStartTime": "Earliest Start Time",
+      "smallestInterval": "Smallest Interval",
+      "leastConflicts": "Least Conflicts",
+      "correct": "Correct",
+      "incorrect": "Incorrect",
+      "interval": "Interval"
+    }
+  }
+}

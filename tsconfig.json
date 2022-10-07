@@ -10,12 +10,16 @@
     "allowJs": true,
     "checkJs": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "isolatedModules": true,
+    "useDefineForClassFields": true,
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "baseUrl": ".",
     "lib": ["esnext", "dom", "dom.iterable"],
     "types": ["vite/client"],
     "outDir": "./dist"
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.vue"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.vue"],
+  "exclude": ["node_modules"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

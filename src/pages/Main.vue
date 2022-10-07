@@ -5,10 +5,10 @@
       <div v-for="category in pagesByCategory" :key="category.key.number" class="column is-one-third">
         <div class="card">
           <div class="card-content">
-            <h4>{{ category.key.number.toString() + ". " + category.key.name }}</h4>
+            <h4>{{ category.key.number + ". " + t(category.key.name) }}</h4>
             <div v-for="item in category.values" :key="item.name">
-              <router-link v-if="item.internal" :to="item.link">{{ item.name }}</router-link>
-              <a target="_blank" v-if="!item.internal" :href="item.link">{{ item.name }}</a>
+              <router-link v-if="item.internal" :to="item.link">{{ t(item.name) }}</router-link>
+              <a target="_blank" v-if="!item.internal" :href="item.link">{{ t(item.name) }}</a>
             </div>
           </div>
         </div>
@@ -28,12 +28,15 @@
 <script lang="ts">
 import { defineComponent, computed, ref, watch, watchEffect } from "vue";
 import { pagesByCategory } from "../router/navigation";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   components: {},
   setup() {
+    const { t } = useI18n();
     const count = ref(0);
     return {
+      t,
       count,
       pagesByCategory,
     };
@@ -41,9 +44,8 @@ export default defineComponent({
 });
 </script>
 
-
 <style scoped>
 .card {
-  height: 100%
+  height: 100%;
 }
 </style>

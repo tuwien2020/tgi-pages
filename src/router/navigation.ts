@@ -11,6 +11,7 @@ import BaseConverter from "./../pages/BaseConverter.vue";
 import CacheCalc from "./../pages/CacheCalc.vue";
 import Stack from "./../pages/Stack.vue";
 import Micro16Decompiler from "./../pages/Micro16Decompiler.vue";
+import IntervalScheduling from "./../pages/algodat/IntervalScheduling.vue";
 
 type PageEntry =
   | {
@@ -18,7 +19,7 @@ type PageEntry =
       link: string;
       category: ChapterEntry;
       internal: true;
-      page: DefineComponent;
+      page: any;
     }
   | {
       name: string;
@@ -44,8 +45,7 @@ export enum Chapter {
   Codierung = 3,
   Informationstheorie = 4,
   BoolescheAlgebra = 5,
-  KVBDD = 6,
-  Digitalschaltungen = 7,
+  BDD = 6,
   Automaten = 8,
   SequenzielleLogik = 9,
   Speicher = 10,
@@ -58,101 +58,109 @@ export enum Chapter {
   Speichermanagement = 17,
   Multicore = 18,
   Speichermodelle = 19,
+  Algodat = 20,
 }
 
 export const chapters: { [c in Chapter]: ChapterEntry } = {
   [Chapter.Zahlendarstellung]: {
     number: 1,
-    name: "Zahlendarstellung",
+    name: "category.numberFormats",
   },
   [Chapter.Numerik]: {
     number: 2,
-    name: "Numerik",
+    name: "category.numerical",
   },
   [Chapter.Codierung]: {
     number: 3,
-    name: "Codierung",
+    name: "category.encodingDecoding",
   },
   [Chapter.Informationstheorie]: {
     number: 4,
-    name: "Informationstheorie",
+    name: "category.informationTheory",
   },
   [Chapter.BoolescheAlgebra]: {
     number: 5,
-    name: "Boole'sche Algebra",
+    name: "category.booleanAlgebra",
   },
-  [Chapter.KVBDD]: {
+  [Chapter.BDD]: {
     number: 6,
-    name: "KV & BDD",
-  },
-  [Chapter.Digitalschaltungen]: {
-    number: 7,
-    name: "Digitalschaltungen",
+    name: "category.Bdd",
   },
   [Chapter.Automaten]: {
     number: 8,
-    name: "Automaten",
+    name: "category.finiteStateMachines",
   },
   [Chapter.SequenzielleLogik]: {
     number: 9,
-    name: "Sequenzielle Logik",
+    name: "category.sequentialLogic",
   },
   [Chapter.Speicher]: {
     number: 10,
-    name: "Speicher",
+    name: "category.memory",
   },
   [Chapter.Schaltwerke]: {
     number: 11,
-    name: "Schaltwerke",
+    name: "category.sequentialCircuitIntro",
   },
   [Chapter.SchaltwerkeRealisierung]: {
     number: 12,
-    name: "Schaltwerke Realisierung",
+    name: "category.sequentialCircuitImplementation",
   },
   [Chapter.SchaltwerkeMooreMealy]: {
     number: 13,
-    name: "Schaltwerke: Moore vs Mealy",
+    name: "category.sequentialCircuitMachines",
   },
   [Chapter.Micro16]: {
     number: 14,
-    name: "Micro16",
+    name: "category.micro16",
   },
   [Chapter.Befehlssatz]: {
     number: 15,
-    name: "Befehlssatz",
+    name: "category.instructionSet",
   },
   [Chapter.Pipelining]: {
     number: 16,
-    name: "Pipelining",
+    name: "category.pipelining",
   },
   [Chapter.Speichermanagement]: {
     number: 17,
-    name: "Speichermanagement",
+    name: "category.memoryManagement",
   },
   [Chapter.Multicore]: {
     number: 18,
-    name: "Multicore",
+    name: "category.multicore",
   },
   [Chapter.Speichermodelle]: {
     number: 19,
-    name: "Speichermodelle",
+    name: "category.memoryModels",
+  },
+  [Chapter.Algodat]: {
+    number: 20,
+    name: "category.algodat",
   },
 };
 
 const tools: PageEntry[] = [
   {
-    name: "Binär Codierung",
+    name: "page.binaryCoding.title",
     link: "binary-coding",
     category: chapters[Chapter.Codierung],
     internal: true,
     page: BinaryCoding,
   },
   {
-    name: "Binär Rechner",
+    name: "page.binaryCalculator.title",
     link: "binary-calculator",
     category: chapters[Chapter.Zahlendarstellung],
     internal: true,
     page: BinaryCalculator,
+  },
+  {
+    name: "page.baseConverter.title",
+    link: "base-converter",
+    internal: true,
+    category: chapters[Chapter.Zahlendarstellung],
+    page: BaseConverter,
   },
   {
     name: "Binär umrechnen (Bei direkten Umrechnungen kann es Rundungsfehler geben)",
@@ -161,20 +169,13 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Convert between number bases",
-    link: "base-converter",
-    internal: true,
-    category: chapters[Chapter.Zahlendarstellung],
-    page: BaseConverter,
-  },
-  {
-    name: "IEEE Rechner",
+    name: "page.ieeeFloatCalculator.title",
     link: "http://weitz.de/ieee/",
     category: chapters[Chapter.Numerik],
     internal: false,
   },
   {
-    name: "Wahrheitstabelle",
+    name: "page.truthTable.title",
     link: "truth-table",
     category: chapters[Chapter.BoolescheAlgebra],
     internal: true,
@@ -189,17 +190,17 @@ const tools: PageEntry[] = [
   {
     name: "KV Diagramm",
     link: "https://www.mathematik.uni-marburg.de/~thormae/lectures/ti1/code/karnaughmap/",
-    category: chapters[Chapter.KVBDD],
+    category: chapters[Chapter.BDD],
     internal: false,
   },
   {
     name: "KV Diagramm & BDD",
     link: "https://kmio.de/logikrechner.html",
-    category: chapters[Chapter.KVBDD],
+    category: chapters[Chapter.BDD],
     internal: false,
   },
   {
-    name: "Mikro 16 Decompiler",
+    name: "page.micro16Decompiler.title",
     link: "micro16-decompiler",
     category: chapters[Chapter.Micro16],
     internal: true,
@@ -230,14 +231,14 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Hamming Code",
+    name: "page.hammingCode.title",
     link: "hamming-code",
     category: chapters[Chapter.Codierung],
     internal: true,
     page: HammingCode,
   },
   {
-    name: "Hamming Distanz",
+    name: "page.hammingDistance.title",
     link: "hamming-distance",
     category: chapters[Chapter.Codierung],
     internal: true,
@@ -256,7 +257,7 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Morse Code",
+    name: "page.morseCode.title",
     link: "https://morsedecoder.com/de/",
     category: chapters[Chapter.Codierung],
     internal: false,
@@ -269,7 +270,7 @@ const tools: PageEntry[] = [
   },
   {
     name: "log2 - Wolfram Alpha",
-    link: "https://www.wolframalpha.com/",
+    link: "https://www.wolframalpha.com/input?i=log_2%2827%29",
     category: chapters[Chapter.Informationstheorie],
     internal: false,
   },
@@ -286,21 +287,9 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Digitalschaltungen Simulator",
-    link: "https://simulator.io/board",
-    category: chapters[Chapter.Schaltwerke],
-    internal: false,
-  },
-  {
-    name: "Digitalschaltungen Simulator (alternativ)",
+    name: "page.logicCircuitSimulator.title",
     link: "https://logigator.com/editor/",
     category: chapters[Chapter.Schaltwerke],
-    internal: false,
-  },
-  {
-    name: "Schaltkreise",
-    link: "http://falstad.com/circuit/circuitjs.html",
-    category: chapters[Chapter.Digitalschaltungen],
     internal: false,
   },
   {
@@ -316,25 +305,32 @@ const tools: PageEntry[] = [
     internal: false,
   },
   {
-    name: "Stack Simulator",
+    name: "page.stackSimulator.title",
     link: "stack",
     category: chapters[Chapter.Befehlssatz],
     internal: true,
     page: Stack,
   },
   {
-    name: "Pipeline Simulator (not recommended)",
+    name: "page.pipelineSimulator.title",
     link: "pipeline",
     category: chapters[Chapter.Pipelining],
     internal: true,
     page: Pipeline,
   },
   {
-    name: "Interleaving Graph",
+    name: "page.interleavingGraph.title",
     link: "interleaving-graph",
     category: chapters[Chapter.Speichermodelle],
     internal: true,
     page: InterleavingGraph,
+  },
+  {
+    name: "page.intervalScheduling.title",
+    link: "interval-scheduling",
+    category: chapters[Chapter.Algodat],
+    internal: true,
+    page: IntervalScheduling,
   },
 ];
 
@@ -348,9 +344,5 @@ export const pagesByCategory = groupBy<ChapterEntry, PageEntry>(
 export const searchablePages: PageSearchResult[] = indexedPages.map((p) => {
   return { name: p.name, link: p.link, internal: p.internal };
 });
-
-export const searchTools = (searchText: string): PageSearchResult[] => {
-  return searchablePages.filter((t) => t.name.match(searchText));
-};
 
 export default tools;

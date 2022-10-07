@@ -1,28 +1,28 @@
 <template>
   <div>
-    <h1>Base-Converter</h1>
+    <h1>{{ t("page.baseConverter.baseConverter") }}</h1>
     <table class="input-table">
       <tbody>
         <tr>
           <td class="right-align">
-            <label> Von Basis <input type="number" v-model="fromBase" class="basis-field" min="1" step="1" /></label>
+            <label> {{ t("page.baseConverter.fromBase") }} <input type="number" v-model="fromBase" class="basis-field" min="1" step="1" /></label>
           </td>
           <td>
-            <label> Zahl <input type="text" v-model="numberToConvert" placeholder="42.0" /> </label>
+            <label> {{ t("page.baseConverter.number") }} <input type="text" v-model="numberToConvert" placeholder="42.0" /> </label>
           </td>
         </tr>
         <tr>
           <td class="right-align">
-            <label>Zu Basis <input type="number" v-model="toBase" class="basis-field" min="1" step="1" /></label>
+            <label> {{ t("page.baseConverter.toBase") }} <input type="number" v-model="toBase" class="basis-field" min="1" step="1" /></label>
           </td>
           <td>= {{ result }}</td>
         </tr>
       </tbody>
     </table>
 
-    <h1>Calculate in base {{ baseForCalculations }}</h1>
+    <h1>{{ t("page.baseConverter.baseCalculator") }} {{ baseForCalculations }}</h1>
     <label>
-      Basis
+      {{ t("page.baseConverter.base") }}
       <input type="number" v-model="baseForCalculations" class="basis-field" />
     </label>
     <table class="input-table">
@@ -58,7 +58,9 @@
 
 <script lang="ts">
 import { defineComponent, computed, shallowRef, ComputedRef, unref, Ref, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import { useUrlRef } from "../url-ref";
 
 function mod(a: number, b: number): number {
   return ((a % b) + b) % b;
@@ -184,7 +186,7 @@ class IntegerWithBase {
   constructor(isNegative: boolean, value: number[], base: number);
   constructor(valueOrIsNegative: string | boolean, baseOrValue: number | number[], nothingOrBase?: number) {
     if (typeof valueOrIsNegative === "string" && typeof baseOrValue === "number") {
-      this.base = baseOrValue;
+      this.base = Math.floor(baseOrValue);
       if (this.base <= 0) {
         throw new Error("Invalid base");
       }
@@ -194,7 +196,7 @@ class IntegerWithBase {
         .split("")
         .map((v) => this.parseCharacter(v));
     } else if (typeof nothingOrBase === "number" && typeof valueOrIsNegative === "boolean" && Array.isArray(baseOrValue)) {
-      this.base = nothingOrBase;
+      this.base = Math.floor(nothingOrBase);
       if (this.base <= 0) {
         throw new Error("Invalid base");
       }
@@ -466,13 +468,17 @@ export default defineComponent({
   setup() {
     // Note: Feel free to use Wolfram Alpha to validate the results
     // https://www.wolframalpha.com/input/?i=%2834%29_7+to+base+2
+    const router = useRouter();
+    const route = useRoute();
+    const { urlRef } = useUrlRef(router, route);
+    const { t } = useI18n();
 
-    const numberToConvert = ref("");
-    const fromBase = ref(10);
-    const toBase = ref(2);
+    const numberToConvert = urlRef("value", "");
+    const fromBase = urlRef("from-base", 10);
+    const toBase = urlRef("to-base", 2);
     const result = computed(() => {
       if (!/[+-]?[0-9a-zA-Z]*(\.[0-9a-zA-Z]*)?/.test(numberToConvert.value)) {
-        return "Invalid number";
+        return t("page.baseConverter.invalidNumber");
       }
 
       try {
@@ -523,9 +529,9 @@ export default defineComponent({
       }
     });
 
-    const baseForCalculations = ref(10);
-    const valueA = ref("");
-    const valueB = ref("");
+    const baseForCalculations = urlRef("calc-base", 10);
+    const valueA = urlRef("calc-value-a", "");
+    const valueB = urlRef("calc-value-b", "");
     const additionResult = computed(() => {
       try {
         let a = new IntegerWithBase(valueA.value, baseForCalculations.value);
@@ -562,9 +568,9 @@ export default defineComponent({
         let b = new IntegerWithBase(valueB.value, baseForCalculations.value);
         let result = a.divide(b);
         if (result.divisionByZero) {
-          return "Division durch 0";
+          return t("page.baseConverter.divisionByZero");
         } else {
-          return `${result.result.toString(false)} und ${result.remainder.toString(false)} Rest`;
+          return t("page.baseConverter.resultAndRemainder", { result: result.result.toString(false), remainder: result.remainder.toString(false) });
         }
       } catch (e) {
         return e + "";
@@ -572,6 +578,7 @@ export default defineComponent({
     });
 
     return {
+      t,
       numberToConvert,
       fromBase,
       toBase,
