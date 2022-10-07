@@ -212,9 +212,14 @@ function updateSorting() {
       </div>
     </div>
   </div>
+  <br /><br />
+  <div class="credits">Credits to Zwick Philippe</div>
 </template>
 
 <style scoped>
+.credits {
+  font-size: 0.5em;
+}
 .graph {
   position: relative;
   z-index: 1;
