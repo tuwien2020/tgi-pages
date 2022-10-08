@@ -193,7 +193,7 @@ const operatorImplies: bnb.Parser<MathJson> =
       bnb
         .choice(
           // a => b
-          operator({ operator: "Implies", match: /impl(y|ies)|==?>|⇒|⊃/i }),
+          operator({ operator: "Implies", match: /impl(y|ies)|==?>|⇒|⊃|→/i }),
           // a <= b
           operator({ operator: "Subset", match: /if|subset|<==?|⊂/i })
         )
