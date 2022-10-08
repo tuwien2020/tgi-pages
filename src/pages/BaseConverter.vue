@@ -450,7 +450,8 @@ class IntegerWithBase {
   }
 
   static formatValue(value: number[], base: number) {
-    value = IntegerWithBase.trimLeadingZeros(value);
+    // Note: Do *not* trim the leading zeroes here, as we  need them when dealing with the number after a decimal point
+    //value = IntegerWithBase.trimLeadingZeros(value);
     return base <= 10 + 26
       ? value.map((v) => (v <= 9 ? v + "" : String.fromCharCode("A".charCodeAt(0) + (v - 10)))).join("")
       : "[" + value.join(",") + "]";
@@ -487,8 +488,8 @@ export default defineComponent({
         // Might be negative
         let beforeDecimalInteger = new IntegerWithBase(beforeDecimal, fromBase.value).convertToBase(toBase.value);
 
-        const digits = IntegerWithBase.formatValue(beforeDecimalInteger.getValue(), beforeDecimalInteger.base);
-        let result = `${beforeDecimalInteger.isNegative ? "-" : ""}${digits}`;
+        const wholeDigits = IntegerWithBase.formatValue(beforeDecimalInteger.trimLeadingZeros().getValue(), beforeDecimalInteger.base);
+        let result = `${beforeDecimalInteger.isNegative ? "-" : ""}${wholeDigits}`;
 
         if (afterDecimal) {
           // Shift/multiply by N, which is the decimal places we want
