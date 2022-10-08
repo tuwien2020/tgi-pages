@@ -1,55 +1,47 @@
 <script lang="ts">
-import { defineComponent } from '@vue/runtime-core'
-import { useRegisterSW } from 'virtual:pwa-register/vue'
+import { defineComponent, ref } from "vue";
+import { registerSW } from "virtual:pwa-register";
 
 export default defineComponent({
   setup() {
-    const {
-      offlineReady,
-      needRefresh,
-      updateServiceWorker,
-    } = useRegisterSW();
-    
-    const close = async() => {
-      offlineReady.value = false
-      needRefresh.value = false
+    const needRefresh = ref(false);
+    const offlineReady = ref(false);
+    const updateServiceWorker = registerSW({
+      onNeedRefresh() {
+        needRefresh.value = true;
+      },
+      onOfflineReady() {
+        offlineReady.value = true;
+      },
+    });
+
+    const close = async () => {
+      offlineReady.value = false;
+      needRefresh.value = false;
     };
 
     return {
       offlineReady,
       needRefresh,
       updateServiceWorker,
-      close
-    }
-  }
-})
-
+      close,
+    };
+  },
+});
 </script>
 
 <template>
-  <div
-    v-if="offlineReady || needRefresh"
-    class="pwa-toast"
-    role="alert"
-  >
+  <div v-if="offlineReady || needRefresh" class="pwa-toast" role="alert">
     <div class="message">
-      <span v-if="offlineReady">
-        App ready to work offline
-      </span>
-      <span v-else>
-        New content available, click on reload button to update.
-      </span>
+      <span v-if="offlineReady"> App ready to work offline </span>
+      <span v-else> New content available, click on reload button to update. </span>
     </div>
-    <button v-if="needRefresh" @click="updateServiceWorker()">
-      Reload
-    </button>
-    <button @click="close">
-      Close
-    </button>
+    <button v-if="needRefresh" @click="updateServiceWorker()">Reload</button>
+    <button @click="close">Close</button>
   </div>
 </template>
 
-<style>
+<style scoped>
 .pwa-toast {
   position: fixed;
   right: 0;

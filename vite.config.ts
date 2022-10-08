@@ -18,15 +18,12 @@ export default defineConfig({
     //vuetify({ autoImport: true }),
     VitePWA({
       includeAssets: ["favicon.svg", "favicon.ico", "robots.txt", "apple-touch-icon.png"],
-      strategies: "injectManifest",
       srcDir: "src",
-      filename: "sw.ts",
       manifest: {
         name: "TGI Pages",
         short_name: "tgi-pages",
         description: "Helpful tools for the TGI Course at the TU Vienna",
         theme_color: "#80CBC4",
-
         icons: [
           {
             src: "pwa-192x192.png",
@@ -41,10 +38,7 @@ export default defineConfig({
           },
         ],
       },
-      registerType: "autoUpdate",
       workbox: {
-        cleanupOutdatedCaches: false,
-        sourcemap: true,
         globPatterns: ["**/*.{js,css,html,ttf,woff2}"],
       },
       injectManifest: {
