@@ -1,14 +1,12 @@
-
-
 <template>
-  <form id="" v-on:submit.prevent="onSubmit">
+  <form id="" v-on:submit.prevent="calc">
     <div><label for="cacheSize">Cache Size (KiB): </label> <input v-model="cacheSizeRef" id="cacheSize" name="cacheSize" /></div>
     <div><label for="setAmount">Set-Anzahl: </label> <input v-model="setAmountRef" id="setAmount" name="setAmount" /></div>
     <div><label for="addressLength">Adresslänge (bit): </label> <input v-model="addressLengthRef" id="addressLength" name="addressLength" /></div>
     <div><label for="wordSize">Wortgröße (byte): </label> <input v-model="wordSizeRef" id="wordSize" name="wordSize" /></div>
     <div><label for="blockSize">Blockgröße: </label> <input v-model="blockSizeRef" id="blockSize" name="blockSize" /></div>
 
-    <button v-on:click="calc">Calculate</button>
+    <button type="submit">Calculate</button>
   </form>
   <div>
     <div>

@@ -32,7 +32,7 @@
               <input
                 type="text"
                 :value="option.value.value"
-                @input="(event) => (option.value.value = event.target.value)"
+                @input="(event) => (option.value.value = event.target!.value)"
                 :pattern="option.pattern"
               />
             </label>

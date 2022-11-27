@@ -6,7 +6,7 @@
     rows="4"
     cols="50"
     :value="codewords"
-    @input="(event) => (codewords = event.target.value.replace(/ /g, '').replace(/[^01\n]/g, ''))"
+    @input="(event) => (codewords = event.target!.value.replace(/ /g, '').replace(/[^01\n]/g, ''))"
   ></textarea>
   <pre>Hamming-Distanz: {{ codewordsData.hammingDistance }}</pre>
   <pre>Ist ein Blockcode: {{ codewordsData.isBlockCode }}</pre>

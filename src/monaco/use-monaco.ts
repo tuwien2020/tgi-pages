@@ -1,7 +1,7 @@
 import loader, { Monaco } from "@monaco-editor/loader";
 import { editor } from "monaco-editor";
 import { ref, Ref, shallowRef, watch } from "vue";
-import {defaultPalette} from './../assets/colors';
+import { defaultPalette } from "./../assets/colors";
 
 let monaco: Monaco | null = null;
 
@@ -9,8 +9,9 @@ export async function useMonaco() {
   if (monaco == null) {
     loader.config({
       paths: {
-        // @ts-ignore
-        vs: import.meta.env.BASE_URL + "node_modules/monaco-editor/min/vs",
+        vs: import.meta.env.DEV
+          ? import.meta.env.BASE_URL + "node_modules/monaco-editor/min/vs"
+          : import.meta.env.BASE_URL + "assets/monaco-editor/min/vs",
       },
     });
 
@@ -53,17 +54,14 @@ export async function useMonaco() {
     const code = ref("");
     let decorations = [] as string[];
 
-    monaco.editor.defineTheme('defaultTGIPages', {
-      base: 'vs',
+    monaco.editor.defineTheme("defaultTGIPages", {
+      base: "vs",
       inherit: true,
-      rules: [
-        { token: 'comment', foreground: defaultPalette[4].toHex()},
-      ],
-      colors: {
-      }
+      rules: [{ token: "comment", foreground: defaultPalette[4].toHex() }],
+      colors: {},
     });
-  
-    monaco.editor.setTheme('defautlTGIPages');
+
+    monaco.editor.setTheme("defautlTGIPages");
 
     watch(
       element,
@@ -74,7 +72,7 @@ export async function useMonaco() {
         }
 
         if (!value || !monaco) return;
-        options.theme ??= 'defaultTGIPages'; 
+        options.theme ??= "defaultTGIPages";
         monaco.editor.setTheme(options.theme);
 
         editor.value = monaco.editor.create(value, options);

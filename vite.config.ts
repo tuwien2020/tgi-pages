@@ -1,9 +1,9 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import copy from "rollup-plugin-copy";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 //import vuetify from "vite-plugin-vuetify";
 import { VitePWA } from "vite-plugin-pwa";
-const { resolve } = require("path");
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,11 +11,11 @@ export default defineConfig({
     exclude: ["monaco-editor"],
   },
   plugins: [
-    vue(),
-    copy({
-      targets: [{ src: "node_modules/monaco-editor/min/vs/**/*", dest: "dist/node_modules/monaco-editor/min/vs" }],
+    viteStaticCopy({
+      // Yeah, this directly copies to the dist folder
+      targets: [{ src: "node_modules/monaco-editor/min/vs/**/*", dest: "assets" }],
+      flatten: false,
     }),
-    //vuetify({ autoImport: true }),
     VitePWA({
       includeAssets: ["favicon.svg", "favicon.ico", "robots.txt", "apple-touch-icon.png"],
       srcDir: "src",
@@ -45,6 +45,8 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ttf,woff2}"],
       },
     }),
+    vue(),
+    //vuetify({ autoImport: true }),
   ],
 
   /*build: {

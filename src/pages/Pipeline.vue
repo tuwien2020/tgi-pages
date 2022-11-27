@@ -87,7 +87,7 @@
                 type="text"
                 placeholder="1, 2, ..."
                 :value="row.readRegisters.join(',')"
-                @blur="(event) => (row.readRegisters = !!event.target.value ? event.target.value.split(',').map((d) => +d) : [])"
+                @blur="(event) => (row.readRegisters = !!event.target!.value ? event.target!.value.split(',').map((d) => +d) : [])"
               />
             </td>
 
@@ -97,7 +97,7 @@
                 type="text"
                 placeholder="1, 2, ..."
                 :value="row.writeRegisters.join(',')"
-                @blur="(event) => (row.writeRegisters = !!event.target.value ? event.target.value.split(',').map((d) => +d) : [])"
+                @blur="(event) => (row.writeRegisters = !!event.target!.value ? event.target!.value.split(',').map((d) => +d) : [])"
               />
             </td>
 
