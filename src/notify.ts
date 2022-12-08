@@ -44,3 +44,7 @@ export function warn(message: string, details: any) {
 export function error(message: string, details: any) {
   notify("error", message, details);
 }
+
+export function clear() {
+  notifications.splice(0, notifications.length);
+}

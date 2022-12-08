@@ -43,6 +43,7 @@ const intervalElements = ref([] as HTMLElement[]);
 const isGreedyRunning = ref(false);
 
 function generateIntervals(count: number) {
+  Notify.clear();
   intervals.length = 0;
   for (let i = 0; i < count; i++) {
     const startTime = Math.random() * 90;
@@ -66,6 +67,7 @@ function sleep(ms: number) {
 
 async function startGreedy() {
   isGreedyRunning.value = true;
+  const sortingMethodName = sortingMethod.value ? t(pageName + "unsorted") : t(pageName + sortingMethod.value);
 
   //performs the greedy algorithm
   const solution: Interval[] = [];
@@ -80,7 +82,7 @@ async function startGreedy() {
     await sleep(10);
   }
 
-  Notify.log("Done", `It was possible to finish ${solution.length} jobs!`);
+  Notify.log("Done", `It was possible to finish ${solution.length} jobs using ${sortingMethodName}!`);
   isGreedyRunning.value = false;
 }
 
@@ -160,12 +162,13 @@ function updateSorting() {
       <select v-model="sortingMethod" :disabled="isGreedyRunning || intervals.length == 0">
         <option value="">{{ t(pageName + "unsorted") }}</option>
         <option v-for="(value, key) in intervalSortingMethods" :key="key" :value="key">
-          {{ t(pageName + key) }} ({{ value.isCorrect ? t(pageName + "correct") : t(pageName + "incorrect") }})
+          {{ t(pageName + key) }}
         </option>
       </select>
     </label>
   </div>
   <br />
+  <span> ({{ value.isCorrect ? t(pageName + "correct") : t(pageName + "incorrect") }}) </span>
   <button @click="startGreedy()" :disabled="isGreedyRunning">Start Greedy</button>
   <br />
   <br />

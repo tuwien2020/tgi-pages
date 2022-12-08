@@ -77,8 +77,8 @@
       "earliestStartTime": "Früheste Startzeit",
       "smallestInterval": "Kleinstes Intervall",
       "leastConflicts": "Kleinste Anzahl der Konflikte",
-      "correct": "Richtig",
-      "incorrect": "Falsch",
+      "correct": "Optimale Lösung",
+      "incorrect": "Nicht optimale Lösung",
       "interval": "Intervall"
     }
   }

@@ -77,8 +77,8 @@
       "earliestStartTime": "Earliest Start Time",
       "smallestInterval": "Smallest Interval",
       "leastConflicts": "Least Conflicts",
-      "correct": "Correct",
-      "incorrect": "Incorrect",
+      "correct": "Optimal solution",
+      "incorrect": "Non optimal solution",
       "interval": "Interval"
     }
   }
