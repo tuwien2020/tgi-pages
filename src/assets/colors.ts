@@ -23,6 +23,8 @@ export class Color {
     } else {
       throw new Error("Invalid color string");
     }
+
+    //
   }
 
   /**

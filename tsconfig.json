@@ -19,7 +19,7 @@
     "types": ["vite/client"],
     "outDir": "./dist"
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.vue"],
+  "include": ["env.d.ts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.js", "src/**/*.vue"],
   "exclude": ["node_modules"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
