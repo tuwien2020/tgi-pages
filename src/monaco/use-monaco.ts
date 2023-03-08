@@ -1,12 +1,13 @@
 import loader, { Monaco } from "@monaco-editor/loader";
 import { editor } from "monaco-editor";
+import { assert } from "../assert";
 import { ref, Ref, shallowRef, watch } from "vue";
 import { defaultPalette } from "./../assets/colors";
 
-let monaco: Monaco | null = null;
+let globalMonaco: Monaco | null = null;
 
 export async function useMonaco() {
-  if (monaco == null) {
+  if (globalMonaco == null) {
     loader.config({
       paths: {
         vs: import.meta.env.DEV
@@ -15,7 +16,7 @@ export async function useMonaco() {
       },
     });
 
-    monaco = await loader.init().then((value) => {
+    globalMonaco = await loader.init().then((value) => {
       value.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
         noSemanticValidation: false,
         noSuggestionDiagnostics: false,
@@ -38,10 +39,10 @@ export async function useMonaco() {
       return value;
     });
   }
+  let monaco: Monaco = globalMonaco as Monaco;
+  assert(monaco !== null);
 
   function addExtraLib(code: string) {
-    if (!monaco) return;
-
     // https://github.com/microsoft/monaco-editor/issues/2147#issuecomment-696750840
     monaco.languages.typescript.javascriptDefaults.addExtraLib(
       code, // Stuff like "declare let testVar = 3, o = 3;"
@@ -52,6 +53,7 @@ export async function useMonaco() {
   function createEditor(element: Ref<HTMLElement | undefined>, options: editor.IStandaloneEditorConstructionOptions) {
     const editor = shallowRef<editor.IStandaloneCodeEditor>();
     const code = ref("");
+    let ignoreUpdate = false;
     let decorations = [] as string[];
 
     monaco.editor.defineTheme("defaultTGIPages", {
@@ -79,16 +81,31 @@ export async function useMonaco() {
         code.value = options.value ?? "";
 
         editor.value.onDidChangeModelContent((e) => {
+          ignoreUpdate = true;
           code.value = editor.value?.getValue() ?? "";
+          ignoreUpdate = false;
         });
       },
       { immediate: true }
     );
 
+    watch(
+      code,
+      (value) => {
+        if (!ignoreUpdate) {
+          editor.value?.setValue(value);
+        }
+      },
+      {
+        immediate: true,
+        flush: "sync",
+      }
+    );
+
     async function getVariableNames(): Promise<string[]> {
       // TODO: Wait until editor is initialized
       const model = editor.value?.getModel();
-      if (!model || !monaco) return [];
+      if (!model) return [];
       const worker = await monaco.languages.typescript.getJavaScriptWorker();
       const thisWorker = await worker(model.uri);
       // @ts-ignore
@@ -98,7 +115,7 @@ export async function useMonaco() {
     }
 
     function setLinePointer(lineNumber: number) {
-      if (!editor.value || !monaco) return;
+      if (!editor.value) return;
 
       if (lineNumber <= 0) {
         decorations = editor.value?.deltaDecorations(decorations, []);
@@ -122,9 +139,7 @@ export async function useMonaco() {
   }
 
   function setMonacoOptions(callback: (monaco: Monaco) => void) {
-    if (monaco) {
-      callback(monaco);
-    }
+    callback(monaco);
   }
 
   return {

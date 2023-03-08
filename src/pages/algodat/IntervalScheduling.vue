@@ -2,9 +2,10 @@
 import { useUrlRef } from "../../url-ref";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, computed, watchEffect } from "vue";
 import { assertUnreachable } from "../../assert";
 import * as Notify from "../../notify";
+import { useMonaco } from "../../monaco/use-monaco";
 
 const { t } = useI18n();
 
@@ -13,6 +14,7 @@ const router = useRouter();
 const route = useRoute();
 const { urlRef } = useUrlRef(router, route);
 
+// TODO: refactor to enums (they now work well with TS 5.0)
 const intervalSortingMethods = {
   earliestEndTime: {
     isCorrect: true,
@@ -38,27 +40,62 @@ interface Interval {
   color: string;
 }
 
-const intervals = reactive([] as Interval[]);
+const parsedIntervals = computed(() => parseIntervals(enteredIntervals.value));
+const intervals = reactive<Interval[]>([]);
 const intervalElements = ref([] as HTMLElement[]);
+const enteredIntervals = ref("");
+const isEnteredIntervalsValid = ref(true);
 const isGreedyRunning = ref(false);
 
 function generateIntervals(count: number) {
   Notify.clear();
-  intervals.length = 0;
+  enteredIntervals.value = "";
+
+  const numDecimals = 0;
+
   for (let i = 0; i < count; i++) {
     const startTime = Math.random() * 90;
-    const intervalLength = startTime + Math.random() * 40 + 10;
-    const endTime = Math.min(intervalLength, 100);
-    intervals.push({
+    let intervalLength = Math.random() * 40 + 10;
+    const endTime = Math.min(100, startTime + intervalLength);
+    intervalLength = endTime - startTime;
+
+    enteredIntervals.value += `${startTime.toFixed(numDecimals)},${intervalLength.toFixed(numDecimals)}\n`;
+  }
+
+  sortingMethod.value = "";
+  updateSorting();
+}
+
+function parseIntervals(enteredIntervals: string): Interval[] {
+  const parsed: Interval[] = [];
+  isEnteredIntervalsValid.value = true;
+
+  const lines = enteredIntervals.trim().split("\n");
+  lines.forEach((line, i) => {
+    const legalChars = "0123456789., ";
+    if (line.split("").some((char) => !legalChars.includes(char))) {
+      isEnteredIntervalsValid.value = false;
+      console.log("illegal line (invalid characters): " + line);
+      return [];
+    }
+
+    const [startTime, duration] = line.split(",").map((v) => parseFloat(v.trim()));
+    const endTime = startTime + duration;
+    if (isNaN(startTime) || isNaN(duration) || startTime < 0 || duration < 0 || endTime > 100) {
+      isEnteredIntervalsValid.value = false;
+      console.log("illegal line (valid characters, wrong values): " + line);
+      return [];
+    }
+
+    parsed.push({
       startTime: startTime,
       endTime: endTime,
       color: "white",
       id: i,
     });
-  }
+  });
 
-  sortingMethod.value = "";
-  updateSorting();
+  return parsed;
 }
 
 function sleep(ms: number) {
@@ -67,7 +104,7 @@ function sleep(ms: number) {
 
 async function startGreedy() {
   isGreedyRunning.value = true;
-  const sortingMethodName = sortingMethod.value ? t(pageName + "unsorted") : t(pageName + sortingMethod.value);
+  const sortingMethodName = sortingMethod.value ? t(pageName + sortingMethod.value) : t(pageName + "unsorted");
 
   //performs the greedy algorithm
   const solution: Interval[] = [];
@@ -92,6 +129,19 @@ watch(sortingMethod, (value) => {
     interval.color = "white";
   });
 });
+
+watch(
+  parsedIntervals,
+  (value) => {
+    intervals.length = 0;
+    parsedIntervals.value.forEach((interval) => {
+      intervals.push({ ...interval });
+    });
+  },
+  {
+    immediate: true,
+  }
+);
 
 function updateSorting() {
   function compareAscending(a: number, b: number) {
@@ -168,7 +218,14 @@ function updateSorting() {
     </label>
   </div>
   <br />
-  <span> ({{ value.isCorrect ? t(pageName + "correct") : t(pageName + "incorrect") }}) </span>
+  <details>
+    <summary>Insert your own schedule</summary>
+    <span> Your current input is {{ isEnteredIntervalsValid ? "valid ✅" : "invalid ⚠️" }} </span>
+    <br />
+    <textarea rows="4" cols="50" v-model="enteredIntervals" class="is-family-monospace"></textarea>
+  </details>
+  <br />
+  <span> ({{ (intervalSortingMethods as any)[sortingMethod]?.isCorrect ? t(pageName + "correct") : t(pageName + "incorrect") }}) </span>
   <button @click="startGreedy()" :disabled="isGreedyRunning">Start Greedy</button>
   <br />
   <br />
@@ -216,7 +273,7 @@ function updateSorting() {
     </div>
   </div>
   <br /><br />
-  <div class="credits">Credits to Zwick Philippe</div>
+  <div class="credits">Credits to: Stefan, Philippe, Yahya</div>
 </template>
 
 <style scoped>
