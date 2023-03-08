@@ -1,5 +1,4 @@
 import { MathJson, MathJsonOperator } from "./math-parsing";
-import { v4 as uuidv4 } from "uuid"; // TODO: Replace with https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID
 
 export interface MathFormattingOptions {
   bracketIds?: boolean;
@@ -55,7 +54,7 @@ export function useMathPrinting() {
 
   function brackets(value: string, bracketIds: boolean | undefined) {
     if (bracketIds !== false) {
-      const bracketId = uuidv4();
+      const bracketId = crypto.randomUUID();
       return `\\htmlData{bracketId=${bracketId}}{(}${value}\\htmlData{bracketId=${bracketId}}{)}`;
     } else {
       return `(${value})`;

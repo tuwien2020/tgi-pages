@@ -1,4 +1,6 @@
-export const RGB_COLOR_REGEX = /\((\d+),\s*(\d+),\s*(\d+)(,\s*(\d*.\d*))?\)/;
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
 
 export class Color {
   public r: number;
@@ -6,31 +8,34 @@ export class Color {
   public b: number;
   public a: number;
 
-  constructor(colorStr?: string);
-  constructor(r?: string | number, g?: number, b?: number);
-  constructor(r?: string | number, g?: number, b?: number, a?: number) {
-    if (typeof r === "string") {
-      r = r.trim();
-      if (r.indexOf("#") === 0) {
-        r = r.substring(r.indexOf("#") + 1);
-        this.r = parseInt(r.substring(0, 2), 16);
-        this.g = parseInt(r.substring(2, 4), 16);
-        this.b = parseInt(r.substring(4, 6), 16);
-      } else if (r.indexOf("rgb") === 0) {
-        const res = RGB_COLOR_REGEX.exec(r);
-        this.r = parseInt(res[1], 10);
-        this.g = parseInt(res[2], 10);
-        this.b = parseInt(res[3], 10);
-        this.a = res[5] ? parseFloat(res[5]) : 1;
+  static fromHex(colorStr: string): Color {
+    if (colorStr.indexOf("#") === 0) {
+      colorStr = colorStr.substring(colorStr.indexOf("#") + 1);
+      let r = parseInt(colorStr.substring(0, 2), 16);
+      let g = parseInt(colorStr.substring(2, 4), 16);
+      let b = parseInt(colorStr.substring(4, 6), 16);
+      if (colorStr.length === 8) {
+        let a = parseInt(colorStr.substring(6, 8), 16);
+        return new Color(r, g, b, a);
+      } else {
+        return new Color(r, g, b);
       }
-    } else if (r != undefined && g != undefined && b != undefined) {
-      this.r = r;
-      this.g = g;
-      this.b = b;
-      this.a = a || 1;
     } else {
-      throw new Error("Invalid color");
+      throw new Error("Invalid color string");
     }
+  }
+
+  /**
+   * @param r - red value, an int between 0 and 255
+   * @param g - green value, an int between 0 and 255
+   * @param b - blue value, an int between 0 and 255
+   * @param a - alpha value, an optional int between 0 and 255
+   */
+  constructor(r: number, g: number, b: number, a: number = 1) {
+    this.r = clamp(r, 0, 255);
+    this.g = clamp(g, 0, 255);
+    this.b = clamp(b, 0, 255);
+    this.a = clamp(a, 0, 255);
   }
 
   toHex() {
@@ -52,4 +57,10 @@ function mapNumberToHexString(n: number) {
   return n != 0 ? n.toString(16) : "00";
 }
 
-export const defaultPalette: Color[] = [new Color("#648fff"), new Color("#d35100"), new Color("#785ef0"), new Color("#cf8e00"), new Color("#b31b65")];
+export const defaultPalette: Color[] = [
+  Color.fromHex("#648fff"),
+  Color.fromHex("#d35100"),
+  Color.fromHex("#785ef0"),
+  Color.fromHex("#cf8e00"),
+  Color.fromHex("#b31b65"),
+];

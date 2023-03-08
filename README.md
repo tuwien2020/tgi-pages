@@ -1,6 +1,6 @@
 # tgi-pages
 
-<!--Krauti, Yousif, Moritz, Møxwell, eSportSuBZero, Daniel-->
+<!--Stefan, Krauti, Yousif, Moritz, Møxwell, eSportSuBZero, Daniel, Philippe, Sueszli-->
 
 ![deploy](https://github.com/tuwien2020/tgi-pages/actions/workflows/deploy.yml/badge.svg)
 
